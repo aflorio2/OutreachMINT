@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Double-Slit Experiment</title>
+<style>
+  :root{
+    --bg:#05060d;
+    --ink:#eef2ff;
+    --muted:#8b93b8;
+    --warm:#ffb24a;     /* classical particles */
+    --cool:#6ad7ff;     /* waves / quantum */
+    --elec:#7CFFB2;     /* electrons */
+    --warn:#ff5470;     /* observation / collapse */
+    --line:#1c2238;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(1200px 800px at 50% -10%, #11162b 0%, var(--bg) 60%);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden;height:100vh;display:flex;flex-direction:column;
+  }
+  header{text-align:center;padding:14px 16px 6px;flex:0 0 auto}
+  header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
+  header h1 .a{color:var(--cool)}
+  header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;
+    transition:opacity .3s}
+
+  .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
+  .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset}
+  canvas{display:block;width:100%;height:100%}
+
+  /* scene tag (top-left) */
+  .tag{position:absolute;top:14px;left:14px;z-index:5;font-size:12px;letter-spacing:2px;
+    font-weight:700;text-transform:uppercase;padding:6px 11px;border-radius:8px;
+    background:#0008;backdrop-filter:blur(4px);border:1px solid var(--line);transition:color .3s,border-color .3s}
+
+  /* caption (bottom-left) */
+  .caption{position:absolute;left:16px;bottom:16px;right:16px;z-index:5;max-width:min(560px,70%);
+    background:#0009;border:1px solid #ffffff22;border-radius:12px;padding:11px 14px;
+    backdrop-filter:blur(5px);transition:opacity .3s}
+  .caption .ct{font-size:clamp(13px,1.5vw,17px);font-weight:700;line-height:1.25}
+  .caption .cs{font-size:clamp(11px,1.2vw,13.5px);color:#c9d1f5;margin-top:4px;line-height:1.35}
+  .caption b.warm{color:var(--warm)} .caption b.cool{color:var(--cool)}
+  .caption b.elec{color:var(--elec)} .caption b.warn{color:var(--warn)}
+
+  /* scene-3 control cluster (top-right) */
+  .qctrl{position:absolute;top:14px;right:14px;z-index:6;display:none;flex-direction:column;
+    gap:8px;align-items:flex-end}
+  .toggle{display:flex;align-items:center;gap:10px;background:#0009;border:1px solid #ffffff22;
+    border-radius:30px;padding:6px 8px 6px 14px;backdrop-filter:blur(5px);cursor:pointer;user-select:none}
+  .toggle .lab{font-size:13px;font-weight:600;color:var(--ink)}
+  .switch{position:relative;width:46px;height:24px;border-radius:14px;background:#2a3150;transition:background .2s;flex:0 0 auto}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+    background:#fff;transition:transform .2s}
+  .toggle.on .switch{background:var(--warn)}
+  .toggle.on .switch::after{transform:translateX(22px)}
+  .toggle.on .lab{color:var(--warn)}
+  .counter{font-size:12px;color:var(--muted);background:#0008;border:1px solid var(--line);
+    border-radius:8px;padding:4px 10px;backdrop-filter:blur(4px)}
+  .counter b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .qbtn{font-size:12px;color:var(--ink);background:#121734;border:1px solid var(--line);
+    border-radius:8px;padding:5px 12px;cursor:pointer;transition:background .15s}
+  .qbtn:hover{background:#1b2350}
+
+  /* speed control (scene 1 & 3) */
+  .speedctrl{position:absolute;bottom:16px;right:16px;z-index:6;display:none;align-items:center;gap:8px;
+    background:#0009;border:1px solid #ffffff22;border-radius:10px;padding:6px 12px;backdrop-filter:blur(5px)}
+  .speedctrl span{font-size:11px;color:var(--muted)}
+  .speedctrl input{width:80px}
+
+  /* bottom navigation */
+  .controls{flex:0 0 auto;padding:12px 24px 18px;display:flex;flex-direction:column;align-items:center;gap:9px}
+  .dots{display:flex;gap:18px;align-items:center}
+  .dot{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;opacity:.55;transition:opacity .2s}
+  .dot.active{opacity:1}
+  .dot .pip{width:11px;height:11px;border-radius:50%;background:#39406a;transition:background .2s,box-shadow .2s}
+  .dot.active .pip{background:var(--cool);box-shadow:0 0 12px var(--cool)}
+  .dot .dl{font-size:11.5px;color:var(--muted);letter-spacing:.3px}
+  .dot.active .dl{color:var(--ink);font-weight:700}
+  .navrow{display:flex;align-items:center;gap:16px}
+  button.nav{background:#121734;color:var(--ink);border:1px solid var(--line);border-radius:10px;
+    width:46px;height:40px;font-size:18px;cursor:pointer;transition:background .15s,transform .1s}
+  button.nav:hover{background:#1b2350} button.nav:active{transform:scale(.94)}
+  button.nav:disabled{opacity:.3;cursor:default}
+  .hint{color:var(--muted);font-size:12px;text-align:center}
+  .hint b{color:var(--ink)}
+</style>
+</head>
+<body>
+  <header>
+    <h1>The <span class="a">Double-Slit</span> Experiment</h1>
+    <p id="subtitle"></p>
+  </header>
+
+  <div class="stage">
+    <div class="panel" id="panel">
+      <canvas id="cv"></canvas>
+      <div class="tag" id="tag"></div>
+
+      <div class="qctrl" id="qctrl">
+        <div class="toggle" id="obsToggle">
+          <span class="lab">👁 Observe which slit</span>
+          <span class="switch"></span>
+        </div>
+        <div class="counter">electrons: <b id="ecount">0</b></div>
+        <button class="qbtn" id="resetBtn">Reset screen</button>
+      </div>
+
+      <div class="speedctrl" id="speedctrl">
+        <button class="qbtn" id="sceneReset">↻ Reset</button>
+        <span>slow</span>
+        <input type="range" id="speed" min="0.075" max="6" step="0.025" value="0.075">
+        <span>fast</span>
+      </div>
+
+      <div class="caption" id="caption">
+        <div class="ct" id="capTitle"></div>
+        <div class="cs" id="capSub"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="dots" id="dots"></div>
+    <div class="navrow">
+      <button class="nav" id="prev" title="Previous (←)">◀</button>
+      <button class="nav" id="next" title="Next (→)">▶</button>
+    </div>
+    <div class="hint">Use <b>◀ ▶</b> or the <b>arrow keys</b> to move between scenes · click a label to jump.</div>
+  </div>
+
+<script>
+"use strict";
+/* ============================================================================
+   THE DOUBLE-SLIT EXPERIMENT  —  3 navigable scenes
+     1) classical balls  -> two bands (no interference)
+     2) waves            -> interference fringes
+     3) electrons        -> fringes build up dot-by-dot; "observe" collapses them
+   Designed to set up the NEXT slide: path integrals (more & more holes) and the
+   idea that interference / superposition is a resource for quantum computing.
+   ========================================================================== */
+
+const cv  = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const panel = document.getElementById('panel');
+
+let W = 0, H = 0, DPR = 1;
+let G = {};              // geometry, recomputed on resize
+
+function computeGeom(){
+  G.sourceX  = W*0.085;
+  G.barrierX = W*0.42;
+  G.screenX  = W*0.80;
+  G.cy       = H*0.50;
+  G.slitGap  = H*0.20;                 // centre-to-centre between the two slits
+  G.slitHalf = H*0.035;                // half-height of each opening
+  G.slitTop  = G.cy - G.slitGap/2;
+  G.slitBot  = G.cy + G.slitGap/2;
+  G.yTop     = H*0.10;                 // screen active range
+  G.yBot     = H*0.90;
+  G.ratio    = (G.screenX - G.sourceX)/(G.barrierX - G.sourceX); // source→slit→screen projection
+  G.detX0    = G.screenX + 6;          // 2-D detector strip: hits/bands accumulate here
+  G.detW     = (W - G.screenX) - 16;
+}
+
+function resize(){
+  const r = panel.getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio||1, 2);
+  W = r.width; H = r.height;
+  cv.width  = Math.round(W*DPR);
+  cv.height = Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  computeGeom();
+  scenes.forEach(s=> s.onResize && s.onResize());
+}
+new ResizeObserver(resize).observe(panel);
+
+/* ----------------------------- shared drawing ----------------------------- */
+function clearBG(){
+  ctx.fillStyle = '#04050b';
+  ctx.fillRect(0,0,W,H);
+  // faint vertical gradient
+  const g = ctx.createLinearGradient(0,0,W,0);
+  g.addColorStop(0,'#070a18'); g.addColorStop(1,'#04050b');
+  ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+}
+
+function drawBarrier(accent){
+  const x = G.barrierX, bw = Math.max(7, W*0.012);
+  ctx.fillStyle = 'rgba(180,190,225,0.92)';
+  // top segment
+  ctx.fillRect(x-bw/2, 0,                 bw, G.slitTop-G.slitHalf);
+  // middle segment (between the two slits)
+  ctx.fillRect(x-bw/2, G.slitTop+G.slitHalf, bw, (G.slitBot-G.slitHalf)-(G.slitTop+G.slitHalf));
+  // bottom segment
+  ctx.fillRect(x-bw/2, G.slitBot+G.slitHalf, bw, H-(G.slitBot+G.slitHalf));
+  // subtle edge glow on the openings
+  ctx.save();
+  ctx.shadowColor = accent; ctx.shadowBlur = 12;
+  ctx.strokeStyle = accent+'';
+  ctx.globalAlpha = .5;
+  [ [G.slitTop-G.slitHalf,G.slitTop+G.slitHalf],
+    [G.slitBot-G.slitHalf,G.slitBot+G.slitHalf] ].forEach(([a,b])=>{
+    ctx.beginPath(); ctx.moveTo(x, a); ctx.lineTo(x, b);
+    ctx.lineWidth = bw; ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function drawScreen(accent){
+  const x = G.screenX;
+  ctx.fillStyle = 'rgba(120,130,170,0.25)';
+  ctx.fillRect(x, G.yTop-6, 3, (G.yBot-G.yTop)+12);
+}
+
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function randn(){ // standard normal (Box-Muller)
+  let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+// SHARED interference pattern (used by BOTH the waves and the electrons so they
+// produce the exact same fringes). It is the time-averaged intensity of two
+// finite-width slits at the detection screen:
+//   I(y) = E1^2 + E2^2 + 2 E1 E2 cos(k (r1 - r2))           (normalised to [0,1])
+// where r1,r2 are the slit->point distances and E1,E2 are the single-slit
+// diffraction envelopes (sinc of the emission angle) that dim the side fringes.
+const WAVE = { lambdaFrac:0.03, slitWidthFrac:0.028 };
+                                           // lambdaFrac: shorter -> more fringes
+                                           // slitWidthFrac: narrower -> gentler envelope
+                                           //   (more side-bands stay visible)
+function fringeI(y){
+  const lambda=H*WAVE.lambdaFrac, k=2*Math.PI/lambda;
+  const ea=Math.PI*(H*WAVE.slitWidthFrac)/lambda;  // finite slit width -> envelope
+  const dx=G.screenX-G.barrierX;
+  const r1=Math.hypot(dx,y-G.slitTop), r2=Math.hypot(dx,y-G.slitBot);
+  const u1=ea*(y-G.slitTop)/r1, E1=u1===0?1:Math.sin(u1)/u1;
+  const u2=ea*(y-G.slitBot)/r2, E2=u2===0?1:Math.sin(u2)/u2;
+  return (E1*E1 + E2*E2 + 2*E1*E2*Math.cos(k*(r1-r2)))/4;
+}
+
+/* =========================================================================
+   SCENE 1 — CLASSICAL BALLS
+   ========================================================================= */
+const sceneBalls = {
+  tag:'1 · Classical balls',
+  tagColor:'var(--warm)',
+  subtitle:'Fire little balls (or paint pellets) at a wall with two slits. What lands on the screen behind it?',
+  capTitle:'Particles make <b class="warm">two stripes</b>.',
+  capSub:'Each ball goes through <b class="warm">one</b> slit or the other, then flies straight on. The pile-up on the screen is just two bumps — one behind each opening.',
+  accent:'#ffb24a',
+  balls:[], dots:[], acc:0,
+  onEnter(){ this.reset(); speedSlider(true); },
+  onLeave(){ speedSlider(false); },
+  onResize(){},
+  reset(){ this.balls.length=0; this.dots.length=0; this.acc=0; },
+  spawn(){
+    const A = (G.slitGap/2 + G.slitHalf*2.4)/(G.barrierX-G.sourceX); // angular spread covers both slits
+    const tan = (Math.random()*2-1)*A;
+    this.balls.push({x:G.sourceX, y:G.cy, vx:1, tan, state:'fly', a:1});
+  },
+  step(dt){
+    this.acc += dt*SPEED;                // scaled time → cadence tracks the speed slider
+    const interval = 0.045;              // one ball every 0.045 s of scaled time
+    while(this.acc > interval){ this.acc -= interval; if(this.balls.length<200) this.spawn(); }
+    const vx = W*0.42*SPEED*dt;
+    for(const b of this.balls){
+      if(b.state==='fly'){
+        const nx = b.x + vx;
+        // crossing the barrier plane?
+        if(b.x < G.barrierX && nx >= G.barrierX){
+          const yb = G.cy + (G.barrierX-G.sourceX)*b.tan;
+          const inTop = Math.abs(yb-G.slitTop) <= G.slitHalf;
+          const inBot = Math.abs(yb-G.slitBot) <= G.slitHalf;
+          if(!(inTop||inBot)){ b.state='absorb'; }
+        }
+        b.x = nx;
+        b.y = G.cy + (b.x-G.sourceX)*b.tan;
+        if(b.x >= G.screenX){
+          if(b.y>=G.yTop && b.y<=G.yBot) this.dots.push({x:G.detX0+Math.random()*G.detW, y:b.y});
+          b.state='dead';
+        }
+      } else if(b.state==='absorb'){
+        b.a -= dt*3; if(b.a<=0) b.state='dead';
+      }
+    }
+    this.balls = this.balls.filter(b=>b.state!=='dead');
+    if(this.dots.length>6000) this.dots.splice(0,this.dots.length-6000);
+  },
+  draw(){
+    clearBG();
+    drawScreen(this.accent);
+    // hits accumulate as dots across the detector strip -> two stripes
+    ctx.fillStyle=this.accent;
+    for(const d of this.dots){ ctx.beginPath(); ctx.arc(d.x,d.y,1.4,0,7); ctx.fill(); }
+    drawBarrier(this.accent);
+    // source (a little hopper / gun)
+    ctx.fillStyle = this.accent;
+    ctx.beginPath(); ctx.arc(G.sourceX, G.cy, Math.max(6,H*0.014), 0, 7); ctx.fill();
+    // balls
+    const r = Math.max(2.6, H*0.0075);
+    for(const b of this.balls){
+      ctx.globalAlpha = b.state==='absorb'? b.a*0.7 : 1;
+      ctx.fillStyle = b.state==='absorb' ? '#7a7f99' : this.accent;
+      ctx.beginPath(); ctx.arc(b.x, b.y, r, 0, 7); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+};
+
+/* =========================================================================
+   SCENE 2 — WAVES (live interference field)
+   ========================================================================= */
+const sceneWaves = {
+  tag:'2 · Waves',
+  tagColor:'var(--cool)',
+  subtitle:'Now send a wave at the same wall — water ripples, sound, light. Each slit becomes a new source of ripples.',
+  capTitle:'Waves make <b class="cool">many stripes</b> — interference.',
+  capSub:'A wave passes through <b class="cool">both</b> slits at once. Where two crests meet they add up (bright); where a crest meets a trough they cancel (dark). The result is a pattern of <b class="cool">many</b> bands.',
+  accent:'#6ad7ff',
+  RS:3,                     // render scale: field computed small, upscaled & smoothed
+  cols:0, rows:0,
+  ds:null, r1:null, r2:null, dy1:null, dy2:null, side:null,    // precomputed per low-res pixel
+  off:null, octx:null, img:null,
+  time:0, k:0, w:0, c:0, tB:0, Dsb:0, softW:0, lambda:0, ea:0,
+  onEnter(){ this.onResize(); this.reset(); speedSlider(true); },
+  onLeave(){ speedSlider(false); },
+  reset(){ this.time=0; },
+  onResize(){
+    if(!W) return;
+    const RS=this.RS;
+    this.cols=Math.max(2,Math.ceil(W/RS));
+    this.rows=Math.max(2,Math.ceil(H/RS));
+    const N=this.cols*this.rows;
+    this.ds=new Float32Array(N); this.r1=new Float32Array(N);
+    this.r2=new Float32Array(N); this.dy1=new Float32Array(N);
+    this.dy2=new Float32Array(N); this.side=new Uint8Array(N);
+    for(let j=0;j<this.rows;j++){
+      for(let i=0;i<this.cols;i++){
+        const idx=j*this.cols+i;
+        const x=(i+0.5)*RS, y=(j+0.5)*RS;
+        this.ds[idx]=x-G.sourceX;
+        this.dy1[idx]=y-G.slitTop; this.dy2[idx]=y-G.slitBot;
+        this.r1[idx]=Math.hypot(x-G.barrierX,y-G.slitTop);
+        this.r2[idx]=Math.hypot(x-G.barrierX,y-G.slitBot);
+        this.side[idx]= x<G.barrierX ?1:0;       // 1 = left (incoming plane wave)
+      }
+    }
+    // offscreen low-res buffer (upscaled with smoothing -> no visible pixels)
+    if(!this.off){ this.off=document.createElement('canvas'); this.octx=this.off.getContext('2d'); }
+    this.off.width=this.cols; this.off.height=this.rows;
+    this.img=this.octx.createImageData(this.cols,this.rows);
+    // wave constants
+    const lambda=H*WAVE.lambdaFrac;  // same wavelength + envelope the electrons use
+    this.lambda=lambda;
+    this.k=2*Math.PI/lambda;
+    this.c=W*0.34;                 // wave speed (px/s)
+    this.w=this.c*this.k;          // angular frequency keeps crests/speed consistent
+    // single-slit diffraction envelope factor (gentle -> several side bands).
+    this.ea=Math.PI*(H*WAVE.slitWidthFrac)/lambda;
+    this.Dsb=G.barrierX-G.sourceX; // source -> barrier distance
+    this.tB=this.Dsb/this.c;       // time for the plane wave to reach the slits
+    this.softW=lambda*0.9;         // soft leading edge for a clean build-up
+    this.dsScreen=G.screenX-G.sourceX;  // the screen absorbs the wave (it stops here)
+  },
+  step(dt){
+    // waves-only speed remap: keep the slowest end, but cap the fastest end at
+    // ~40% of the slider track (the full field build-up is hard to read faster).
+    const frac=(SPEED-0.075)/(6-0.075);
+    const eff=0.075+frac*(2.445-0.075);
+    this.time+=dt*eff;
+  },
+  draw(){
+    const cols=this.cols, rows=this.rows, k=this.k, ea=this.ea;
+    const ph=this.w*this.time, ct=this.c*this.time;
+    const avail=ct-this.Dsb;       // how far the slit-waves have travelled
+    const kOff=k*this.Dsb;         // phase offset so slit waves match the plane wave
+    const softW=this.softW, data=this.img.data;
+    let p=0;
+    for(let idx=0; idx<cols*rows; idx++){
+      let s=0, A=0;                 // s = instantaneous wave; A = standing amplitude
+      if(this.side[idx]){
+        const ds=this.ds[idx];
+        if(ds>=0){
+          const g=clamp((ct-ds)/softW,0,1);            // soft leading edge
+          if(g>0){ const aL=0.60*g; s=aL*Math.sin(k*ds-ph); A=aL; }
+        }
+      } else if(avail>0 && this.ds[idx] < this.dsScreen){   // nothing past the screen
+        const d1=this.r1[idx], d2=this.r2[idx];
+        // single-slit envelope per slit (sinc of the emission angle)
+        const u1=ea*this.dy1[idx]/d1, E1=u1===0?1:Math.sin(u1)/u1;
+        const u2=ea*this.dy2[idx]/d2, E2=u2===0?1:Math.sin(u2)/u2;
+        const g1=clamp((avail-d1)/softW,0,1), g2=clamp((avail-d2)/softW,0,1);
+        const a1=0.5*E1*g1, a2=0.5*E2*g2;
+        s = a1*Math.sin(k*d1-ph+kOff) + a2*Math.sin(k*d2-ph+kOff);
+        // standing interference amplitude: ZERO on the nodal (cancellation) lines,
+        // large on the bright beams -> a stationary, clearly-visible pattern.
+        A = Math.sqrt(a1*a1 + a2*a2 + 2*a1*a2*Math.cos(k*(d1-d2)));
+      }
+      // brightness = persistent interference INTENSITY (A^2, so the dark nodal
+      // fan is crushed to black and the beams stay bright) + travelling crest.
+      let val = 1.5*A*A + 0.5*(s>0?s:0);
+      if(val>1) val=1; else if(val<0) val=0;
+      data[p++]=6+val*96; data[p++]=10+val*200; data[p++]=20+val*235; data[p++]=255;
+    }
+    this.octx.putImageData(this.img,0,0);
+    clearBG();
+    ctx.save();
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+    ctx.drawImage(this.off,0,0,W,H);
+    ctx.restore();
+    drawBarrier(this.accent);
+    // wave source, pulsing as it emits
+    const pr=Math.max(5,H*0.012)*(1+0.18*Math.sin(ph));
+    ctx.fillStyle=this.accent;
+    ctx.beginPath(); ctx.arc(G.sourceX,G.cy,pr,0,7); ctx.fill();
+    // detection screen lights up with the SAME bands the electrons make,
+    // building up as the waves arrive.
+    const reach=(ct-(this.Dsb+(G.screenX-G.barrierX)))/(H*0.5);
+    drawBands(clamp(reach,0,1), this.accent);
+    drawScreen(this.accent);
+  }
+};
+
+// Render the interference pattern as real bright/dark BANDS on the detector
+// strip (same look as the electron build-up). brightness ∝ intensity fringeI(y).
+function drawBands(build, accent){
+  if(build<=0) return;
+  const rows=Math.max(60, Math.round((G.yBot-G.yTop)/3));
+  const h=(G.yBot-G.yTop)/rows;
+  for(let i=0;i<rows;i++){
+    const y=G.yTop+(i+0.5)*h;
+    const v=clamp(fringeI(y),0,1)*build;
+    ctx.fillStyle='rgb('+Math.round(6+v*96)+','+Math.round(10+v*200)+','+Math.round(20+v*235)+')';
+    ctx.fillRect(G.detX0, G.yTop+i*h, G.detW, h+1);
+  }
+}
+
+/* =========================================================================
+   SCENE 3 — ELECTRONS (dot-by-dot build-up + observe toggle)
+   ========================================================================= */
+const sceneElectrons = {
+  tag:'3 · Electrons',
+  tagColor:'var(--elec)',
+  subtitle:'Electrons are tiny lumps of matter. Fire them one at a time — and watch what the screen remembers.',
+  capTitle:'Matter builds the <b class="cool">wave pattern</b> — one dot at a time.',
+  capSub:'Each electron lands as a single dot, yet thousands of dots form interference fringes. Unobserved, every electron travels <b class="elec">both paths at once</b>. Ask <b class="warn">"which slit?"</b> and the fringes vanish — back to two stripes.',
+  accent:'#7CFFB2',
+  dots:[],            // landed dots {x,y}
+  flying:[],          // in-flight {t, y, slit, observed}
+  count:0, acc:0, observed:false,
+  onEnter(){ speedSlider(true); qctrl(true); this.refresh(); },
+  onLeave(){ speedSlider(false); qctrl(false); },
+  onResize(){},
+  reset(){ this.dots.length=0; this.flying.length=0; this.count=0;
+           document.getElementById('ecount').textContent='0'; },
+  refresh(){ this.reset(); },
+  // intensity at screen y for current mode
+  sampleY(){
+    const ratio=G.ratio, c1=G.cy+(G.slitTop-G.cy)*ratio, c2=G.cy+(G.slitBot-G.cy)*ratio;
+    if(this.observed){
+      // EXACTLY the same two-band distribution as the classical balls:
+      // uniform within a band of half-width ratio*slitHalf, centred on each
+      // projected slit. (A ball/observed electron goes straight through one slit.)
+      const hw=G.slitHalf*ratio;
+      const c=Math.random()<0.5?c1:c2;
+      return c + (Math.random()*2-1)*hw;
+    }
+    // unobserved: the SAME interference pattern the waves produce
+    for(let tries=0;tries<300;tries++){
+      const y=G.yTop+Math.random()*(G.yBot-G.yTop);
+      if(Math.random()<fringeI(y)) return y;
+    }
+    return G.cy;
+  },
+  fire(){
+    const y=this.sampleY();
+    const slit = this.observed
+        ? (Math.abs(y-G.cy) < 0 ? 0 : (y<G.cy?0:1))   // route through nearer slit
+        : (Math.random()<0.5?0:1);
+    this.flying.push({t:0, y, slit, observed:this.observed, flash:this.observed?1:0});
+  },
+  step(dt){
+    this.acc+=dt*SPEED;
+    const interval=0.16;                  // one electron every 0.16 s of scaled time
+    while(this.acc>interval){ this.acc-=interval; if(this.flying.length<22) this.fire(); }
+    const sp=1.6*SPEED;
+    for(const f of this.flying){
+      f.t += dt*sp;
+      if(f.flash>0) f.flash=Math.max(0,f.flash-dt*2.2);
+      if(f.t>=1){
+        // land somewhere across the 2-D detector strip -> bands become visible
+        this.dots.push({x:G.detX0+Math.random()*G.detW, y:f.y});
+        this.count++;
+        f.dead=true;
+      }
+    }
+    this.flying=this.flying.filter(f=>!f.dead);
+    document.getElementById('ecount').textContent=this.count;
+    if(this.dots.length>6000) this.dots.splice(0,this.dots.length-6000);
+  },
+  // position of a flying electron along its (curved) trajectory
+  draw(){
+    clearBG();
+    drawScreen(this.accent);
+    // accumulated dots across the 2-D detector strip -> visible bands
+    ctx.fillStyle=this.accent;
+    for(const d of this.dots){
+      ctx.beginPath(); ctx.arc(d.x,d.y,1.4,0,7); ctx.fill();
+    }
+    drawBarrier(this.observed? '#ff5470' : this.accent);
+    // detectors at slits when observing
+    if(this.observed){
+      for(const sy of [G.slitTop,G.slitBot]){
+        ctx.strokeStyle='#ff5470'; ctx.lineWidth=2; ctx.globalAlpha=.9;
+        ctx.beginPath(); ctx.arc(G.barrierX, sy, G.slitHalf*1.9, 0, 7); ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+    }
+    // flying electrons
+    for(const f of this.flying){
+      this.drawElectron(f);
+    }
+    // source
+    ctx.fillStyle=this.accent;
+    ctx.beginPath(); ctx.arc(G.sourceX,G.cy,Math.max(5,H*0.012),0,7); ctx.fill();
+  },
+  // draw an (elliptical) glowing blob centred at px,py with radii rx,ry
+  blob(px,py,rx,ry,color){
+    ctx.save();
+    ctx.translate(px,py); ctx.scale(rx,ry);
+    const g=ctx.createRadialGradient(0,0,0,0,0,1);
+    g.addColorStop(0,color); g.addColorStop(0.55,color+'cc'); g.addColorStop(1,color+'00');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(0,0,1,0,7); ctx.fill();
+    ctx.restore();
+  },
+  drawElectron(f){
+    const sy=f.slit===0?G.slitTop:G.slitBot;
+    const sx=G.barrierX, t=f.t;
+    const L=(a,b,u)=>a+(b-a)*u;
+    const spanRy = G.slitGap/2 + G.slitHalf*1.7;   // tall enough to cover BOTH slits
+    const startR = Math.max(4, H*0.013);           // blob size leaving the cannon
+    const bigRx  = Math.max(6, H*0.018);
+    const smallR = Math.max(2.6, H*0.008);
+
+    if(!f.observed){
+      // faint guide paths through BOTH slits (context only)
+      ctx.globalAlpha=0.16; ctx.lineWidth=1.3; ctx.strokeStyle=this.accent;
+      for(const slitY of [G.slitTop,G.slitBot]){
+        ctx.beginPath(); ctx.moveTo(G.sourceX,G.cy);
+        ctx.lineTo(sx,slitY); ctx.lineTo(G.screenX,f.y); ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+      // ONE big wavepacket: grows out of the cannon, spans both slits at the
+      // barrier, then collapses to a small ball ON THE WALL at the landing point.
+      let px,py,rx,ry;
+      if(t<0.5){ const u=t/0.5;
+        px=L(G.sourceX,sx,u); py=G.cy; rx=L(startR,bigRx,u); ry=L(startR,spanRy,u);
+      } else { const u=(t-0.5)/0.5;
+        px=L(sx,G.screenX,u); py=L(G.cy,f.y,u); rx=L(bigRx,smallR,u); ry=L(spanRy,smallR,u);
+      }
+      this.blob(px,py,rx,ry,this.accent);
+    } else {
+      // OBSERVED: same big packet grows from the cannon, but a detector at the
+      // slit collapses it to a small ball AT THE SLIT, which then flies on.
+      if(t<0.5){ const u=t/0.5;
+        const px=L(G.sourceX,sx,u), rx=L(startR,bigRx,u), ry=L(startR,spanRy,u);
+        this.blob(px,G.cy,rx,ry,this.accent);
+      } else { const u=(t-0.5)/0.5;
+        // collapse flash at the chosen slit
+        const flash=Math.max(0,1-u/0.35);
+        if(flash>0){ ctx.globalAlpha=flash; ctx.fillStyle='#ff5470';
+          ctx.beginPath(); ctx.arc(sx,sy,G.slitHalf*2.6,0,7); ctx.fill(); ctx.globalAlpha=1; }
+        // faint definite path slit -> landing
+        ctx.globalAlpha=.4; ctx.strokeStyle='#ff5470'; ctx.lineWidth=1.3;
+        ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(G.screenX,f.y); ctx.stroke();
+        ctx.globalAlpha=1;
+        // small definite ball
+        const px=L(sx,G.screenX,u), py=L(sy,f.y,u);
+        ctx.fillStyle=this.accent; ctx.beginPath(); ctx.arc(px,py,smallR,0,7); ctx.fill();
+      }
+    }
+  }
+};
+
+/* ----------------------------- scene manager ------------------------------ */
+const scenes=[sceneBalls, sceneWaves, sceneElectrons];
+let cur=0, last=performance.now();
+
+const els = {
+  subtitle:document.getElementById('subtitle'),
+  tag:document.getElementById('tag'),
+  capTitle:document.getElementById('capTitle'),
+  capSub:document.getElementById('capSub'),
+  caption:document.getElementById('caption'),
+  prev:document.getElementById('prev'),
+  next:document.getElementById('next'),
+};
+
+function speedSlider(show){ document.getElementById('speedctrl').style.display = show?'flex':'none'; }
+function qctrl(show){ document.getElementById('qctrl').style.display = show?'flex':'none'; }
+let SPEED = 0.075;     // default to the slowest setting on every panel
+document.getElementById('speed').addEventListener('input',e=> SPEED=parseFloat(e.target.value));
+
+// dots/labels
+const dotsWrap=document.getElementById('dots');
+const labels=['Balls','Waves','Electrons'];
+const dotEls=labels.map((l,i)=>{
+  const d=document.createElement('div'); d.className='dot';
+  d.innerHTML=`<span class="pip"></span><span class="dl">${l}</span>`;
+  d.onclick=()=>go(i); dotsWrap.appendChild(d); return d;
+});
+
+function applySceneUI(s){
+  els.subtitle.textContent=s.subtitle;
+  els.tag.textContent=s.tag; els.tag.style.color=s.tagColor; els.tag.style.borderColor=s.tagColor+'55';
+  els.capTitle.innerHTML=s.capTitle;
+  els.capSub.innerHTML=s.capSub;
+  dotEls.forEach((d,i)=>d.classList.toggle('active',i===cur));
+  els.prev.disabled=cur===0; els.next.disabled=cur===scenes.length-1;
+}
+
+function go(i){
+  i=clamp(i,0,scenes.length-1);
+  if(i===cur){ return; }
+  scenes[cur].onLeave && scenes[cur].onLeave();
+  cur=i;
+  scenes[cur].onResize && scenes[cur].onResize();
+  scenes[cur].onEnter && scenes[cur].onEnter();
+  applySceneUI(scenes[cur]);
+}
+
+els.prev.onclick=()=>go(cur-1);
+els.next.onclick=()=>go(cur+1);
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight') go(cur+1);
+  if(e.key==='ArrowLeft')  go(cur-1);
+});
+
+// observe toggle + reset (scene 3)
+const obsToggle=document.getElementById('obsToggle');
+obsToggle.onclick=()=>{
+  sceneElectrons.observed=!sceneElectrons.observed;
+  obsToggle.classList.toggle('on',sceneElectrons.observed);
+  sceneElectrons.reset();        // rebuild cleanly so the contrast is obvious
+};
+document.getElementById('resetBtn').onclick=()=>sceneElectrons.reset();
+document.getElementById('sceneReset').onclick=()=>{ const s=scenes[cur]; s.reset && s.reset(); };
+
+/* ------------------------------- main loop -------------------------------- */
+function loop(now){
+  let dt=(now-last)/1000; last=now;
+  dt=Math.min(dt,0.05);
+  const s=scenes[cur];
+  s.step(dt);
+  s.draw();
+  requestAnimationFrame(loop);
+}
+
+// boot
+resize();
+scenes[0].onResize && scenes[0].onResize();
+scenes[0].onEnter && scenes[0].onEnter();
+applySceneUI(scenes[0]);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
