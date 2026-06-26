@@ -20,3 +20,9 @@
 # ========================================
 &double-slit
 
+# ========================================
+# Counting & Adding in Base 2 — interactive 2-scene slide
+# (live HTML scene; inlined from binary-base2.jl)
+# ========================================
+&binary-base2
+
