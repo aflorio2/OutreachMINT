@@ -14,3 +14,9 @@
 # ========================================
 &scales-quantum-cosmos
 
+# ========================================
+# The Double-Slit Experiment — interactive 3-scene canvas
+# (live HTML scene; inlined from double-slit.jl)
+# ========================================
+&double-slit
+
