@@ -135,6 +135,11 @@ function computeGeom(){
   G.sH2  = Math.max(8, H*0.034);
   G.cTop = G.cyC - G.gap2/2; G.cBot = G.cyC + G.gap2/2;
   G.tTop = G.cyT - G.gap2/2; G.tBot = G.cyT + G.gap2/2;
+  // three-channel geometry (Toffoli): control1, control2, target
+  G.t3a=H*0.20; G.t3b=H*0.48; G.t3c=H*0.76; G.gap3=H*0.12; G.sH3=Math.max(7,H*0.026);
+  G.a1T=G.t3a-G.gap3/2; G.a1B=G.t3a+G.gap3/2;
+  G.a2T=G.t3b-G.gap3/2; G.a2B=G.t3b+G.gap3/2;
+  G.a3T=G.t3c-G.gap3/2; G.a3B=G.t3c+G.gap3/2;
 }
 function resize(){
   const r=panel.getBoundingClientRect();
@@ -254,9 +259,6 @@ function drawNOTgate(){
   ctx.beginPath();ctx.moveTo(x0,G.sTop);ctx.lineTo(x1,G.sBot);ctx.stroke();
   ctx.beginPath();ctx.moveTo(x0,G.sBot);ctx.lineTo(x1,G.sTop);ctx.stroke();
   ctx.restore();
-  ctx.font='800 '+Math.max(14,Math.round(H*0.045))+'px Inter,system-ui';
-  ctx.textAlign='center';ctx.fillStyle=C.elec;
-  ctx.fillText('NOT',G.gateX,yT-10);
 }
 
 /* ----- parametric helpers for multi-channel scenes (CNOT, ...) ----- */
@@ -269,9 +271,18 @@ function crossYabs(x,yIn,yOut){
   if(x<=a) return yIn; if(x>=b) return yOut;
   return lerp(yIn,yOut,(x-a)/(b-a));
 }
-function drawCannonAt(y){
-  ctx.save();ctx.shadowColor=C.warm;ctx.shadowBlur=16;
-  ctx.beginPath();ctx.arc(G.sx,y,Math.max(6,H*0.013),0,7);ctx.fillStyle=C.warm;ctx.fill();
+/* one qubit = one shape: circle, square or triangle (cannon + end state) */
+function shapeAt(cx,cy,rad,shape){
+  ctx.beginPath();
+  if(shape==='square'){ const s=rad*1.75; ctx.rect(cx-s/2,cy-s/2,s,s); }
+  else if(shape==='triangle'){ const s=rad*2.15, h=s*0.866;
+    ctx.moveTo(cx,cy-2*h/3); ctx.lineTo(cx+s/2,cy+h/3); ctx.lineTo(cx-s/2,cy+h/3); ctx.closePath(); }
+  else { ctx.arc(cx,cy,rad,0,7); }
+}
+function drawCannonAt(y,shape,col){
+  col=col||C.warm;
+  ctx.save();ctx.shadowColor=col;ctx.shadowBlur=16;
+  shapeAt(G.sx,y,Math.max(6,H*0.014),shape);ctx.fillStyle=col;ctx.fill();
   ctx.restore();
 }
 function drawBarrierMulti(slits,sH){
@@ -297,11 +308,11 @@ function drawLanesMulti(){
     ctx.beginPath();ctx.moveTo(x1,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();});
   ctx.restore();
 }
-function drawReadoutPair(yA,yB,landed){
+function drawReadoutPair(yA,yB,landed,shape){
   const rr=Math.max(11,(yB-yA)*0.22);
   [[yA,C.warm,'1',1],[yB,C.cool,'0',0]].forEach(z=>{
     const on=landed===z[3];
-    ctx.beginPath();ctx.arc(G.rx,z[0],rr,0,7);ctx.fillStyle=on?z[1]:'#0d1226';
+    shapeAt(G.rx,z[0],rr,shape);ctx.fillStyle=on?z[1]:'#0d1226';
     if(on){ctx.save();ctx.shadowColor=z[1];ctx.shadowBlur=18;ctx.fill();ctx.restore();}else ctx.fill();
     ctx.lineWidth=2;ctx.strokeStyle=z[1]+(on?'':'66');ctx.stroke();
     ctx.font='800 13px Inter,system-ui';ctx.textAlign='center';ctx.fillStyle=on?'#10131f':z[1];
@@ -338,8 +349,6 @@ function drawGateBox(yA,yB,active,label){
     ctx.strokeStyle=C.warm+'66';ctx.beginPath();ctx.moveTo(x0,yA);ctx.lineTo(x1,yA);ctx.stroke();
     ctx.strokeStyle=C.cool+'66';ctx.beginPath();ctx.moveTo(x0,yB);ctx.lineTo(x1,yB);ctx.stroke();ctx.restore();
   }
-  ctx.font='800 '+Math.max(13,Math.round(laneGap*0.12+6))+'px Inter,system-ui';
-  ctx.textAlign='center';ctx.fillStyle=C.elec;ctx.fillText(label||'NOT',G.gateX,yT-9);
 }
 /* control dot on the control 1-lane + linkage down to the target box */
 function drawControlLink(active){
@@ -353,6 +362,32 @@ function drawControlLink(active){
   ctx.fillStyle=active?C.elec:'#0c101e';ctx.fill();
   ctx.strokeStyle=active?C.elec:'#7CFFB288';ctx.stroke();
   ctx.restore();
+}
+/* dashed lanes for an arbitrary list of channels (gated ones split at the box) */
+function drawChannelLanes(channels){
+  ctx.save();ctx.setLineDash([5,8]);ctx.lineWidth=1.5;
+  const x0=G.gateX-G.cw, x1=G.gateX+G.cw, sx=G.bx+G.bw/2;
+  channels.forEach(ch=>{
+    [[ch.yT,C.warm],[ch.yB,C.cool]].forEach(p=>{ctx.strokeStyle=p[1]+'40';
+      if(ch.gated){ctx.beginPath();ctx.moveTo(sx,p[0]);ctx.lineTo(x0,p[0]);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x1,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();}
+      else{ctx.beginPath();ctx.moveTo(sx,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();}});
+  });
+  ctx.restore();
+}
+/* one vertical linkage tapping several control dots; bright only when active */
+function drawControlLinks(dotYs,ons,active,boxTop){
+  const x=G.gateX, top=Math.min.apply(null,dotYs);
+  ctx.save();
+  ctx.strokeStyle=active?C.elec:'#7CFFB244';ctx.lineWidth=2.5;ctx.lineCap='round';
+  if(active){ctx.shadowColor=C.elec;ctx.shadowBlur=8;}
+  ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,boxTop);ctx.stroke();
+  ctx.restore();
+  dotYs.forEach((y,i)=>{const on=ons[i];ctx.save();
+    ctx.beginPath();ctx.arc(x,y,7,0,7);
+    if(on){ctx.shadowColor=C.elec;ctx.shadowBlur=8;}
+    ctx.fillStyle=on?C.elec:'#0c101e';ctx.fill();
+    ctx.lineWidth=2.5;ctx.strokeStyle=on?C.elec:'#7CFFB288';ctx.stroke();ctx.restore();});
 }
 
 /* path the ball follows along the lanes, with optional crossover at the gate */
@@ -493,13 +528,13 @@ const S3={
   draw(){
     clearBG();
     drawLanesMulti();
-    drawReadoutPair(G.cTop,G.cBot,this.cLanded);
-    drawReadoutPair(G.tTop,G.tBot,this.tLanded);
+    drawReadoutPair(G.cTop,G.cBot,this.cLanded,'square');
+    drawReadoutPair(G.tTop,G.tBot,this.tLanded,'circle');
     drawGateBox(G.tTop,G.tBot,this.cin===1,'NOT');
     drawControlLink(this.cin===1);
     drawBarrierMulti([{y:G.cTop,color:C.warm,lab:'1'},{y:G.cBot,color:C.cool,lab:'0'},
                       {y:G.tTop,color:C.warm,lab:'1'},{y:G.tBot,color:C.cool,lab:'0'}],G.sH2);
-    drawCannonAt(G.cyC);drawCannonAt(G.cyT);
+    drawCannonAt(G.cyC,'square',colOf(this.cin));drawCannonAt(G.cyT,'circle',colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
     ctx.fillText('control',G.sx,G.cTop-12);
     ctx.fillText('target',G.sx,G.tBot+18);
@@ -513,9 +548,88 @@ const S3={
   onLeave(){ this.cball=this.tball=null; },
 };
 
+/* =========================================================================
+   SCENE 4 — TOFFOLI (CCNOT): target flips only if BOTH controls are 1
+   ========================================================================= */
+const S4={
+  tag:'4 · Toffoli gate', tagColor:'var(--elec)',
+  subtitle:'Three bits. The target flips only when BOTH controls are 1.',
+  capTitle:'<b class="elec">Toffoli</b>: flip the target only if <b class="warm">both</b> controls are 1.',
+  capSub:'The <b class="cool">target</b> box crosses only when the <b>square</b> and <b>triangle</b> are both on their <b class="warm">up&nbsp;(1)</b> lane &mdash; one switch wired as an <b class="elec">AND</b>. Still reversible: three balls in, three balls out.',
+  c1:1, c2:1, tin:0, b1:null, b2:null, b3:null, l1:null, l2:null, l3:null, _sync:null,
+  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  active(){ return this.c1===1 && this.c2===1; },
+  buildControls(el){
+    el.innerHTML='';const self=this;
+    const cA=mkbtn('','',()=>{self.c1^=1;self._sync();self.reset();});
+    const cB=mkbtn('','',()=>{self.c2^=1;self._sync();self.reset();});
+    const tB=mkbtn('','',()=>{self.tin^=1;self._sync();self.reset();});
+    el.append(cA,cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('↻','',()=>self.reset()));
+    this._sync=function(){
+      cA.textContent='▲ '+(self.c1?'1':'0');cA.className='stepbtn '+(self.c1?'up':'dn');
+      cB.textContent='■ '+(self.c2?'1':'0');cB.className='stepbtn '+(self.c2?'up':'dn');
+      tB.textContent='● '+(self.tin?'1':'0');tB.className='stepbtn '+(self.tin?'up':'dn');
+    };this._sync();
+  },
+  reset(){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;
+    this.setReadout('Set the two <b class="e">controls</b> (■ ▲) and the <b class="w">target</b> (●), then press <b>Run</b>.'); },
+  run(){
+    this.l1=this.l2=this.l3=null;const act=this.active(),tout=act?(1-this.tin):this.tin;
+    this.b1={x:G.sx,y:G.t3a,sy:(this.c1?G.a1T:G.a1B),vin:this.c1,cy:G.t3a,phase:'toSlit'};
+    this.b2={x:G.sx,y:G.t3b,sy:(this.c2?G.a2T:G.a2B),vin:this.c2,cy:G.t3b,phase:'toSlit'};
+    this.b3={x:G.sx,y:G.t3c,syIn:(this.tin?G.a3T:G.a3B),syOut:(tout?G.a3T:G.a3B),vin:this.tin,vout:tout,cy:G.t3c,phase:'toSlit'};
+    this.setReadout('Running&hellip;');
+  },
+  _result(){
+    if(this.b1||this.b2||this.b3)return;
+    if(this.l1==null&&this.l2==null&&this.l3==null)return;
+    const tout=this.l3;
+    this.setReadout('controls <b class="'+(this.l1?'w':'c')+'">'+this.l1+'</b> <b class="'+(this.l2?'w':'c')+'">'+this.l2+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">Toffoli</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+  },
+  step(dt){
+    const vx=W*0.42*dt;
+    const moveStraight=(b,set)=>{
+      if(b.phase==='toSlit'){const dx=G.bx-G.sx,dy=b.sy-b.cy,L=Math.hypot(dx,dy)||1;b.x+=dx/L*vx;b.y+=dy/L*vx;if(b.x>=G.bx){b.x=G.bx;b.y=b.sy;b.phase='lane';}return false;}
+      b.x+=vx;b.y=b.sy;if(b.x>=G.rx){set(b.vin);return true;}return false;
+    };
+    if(this.b1&&moveStraight(this.b1,v=>this.l1=v)){this.b1=null;this._result();}
+    if(this.b2&&moveStraight(this.b2,v=>this.l2=v)){this.b2=null;this._result();}
+    const b=this.b3;
+    if(b){
+      if(b.phase==='toSlit'){const dx=G.bx-G.sx,dy=b.syIn-b.cy,L=Math.hypot(dx,dy)||1;b.x+=dx/L*vx;b.y+=dy/L*vx;if(b.x>=G.bx){b.x=G.bx;b.y=b.syIn;b.phase='lane';}}
+      else{b.x+=vx;b.y=crossYabs(b.x,b.syIn,b.syOut);if(b.x>=G.rx){this.l3=b.vout;this.b3=null;this._result();}}
+    }
+  },
+  draw(){
+    clearBG();
+    drawChannelLanes([{yT:G.a1T,yB:G.a1B,gated:false},{yT:G.a2T,yB:G.a2B,gated:false},{yT:G.a3T,yB:G.a3B,gated:true}]);
+    drawReadoutPair(G.a1T,G.a1B,this.l1,'triangle');
+    drawReadoutPair(G.a2T,G.a2B,this.l2,'square');
+    drawReadoutPair(G.a3T,G.a3B,this.l3,'circle');
+    drawGateBox(G.a3T,G.a3B,this.active(),'NOT');
+    const boxTop=G.a3T-Math.max(26,(G.a3B-G.a3T)*0.34);
+    drawControlLinks([G.a1T,G.a2T],[this.c1===1,this.c2===1],this.active(),boxTop);
+    drawBarrierMulti([{y:G.a1T,color:C.warm,lab:'1'},{y:G.a1B,color:C.cool,lab:'0'},
+                      {y:G.a2T,color:C.warm,lab:'1'},{y:G.a2B,color:C.cool,lab:'0'},
+                      {y:G.a3T,color:C.warm,lab:'1'},{y:G.a3B,color:C.cool,lab:'0'}],G.sH3);
+    drawCannonAt(G.t3a,'triangle',colOf(this.c1));drawCannonAt(G.t3b,'square',colOf(this.c2));drawCannonAt(G.t3c,'circle',colOf(this.tin));
+    ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);
+    ctx.fillText('target',G.sx,G.a3B+18);
+    const drawB=(b,vb,va)=>{const v=b.x<G.gateX?vb:va,col=colOf(v);
+      ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
+      ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
+    if(this.b1)drawB(this.b1,this.c1,this.c1);
+    if(this.b2)drawB(this.b2,this.c2,this.c2);
+    if(this.b3)drawB(this.b3,this.tin,this.b3.vout);
+  },
+  onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+  onLeave(){ this.b1=this.b2=this.b3=null; },
+};
+
 /* ----------------------------- scene manager ------------------------------ */
-const scenes=[S1,S2,S3];
-const labels=['Bit','NOT','CNOT'];
+const scenes=[S1,S2,S3,S4];
+const labels=['Bit','NOT','CNOT','Toffoli'];
 let cur=0;
 
 const els={
