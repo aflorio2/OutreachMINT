@@ -189,13 +189,13 @@
         <div class="s2top">
           <div class="picker a">
             <label>A</label>
-            <input type="range" id="inA" min="0" max="15" step="1" value="6">
-            <span class="val" id="valA">6</span>
+            <input type="range" id="inA" min="0" max="3" step="1" value="2">
+            <span class="val" id="valA">2</span>
           </div>
           <div class="picker b">
             <label>B</label>
-            <input type="range" id="inB" min="0" max="15" step="1" value="7">
-            <span class="val" id="valB">7</span>
+            <input type="range" id="inB" min="0" max="3" step="1" value="3">
+            <span class="val" id="valB">3</span>
           </div>
           <button class="stepbtn" id="addStep">Step ▶</button>
           <button class="stepbtn play" id="addAuto">Add it ⚡</button>
@@ -313,15 +313,16 @@ const S2 = {
   subtitle:'Add two numbers the same way you learned in school — right to left — but the only rule is 1 + 1 = 10 (carry the 1).',
   capTitle:'Add column by column; <b class="warn">1 + 1 carries</b> to the next.',
   capSub:'In each column add the two bits plus any <b class="warn">carry</b>. 0+0=0, 1+0=1, and <b class="warn">1+1 = "0 carry 1"</b>. The carry slides left into the next column — exactly like carrying the 10 in ordinary addition.',
-  a:6, b:7, NB:4,            // NB input bits; result needs NB+1
+  a:2, b:3, NB:2,            // NB input bits; result needs NB+1
   step:-1, autoTimer:null,
   // DOM cell stores: carry row (NB+1), A row, B row, result row
   cells:{carry:[],a:[],b:[],res:[]},
   build(){
     const g=document.getElementById('addGrid');
     g.style.setProperty('--cell','clamp(46px,7.5vw,86px)');
-    g.innerHTML='';
     const COLS=this.NB+1;                    // result width (extra column on the left)
+    g.style.gridTemplateColumns='auto repeat('+COLS+',var(--cell))';
+    g.innerHTML='';
     this.cells={carry:[],a:[],b:[],res:[]};
 
     const placeOf=(colFromLeft)=> Math.pow(2, COLS-1-colFromLeft); // value of column

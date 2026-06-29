@@ -1,0 +1,2189 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>binary-base2 slide-mode test</title>
+<style>/* MCPresPluto — Beamer-matching slide styles
+ * Replicates doubleslides.sty + beamerthemesimple.sty layout
+ * CSS isolation via Shadow DOM — no Pluto override rules needed
+ *
+ * Beamer 4:3 default: 128mm x 96mm (aspect ratio 1.333)
+ * Margins: left 0.8cm, right 0.4cm
+ * Font: Cabin 9pt, text color #515151 (destacado)
+ * Title: bold, \large (~12pt), in \linecol color
+ * Footer: \tiny (~5pt), opacity 0.45, in \linecol color
+ * Double columns: 1% | 40% | 2% (divider) | 45% | remainder
+ */
+
+/* Font loaded via <link> tag in setup.jl — not @import (avoids blocking) */
+
+/* ===== Base slide styles ===== */
+
+.mcpres-slide {
+    font-family: 'Cabin', sans-serif;
+    font-size: var(--mcpres-font-size, 9pt);
+    color: #515151;
+    line-height: 1.45;
+    box-sizing: border-box;
+}
+
+.mcpres-slide * {
+    box-sizing: border-box;
+}
+
+/* Heading styles */
+.mcpres-slide h1,
+.mcpres-slide h2,
+.mcpres-slide h3,
+.mcpres-slide h4 {
+    color: var(--mcpres-colour);
+    font-family: 'Cabin', sans-serif;
+    margin-top: 0.3em;
+    margin-bottom: 0.2em;
+    border: none;
+    border-bottom: none;
+    box-shadow: none;
+    background: none;
+    padding-bottom: 0;
+}
+
+.mcpres-slide p {
+    margin: 0.35em 0;
+}
+
+.mcpres-slide img,
+.mcpres-slide svg:not(.main-svg) {
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Plotly.js support: its <svg class="main-svg"> layers must not be resized
+   by the blanket rule above, and must stack via position:absolute (see the
+   shadow-DOM override in mcpres.js for the full explanation). */
+.mcpres-slide .js-plotly-plot,
+.mcpres-slide .js-plotly-plot .plot-container {
+    position: relative;
+}
+.mcpres-slide .js-plotly-plot .svg-container {
+    position: relative;
+    overflow: hidden;
+}
+.mcpres-slide .js-plotly-plot .svg-container > svg.main-svg,
+.mcpres-slide .js-plotly-plot .svg-container > svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* --- Title bar --- */
+.mcpres-title-bar {
+    font-weight: bold;
+    font-size: 1.25em;
+    color: var(--mcpres-colour);
+    padding: 0.55em 0 0.1em 0.65em;
+    line-height: 1.2;
+}
+
+
+.mcpres-title-left,
+.mcpres-title-right {
+    font-weight: bold;
+    font-size: 1.25em;
+    color: var(--mcpres-colour);
+    line-height: 1.2;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* --- Double slide titles --- */
+.mcpres-double-titles {
+    display: flex;
+    align-items: baseline;
+    padding: 0.55em 0 0.1em 0;
+}
+
+
+.mcpres-title-left {
+    width: 47%;
+    padding-left: 0.65em;
+    flex-shrink: 0;
+}
+
+.mcpres-title-spacer {
+    width: 6%;
+    flex-shrink: 0;
+}
+
+.mcpres-title-right {
+    width: 47%;
+    flex-shrink: 0;
+}
+
+/* --- Double slide panels --- */
+.mcpres-double-panels {
+    display: grid;
+    grid-template-columns: 1fr 2px 1fr;
+    gap: 0;
+    align-items: start;
+    min-height: 0;
+    padding: 0;
+}
+
+.mcpres-panel-left {
+    padding: 0.2em 1.2em 0 0.65em;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.mcpres-panel-right {
+    padding: 0.2em 0.4em 0 1.2em;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Fade divider */
+.mcpres-divider {
+    width: 2px;
+    justify-self: center;
+    align-self: stretch;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        var(--mcpres-colour) 5%,
+        var(--mcpres-colour) 95%,
+        transparent 100%
+    );
+    opacity: var(--mcpres-page-opacity, 0.45);
+}
+
+/* --- Single slide content --- */
+.mcpres-content-single {
+    padding: 0.2em 0.4em 0 0.65em;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* --- Blank slide content --- */
+.mcpres-content-blank {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2em;
+}
+
+.mcpres-content-blank h2 {
+    font-weight: normal;
+    font-size: 1.3em;
+    color: #515151;
+    margin-bottom: 0.8em;
+    line-height: 1.3;
+}
+
+.mcpres-content-blank em {
+    font-size: 0.95em;
+    color: #515151;
+}
+
+/* --- Toggle button (notebook mode) --- */
+.mcpres-button-container {
+    text-align: center;
+    padding: 0.5em;
+}
+
+.mcpres-toggle-checkbox {
+    display: none;
+}
+
+.mcpres-toggle-label {
+    cursor: pointer;
+    padding: 0.4em 1.2em;
+    border: 2px solid var(--mcpres-colour);
+    border-radius: 6px;
+    color: var(--mcpres-colour);
+    font-family: 'Cabin', sans-serif;
+    font-weight: bold;
+    font-size: 0.95em;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+}
+
+.mcpres-toggle-label:hover {
+    background: var(--mcpres-colour);
+    color: white;
+}
+
+/* Export PDF button — matches the toggle visual */
+.mcpres-export-pdf-button {
+    margin-left: 0.5em;
+    padding: 0.4em 1.2em;
+    border: 2px solid var(--mcpres-colour);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--mcpres-colour);
+    font-family: 'Cabin', sans-serif;
+    font-weight: bold;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.mcpres-export-pdf-button:hover {
+    background: var(--mcpres-colour);
+    color: white;
+}
+
+/* Export HTML button — matches the toggle visual */
+.mcpres-export-html-button {
+    margin-left: 0.5em;
+    padding: 0.4em 1.2em;
+    border: 2px solid var(--mcpres-colour);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--mcpres-colour);
+    font-family: 'Cabin', sans-serif;
+    font-weight: bold;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.mcpres-export-html-button:hover {
+    background: var(--mcpres-colour);
+    color: white;
+}
+
+/* Hide the export buttons while Slide Mode is active */
+.mcpres-button-container:has(.mcpres-toggle-checkbox:checked) .mcpres-export-pdf-button,
+.mcpres-button-container:has(.mcpres-toggle-checkbox:checked) .mcpres-export-html-button {
+    display: none;
+}
+
+/* --- Overlay base styles --- */
+.mcpres-overlay {
+    display: block;
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    outline: none;
+}
+
+/* ===== Print Layout ===== */
+
+#mcpres-print-layout {
+    max-width: 310mm;
+    margin: 0 auto;
+    padding: 1em 0;
+}
+
+/* "Back to slides" button */
+#mcpres-print-back {
+    display: block;
+    margin: 0 auto 1em auto;
+    padding: 0.5em 1.5em;
+    border: 2px solid var(--mcpres-colour);
+    border-radius: 6px;
+    background: white;
+    color: var(--mcpres-colour);
+    font-family: 'Cabin', sans-serif;
+    font-weight: bold;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+#mcpres-print-back:hover {
+    background: var(--mcpres-colour);
+    color: white;
+}
+
+/* Each print page = A4 landscape */
+.mcpres-print-page {
+    width: 297mm;
+    height: 210mm;
+    overflow: hidden;
+    position: relative;
+    background: white;
+    margin: 0 auto 1em auto;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    box-sizing: border-box;
+}
+
+/* Slide fills the print page */
+.mcpres-print-page .mcpres-slide {
+    width: 297mm;
+    height: 210mm;
+    overflow: hidden;
+    position: relative;
+    font-size: clamp(8pt, 1.4vw, 16pt);
+}
+
+/* Content areas sized for print page */
+.mcpres-print-page .mcpres-content-single {
+    height: calc(210mm - 4.5em);
+    overflow: hidden;
+    padding: 1em 2em 1em 2em;
+}
+
+.mcpres-print-page .mcpres-double-panels {
+    height: calc(210mm - 4.5em);
+    grid-template-columns: 47fr 2px 53fr;
+    align-items: stretch;
+}
+
+/* More breathing room for print panels */
+.mcpres-print-page .mcpres-panel-left {
+    padding: 1em 2em 1em 2em;
+}
+
+.mcpres-print-page .mcpres-panel-right {
+    padding: 1em 2em 1em 2em;
+}
+
+.mcpres-print-page .mcpres-content-blank {
+    height: 210mm;
+    width: 297mm;
+}
+
+.mcpres-print-page .mcpres-content-blank > * {
+    max-height: 100%;
+    max-width: 100%;
+}
+
+/* Images and SVGs — fit within print page */
+.mcpres-print-page img,
+.mcpres-print-page svg {
+    max-width: 100%;
+    max-height: 80%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
+
+/* Overlay fills content area for correct image sizing */
+.mcpres-print-page .mcpres-content-single .mcpres-overlay,
+.mcpres-print-page .mcpres-panel-left .mcpres-overlay,
+.mcpres-print-page .mcpres-panel-right .mcpres-overlay {
+    height: 100%;
+}
+
+.mcpres-print-page .mcpres-content-blank .mcpres-overlay {
+    max-height: 100%;
+}
+
+/* KaTeX sizing in print pages */
+.mcpres-print-page .katex {
+    font-size: 1.1em;
+}
+
+/* Extra cells (slide_part) in print layout */
+.mcpres-print-extra-cell {
+    position: absolute;
+    bottom: 2.5em;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: 60%;
+    font-family: 'Cabin', sans-serif;
+    font-size: clamp(7pt, 1vw, 11pt);
+    color: var(--mcpres-colour);
+    opacity: 0.7;
+    text-align: center;
+}
+
+/* Static value replacing interactive inputs */
+.mcpres-print-static-value {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    font-weight: bold;
+}
+
+/* Print footer at bottom of each page */
+.mcpres-print-footer {
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2em;
+    align-items: center;
+    padding: 0 0.65em;
+    font-family: 'Cabin', sans-serif;
+    font-size: clamp(5pt, 0.85vw, 9pt);
+    color: var(--mcpres-colour);
+    opacity: var(--mcpres-page-opacity, 0.45);
+    pointer-events: none;
+}
+
+.mcpres-print-footer-left {
+    flex: 1;
+    text-align: left;
+}
+
+.mcpres-print-footer-right {
+    flex: 1;
+    text-align: right;
+    padding-right: 0.3em;
+}
+
+/* ===== @page — must be top-level (not nested in @media) for Chrome to apply ===== */
+/* Only takes effect during printing; zero margin suppresses Chrome's date/URL headers */
+
+@page {
+    size: A4 landscape;
+    margin: 0;
+}
+
+/* ===== @media print — Ctrl+P produces clean PDF ===== */
+
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Hide everything outside the print layout — Pluto chrome, notebook content, etc. */
+    body > *:not(#mcpres-print-layout) {
+        display: none !important;
+    }
+
+    /* "Back to slides" button lives inside print layout — hide during actual print */
+    #mcpres-print-back {
+        display: none !important;
+    }
+
+    /* Print layout container — force layout, override Pluto/theme defaults */
+    #mcpres-print-layout {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: none !important;
+    }
+
+    .mcpres-print-page {
+        box-shadow: none;
+        margin: 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Double panels grid geometry — override Pluto's print CSS */
+    #mcpres-print-layout .mcpres-double-panels {
+        display: grid !important;
+        grid-template-columns: 47fr 2px 53fr !important;
+        height: calc(210mm - 4.5em) !important;
+        align-items: stretch !important;
+    }
+
+    /* Panel overflow control for print */
+    #mcpres-print-layout .mcpres-panel-left,
+    #mcpres-print-layout .mcpres-panel-right {
+        display: block !important;
+        min-height: 0;
+        overflow: hidden;
+        padding: 1em 2em !important;
+    }
+
+    /* Single-panel content padding */
+    #mcpres-print-layout .mcpres-content-single {
+        padding: 1em 2em !important;
+    }
+
+    /* Preserve background colors and theme colors */
+    .mcpres-print-page,
+    .mcpres-divider,
+    .mcpres-title-bar,
+    .mcpres-title-left,
+    .mcpres-title-right,
+    .mcpres-print-footer {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Chromium drops backgrounds on empty elements in print — use a border instead */
+    .mcpres-divider {
+        background: none !important;
+        border-left: 2px solid var(--mcpres-colour);
+        opacity: var(--mcpres-page-opacity, 0.45);
+    }
+}
+</style>
+<style>#banner{position:fixed;top:8px;left:8px;right:8px;z-index:200000;background:#111;color:#fff;
+  font:14px/1.4 system-ui;padding:10px 14px;border-radius:8px}
+ #banner b{color:#6ad7ff} #banner button{font-size:15px;padding:6px 14px;margin-left:8px;cursor:pointer}
+ #selftest{margin-top:6px;font-weight:700}</style></head>
+<body style="margin:0;padding-top:74px">
+<div id="banner"><b>Standalone slide-mode test (with the in-place fix)</b> —
+  <button id="enterBtn">Enter slide mode</button><button id="exitBtn">Exit</button>
+  <div id="selftest">self-test: running…</div></div>
+<div id="mcpres-config" style="display:none" data-author="Adrien Florio" data-place="MINT Sommer" data-date="08.07.26" data-colour="bleunuit"></div>
+<label class="mcpres-toggle" style="position:fixed;bottom:8px;right:8px;z-index:200000"><input type="checkbox" id="mcpres-toggle-input"> slide</label>
+<pluto-cell><div class="mcpres-slide" data-mcpres-slide="blank"><div class="mcpres-content-blank">
+
+<div id="bb-root">
+  <!-- Hidden canvas: makes MCPresPluto keep this slide IN-PLACE (light DOM) in
+       slide mode — the same path the canvas-based double-slit slide takes —
+       instead of moving it into the Shadow DOM, where Pluto's cloned global CSS
+       breaks the scene (clicks dead / mis-sized). The canvas is otherwise unused. -->
+  <canvas width="0" height="0" style="display:none" aria-hidden="true"></canvas>
+  <header>
+    <h1>Counting &amp; Adding in <span class="a">Base 2</span></h1>
+    <p id="subtitle"></p>
+  </header>
+
+  <div class="stage">
+    <div class="panel" id="panel">
+      <div class="tag" id="tag"></div>
+
+      <!-- ===================== SCENE 1: COUNTING ===================== -->
+      <div class="scene" id="scene1">
+        <div class="s1ctrl">
+          <button class="stepbtn" id="s1minus">- 1</button>
+          <button class="stepbtn" id="s1plus">+ 1</button>
+          <button class="stepbtn play" id="s1play">&#9654; Count</button>
+        </div>
+
+        <div class="s1wrap">
+          <div class="bitrow" id="bitrow"></div>
+          <div class="sumline" id="s1sum"></div>
+          <div class="readout">
+            <div>
+              <div class="bignum"><span class="bincode" id="binBig">0000</span></div>
+              <div class="numlab">binary</div>
+            </div>
+            <div class="bignum eq">=</div>
+            <div>
+              <div class="bignum"><span class="deccode" id="decBig">0</span></div>
+              <div class="numlab">decimal</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== SCENE 2: ADDITION ===================== -->
+      <div class="scene" id="scene2">
+        <div class="s2top">
+          <div class="picker a">
+            <label>A</label>
+            <input type="range" id="inA" min="0" max="15" step="1" value="6">
+            <span class="val" id="valA">6</span>
+          </div>
+          <div class="picker b">
+            <label>B</label>
+            <input type="range" id="inB" min="0" max="15" step="1" value="7">
+            <span class="val" id="valB">7</span>
+          </div>
+          <button class="stepbtn" id="addStep">Step &#9654;</button>
+          <button class="stepbtn play" id="addAuto">Add it &#9889;</button>
+          <button class="stepbtn" id="addReset">&#8635;</button>
+        </div>
+
+        <div class="add" id="addGrid"></div>
+        <div class="s2status" id="s2status"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="caption" id="caption">
+      <div class="ct" id="capTitle"></div>
+      <div class="cs" id="capSub"></div>
+    </div>
+    <div class="dots" id="dots"></div>
+  </div>
+</div>
+
+<style>
+  #bb-root{
+    --bg:#05060d; --ink:#eef2ff; --muted:#8b93b8;
+    --warm:#ffb24a;     /* the "1" / on */
+    --cool:#6ad7ff;     /* place values / accents */
+    --elec:#7CFFB2;     /* result / success */
+    --warn:#ff5470;     /* carry */
+    --line:#1c2238;
+    /* Fill the slide box exactly in slide mode (definite parent height); in the
+       notebook editor aspect-ratio derives a landscape height from the width.
+       max-height keeps us inside MCPresPluto's 4:3 box (no vh min-height). */
+    width:100%; height:100%; max-height:100%; aspect-ratio:4 / 3;
+    background:radial-gradient(1200px 800px at 50% -10%, #11162b 0%, var(--bg) 60%);
+    color:var(--ink);
+    font-family:'Cabin','Inter',system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden;display:flex;flex-direction:column;border-radius:10px;
+  }
+  #bb-root *{box-sizing:border-box;margin:0;padding:0}
+  #bb-root header{text-align:center;padding:14px 16px 6px;flex:0 0 auto}
+  #bb-root header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
+  #bb-root header h1 .a{color:var(--cool)}
+  #bb-root header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;transition:opacity .3s}
+
+  #bb-root .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
+  #bb-root .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset;
+    display:flex;align-items:center;justify-content:center}
+
+  /* scene tag (top-left) */
+  #bb-root .tag{position:absolute;top:14px;left:14px;z-index:5;font-size:12px;letter-spacing:2px;
+    font-weight:700;text-transform:uppercase;padding:6px 11px;border-radius:8px;
+    background:#0008;backdrop-filter:blur(4px);border:1px solid var(--line);transition:color .3s,border-color .3s}
+
+  /* caption (centered, in the bottom controls bar) */
+  #bb-root .caption{max-width:min(720px,94%);margin:0 auto;
+    background:#0009;border:1px solid #ffffff22;border-radius:12px;padding:10px 16px;
+    backdrop-filter:blur(5px);text-align:center;transition:opacity .3s}
+  #bb-root .caption .ct{font-size:clamp(13px,1.5vw,17px);font-weight:700;line-height:1.25}
+  #bb-root .caption .cs{font-size:clamp(11px,1.2vw,13.5px);color:#c9d1f5;margin-top:4px;line-height:1.35}
+  #bb-root .caption b.warm{color:var(--warm)} #bb-root .caption b.cool{color:var(--cool)}
+  #bb-root .caption b.elec{color:var(--elec)} #bb-root .caption b.warn{color:var(--warn)}
+
+  /* each scene fills the panel */
+  #bb-root .scene{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    flex-direction:column;padding:46px 18px 14px}
+  #bb-root .scene.active{display:flex}
+
+  /* ---------- shared bit / cell styling ---------- */
+  #bb-root .bit{
+    --sz:clamp(34px,5.5vw,80px);
+    width:var(--sz);height:var(--sz);border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:calc(var(--sz)*0.5);font-weight:800;font-variant-numeric:tabular-nums;
+    border:2px solid #2a3150;background:#0d1226;color:#566089;
+    transition:all .25s cubic-bezier(.2,.8,.3,1);user-select:none;position:relative;
+  }
+  #bb-root .bit.on{
+    border-color:var(--warm);color:#1a1206;
+    background:radial-gradient(120% 120% at 50% 0%, #ffd089 0%, var(--warm) 70%);
+    box-shadow:0 0 26px -2px var(--warm);transform:translateY(-2px);
+  }
+  #bb-root .bit.click{cursor:pointer}
+  #bb-root .bit.click:hover{border-color:var(--warm);box-shadow:0 0 16px -4px var(--warm)}
+  #bb-root .place{font-size:clamp(10px,1.1vw,14px);color:var(--cool);font-weight:700;
+    text-align:center;margin-top:5px;letter-spacing:.3px}
+  #bb-root .placefade{color:var(--muted);font-weight:500;font-size:clamp(10px,1.1vw,12px);margin-top:2px}
+
+  /* scene 1 layout */
+  #bb-root .s1wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+  #bb-root .bitrow{display:flex;gap:clamp(8px,1.4vw,18px);align-items:flex-start}
+  #bb-root .bitcol{display:flex;flex-direction:column;align-items:center}
+  #bb-root .readout{display:flex;align-items:center;gap:clamp(12px,2.4vw,36px);margin-top:16px;flex-wrap:wrap;justify-content:center}
+  #bb-root .bignum{font-size:clamp(28px,4.4vw,60px);font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  #bb-root .bignum .eq{color:var(--muted);font-weight:400;margin:0 .15em}
+  #bb-root .bincode{color:var(--warm)} #bb-root .deccode{color:var(--elec)}
+  #bb-root .numlab{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-top:6px}
+  #bb-root .sumline{font-size:clamp(12px,1.5vw,17px);color:#c9d1f5;margin-top:13px;min-height:1.4em;text-align:center;font-variant-numeric:tabular-nums}
+  #bb-root .sumline .t{color:var(--warm);font-weight:700}
+
+  /* scene 1 controls */
+  #bb-root .s1ctrl{position:absolute;top:14px;right:14px;z-index:6;display:flex;gap:8px;align-items:center}
+  #bb-root .stepbtn{font-size:13px;color:var(--ink);background:#121734;border:1px solid var(--line);
+    border-radius:9px;padding:7px 14px;cursor:pointer;transition:background .15s;font-weight:600}
+  #bb-root .stepbtn:hover{background:#1b2350}
+  #bb-root .stepbtn.play.on{background:#3a2a12;border-color:var(--warm);color:var(--warm)}
+
+  /* scene 2 layout: the addition "worksheet" */
+  #bb-root .add{display:grid;grid-template-columns:auto repeat(5,var(--cell));gap:0 clamp(6px,1vw,12px);
+    --cell:clamp(34px,5vw,80px);align-items:center;justify-items:center;font-variant-numeric:tabular-nums}
+  #bb-root .add .lab{justify-self:end;color:var(--muted);font-size:clamp(11px,1.3vw,15px);
+    font-weight:600;padding-right:10px;white-space:nowrap}
+  #bb-root .add .lab b{color:var(--cool)}
+  #bb-root .add .carry{height:clamp(20px,2.4vw,32px);display:flex;align-items:center;justify-content:center;
+    font-size:clamp(13px,1.7vw,22px);font-weight:800;color:var(--warn);opacity:0;transition:opacity .3s,transform .3s;transform:translateY(6px)}
+  #bb-root .add .carry.show{opacity:1;transform:translateY(0)}
+  #bb-root .add .place2{color:var(--cool);font-size:clamp(10px,1.1vw,13px);font-weight:700;height:20px}
+  #bb-root .cell{
+    --sz:clamp(30px,4.4vw,72px);width:var(--sz);height:var(--sz);border-radius:13px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:calc(var(--sz)*0.5);font-weight:800;
+    border:2px solid #2a3150;background:#0d1226;color:#566089;transition:all .3s}
+  #bb-root .cell.one{border-color:var(--warm);color:#1a1206;
+    background:radial-gradient(120% 120% at 50% 0%, #ffd089 0%, var(--warm) 70%);box-shadow:0 0 18px -4px var(--warm)}
+  #bb-root .cell.res.one{border-color:var(--elec);color:#06150d;
+    background:radial-gradient(120% 120% at 50% 0%, #b6ffd9 0%, var(--elec) 70%);box-shadow:0 0 18px -3px var(--elec)}
+  #bb-root .cell.active{outline:3px solid var(--cool);outline-offset:3px}
+  #bb-root .cell.empty{border:none;background:none;box-shadow:none}
+  #bb-root .rule{grid-column:2 / -1;height:3px;background:#2a3150;border-radius:3px;margin:6px 0;align-self:stretch;justify-self:stretch;width:100%}
+  #bb-root .plus{justify-self:end;color:var(--warm);font-weight:800;font-size:clamp(16px,2.4vw,32px)}
+
+  /* scene 2 controls */
+  #bb-root .s2top{position:absolute;top:14px;right:14px;z-index:6;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  #bb-root .picker{display:flex;align-items:center;gap:8px;background:#0009;border:1px solid #ffffff22;
+    border-radius:10px;padding:6px 12px;backdrop-filter:blur(5px)}
+  #bb-root .picker label{font-size:12px;color:var(--muted)}
+  #bb-root .picker .val{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;min-width:1.4em;text-align:center}
+  #bb-root .picker.a .val{color:var(--warm)} #bb-root .picker.b .val{color:var(--cool)}
+  #bb-root .picker input{width:90px}
+  #bb-root .s2status{font-size:clamp(12px,1.6vw,19px);margin-top:16px;min-height:1.5em;text-align:center;color:#c9d1f5;font-variant-numeric:tabular-nums}
+  #bb-root .s2status .r{color:var(--elec);font-weight:800}
+  #bb-root .s2status .c{color:var(--warn);font-weight:800}
+
+  /* bottom controls: caption + scene selector, centered and pushed low */
+  #bb-root .controls{flex:0 0 auto;padding:6px 24px 8px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  #bb-root .dots{display:flex;gap:18px;align-items:center}
+  #bb-root .dot{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;opacity:.55;transition:opacity .2s}
+  #bb-root .dot.active{opacity:1}
+  #bb-root .dot .pip{width:11px;height:11px;border-radius:50%;background:#39406a;transition:background .2s,box-shadow .2s}
+  #bb-root .dot.active .pip{background:var(--cool);box-shadow:0 0 12px var(--cool)}
+  #bb-root .dot .dl{font-size:11.5px;color:var(--muted);letter-spacing:.3px}
+  #bb-root .dot.active .dl{color:var(--ink);font-weight:700}
+</style>
+
+<script>
+(function(){
+"use strict";
+const root = document.getElementById('bb-root');
+if(!root || root._bbInit) return;
+root._bbInit = true;
+const gid = id => root.querySelector('#'+id);
+/* ============================================================================
+   COUNTING & ADDING IN BASE 2  —  2 navigable scenes
+     1) Counting: 4 clickable bits (8 4 2 1), live binary<->decimal, auto-count
+     2) Addition: pick A and B (0..15), watch the column-by-column add with carries
+   Same house style as the double-slit slide. Sets up classical logic / gates.
+   ========================================================================== */
+
+const PLACES = [8,4,2,1];                  // most-significant first
+const POWLAB = ['2³','2²','2¹','2⁰'];
+
+/* ----------------------------- shared UI refs ----------------------------- */
+const els = {
+  subtitle:gid('subtitle'),
+  tag:gid('tag'),
+  capTitle:gid('capTitle'),
+  capSub:gid('capSub'),
+};
+
+/* =========================================================================
+   SCENE 1 — COUNTING IN BINARY
+   ========================================================================= */
+const S1 = {
+  tag:'1 · Counting',
+  tagColor:'var(--cool)',
+  subtitle:'We only have two digits: 0 and 1. Click the boxes — each one is worth twice the one to its right.',
+  capTitle:'Every number is a sum of <b class="cool">powers of two</b>.',
+  capSub:'Each box is a <b class="warm">bit</b>: off = 0, on = 1. A box that is <b class="warm">on</b> adds its value (8, 4, 2 or 1). Add the lit boxes and you get the decimal number — that is all "base 2" means.',
+  value:0, bits:[0,0,0,0], cells:[], playing:false, timer:null,
+  build(){
+    const row=gid('bitrow');
+    row.innerHTML='';
+    this.cells=[];
+    PLACES.forEach((p,i)=>{
+      const col=document.createElement('div'); col.className='bitcol';
+      const bit=document.createElement('div'); bit.className='bit click';
+      bit.textContent='0';
+      bit.onclick=()=>{ this.bits[i]^=1; this.sync(); };
+      const place=document.createElement('div'); place.className='place';
+      place.innerHTML=p+' <span style="opacity:.6">('+POWLAB[i]+')</span>';
+      col.appendChild(bit); col.appendChild(place);
+      row.appendChild(col);
+      this.cells.push(bit);
+    });
+    this.sync();
+  },
+  set(v){ v=((v%16)+16)%16; this.bits=PLACES.map(p=>(v&p)?1:0); this.sync(); },
+  sync(){
+    let v=0, parts=[];
+    PLACES.forEach((p,i)=>{
+      const on=this.bits[i];
+      this.cells[i].textContent=on?'1':'0';
+      this.cells[i].classList.toggle('on',!!on);
+      if(on){ v+=p; parts.push(p); }
+    });
+    this.value=v;
+    gid('binBig').textContent=this.bits.join('');
+    gid('decBig').textContent=v;
+    const sum=gid('s1sum');
+    if(parts.length===0){ sum.innerHTML='Nothing lit → <span class="t">0</span>'; }
+    else { sum.innerHTML=parts.join(' <span style="color:var(--muted)">+</span> ')+
+            ' <span style="color:var(--muted)">=</span> <span class="t">'+v+'</span>'; }
+  },
+  togglePlay(){
+    this.playing=!this.playing;
+    const btn=gid('s1play');
+    btn.classList.toggle('on',this.playing);
+    btn.textContent=this.playing?'⏸ Pause':'▶ Count';
+    if(this.playing){ this.timer=setInterval(()=>this.set(this.value+1),750); }
+    else { clearInterval(this.timer); }
+  },
+  onEnter(){ this.build(); },
+  onLeave(){ if(this.playing) this.togglePlay(); },
+};
+
+gid('s1plus').onclick =()=>S1.set(S1.value+1);
+gid('s1minus').onclick=()=>S1.set(S1.value-1);
+gid('s1play').onclick =()=>S1.togglePlay();
+
+/* =========================================================================
+   SCENE 2 — ADDING IN BINARY (with carries)
+   ========================================================================= */
+const S2 = {
+  tag:'2 · Adding',
+  tagColor:'var(--elec)',
+  subtitle:'Add two numbers the same way you learned in school — right to left — but the only rule is 1 + 1 = 10 (carry the 1).',
+  capTitle:'Add column by column; <b class="warn">1 + 1 carries</b> to the next.',
+  capSub:'In each column add the two bits plus any <b class="warn">carry</b>. 0+0=0, 1+0=1, and <b class="warn">1+1 = "0 carry 1"</b>. The carry slides left into the next column — exactly like carrying the 10 in ordinary addition.',
+  a:6, b:7, NB:4,            // NB input bits; result needs NB+1
+  step:-1, autoTimer:null,
+  // DOM cell stores: carry row (NB+1), A row, B row, result row
+  cells:{carry:[],a:[],b:[],res:[]},
+  build(){
+    const g=gid('addGrid');
+    g.style.setProperty('--cell','clamp(46px,7.5vw,86px)');
+    g.innerHTML='';
+    const COLS=this.NB+1;                    // result width (extra column on the left)
+    this.cells={carry:[],a:[],b:[],res:[]};
+
+    const placeOf=(colFromLeft)=> Math.pow(2, COLS-1-colFromLeft); // value of column
+
+    // --- row 0: carries (label + COLS) ---
+    g.appendChild(mk('lab','carry →'));
+    for(let c=0;c<COLS;c++){ const e=mk('carry',''); this.cells.carry.push(e); g.appendChild(e); }
+    // --- row 1: place labels ---
+    g.appendChild(mk('lab',''));
+    for(let c=0;c<COLS;c++){ g.appendChild(mk('place2', placeOf(c))); }
+    // --- row 2: A ---
+    g.appendChild(labHTML('<b>A</b> = '+this.a));
+    for(let c=0;c<COLS;c++){ const e=cellEl(); this.cells.a.push(e); g.appendChild(e); }
+    // --- row 3: B ---
+    g.appendChild(plusLab());
+    for(let c=0;c<COLS;c++){ const e=cellEl(); this.cells.b.push(e); g.appendChild(e); }
+    // --- rule line ---
+    const r=document.createElement('div'); r.className='rule'; g.appendChild(r);
+    // --- row 4: result ---
+    g.appendChild(labHTML('<b style="color:var(--elec)">Sum</b>'));
+    for(let c=0;c<COLS;c++){ const e=cellEl(); e.classList.add('res'); this.cells.res.push(e); g.appendChild(e); }
+
+    this.reset();
+
+    function mk(cls,txt){ const e=document.createElement('div'); e.className=cls; e.textContent=txt; return e; }
+    function labHTML(html){ const e=document.createElement('div'); e.className='lab'; e.innerHTML=html; return e; }
+    function plusLab(){ const e=document.createElement('div'); e.className='plus'; e.textContent='+'; return e; }
+    function cellEl(){ const e=document.createElement('div'); e.className='cell'; return e; }
+  },
+  bitsOf(v,cols){ const out=[]; for(let i=cols-1;i>=0;i--) out.push((v>>i)&1); return out; }, // MSB..LSB
+  reset(){
+    clearInterval(this.autoTimer); this.autoTimer=null;
+    gid('addAuto').classList.remove('on');
+    gid('addAuto').textContent='Add it ⚡';
+    this.step=-1;
+    const COLS=this.NB+1;
+    const ab=this.bitsOf(this.a,COLS), bb=this.bitsOf(this.b,COLS);
+    for(let c=0;c<COLS;c++){
+      paint(this.cells.a[c], ab[c]);
+      paint(this.cells.b[c], bb[c]);
+      // hide the always-zero top A/B box so the extra column reads as "room for carry"
+      this.cells.a[c].classList.toggle('empty', c===0);
+      this.cells.b[c].classList.toggle('empty', c===0);
+      this.cells.res[c].className='cell res';
+      this.cells.res[c].textContent='';
+      this.cells.carry[c].textContent='';
+      this.cells.carry[c].classList.remove('show');
+    }
+    gid('s2status').innerHTML=
+      'A = <b style="color:var(--warm)">'+this.a+'</b> ('+this.a.toString(2).padStart(this.NB,'0')+
+      ')  +  B = <b style="color:var(--cool)">'+this.b+'</b> ('+this.b.toString(2).padStart(this.NB,'0')+
+      ')  —  press <b>Step</b> or <b>Add it</b>.';
+    function paint(el,bit){ el.textContent=bit; el.classList.toggle('one',bit===1); }
+  },
+  // advance one column (right to left). step counts columns done.
+  next(){
+    const COLS=this.NB+1;
+    if(this.step>=COLS-1){ this.finish(); return false; }
+    this.step++;
+    const col=COLS-1-this.step;               // index from left of the column being processed
+    const ab=this.bitsOf(this.a,COLS), bb=this.bitsOf(this.b,COLS);
+    // carry coming into this column was written into this.cells.carry[col] already (or 0)
+    const cin = this.cells.carry[col].textContent==='1' ? 1 : 0;
+    const sum = ab[col]+bb[col]+cin;
+    const bit = sum & 1;
+    const cout= sum >> 1;
+    // highlight current column
+    [...this.cells.a,...this.cells.b,...this.cells.res].forEach(e=>e.classList.remove('active'));
+    this.cells.a[col].classList.add('active');
+    this.cells.b[col].classList.add('active');
+    this.cells.res[col].classList.add('active');
+    // write result bit
+    this.cells.res[col].textContent=bit;
+    this.cells.res[col].classList.toggle('one',bit===1);
+    // write carry-out into the column to the left
+    if(col-1>=0){
+      this.cells.carry[col-1].textContent=cout? '1':'';
+      this.cells.carry[col-1].classList.toggle('show',cout===1);
+    }
+    const pv=Math.pow(2,this.step);
+    const cinTxt = cin? ' + carry <span class="c">1</span>' : '';
+    let line='Column '+pv+': <b style="color:var(--warm)">'+ab[col]+'</b> + <b style="color:var(--cool)">'+bb[col]+'</b>'+cinTxt+
+             ' = '+sum+' → write <span class="r">'+bit+'</span>';
+    if(cout) line+=', carry <span class="c">1</span> left';
+    gid('s2status').innerHTML=line;
+    if(this.step>=COLS-1){ setTimeout(()=>this.finish(),10); }
+    return true;
+  },
+  finish(){
+    [...this.cells.a,...this.cells.b,...this.cells.res].forEach(e=>e.classList.remove('active'));
+    clearInterval(this.autoTimer); this.autoTimer=null;
+    gid('addAuto').classList.remove('on');
+    gid('addAuto').textContent='Add it ⚡';
+    const tot=this.a+this.b;
+    const COLS=this.NB+1;
+    gid('s2status').innerHTML=
+      '<b style="color:var(--warm)">'+this.a+'</b> + <b style="color:var(--cool)">'+this.b+'</b> = '+
+      '<span class="r">'+tot+'</span>  =  <span class="r">'+tot.toString(2).padStart(COLS,'0')+'</span> in binary.';
+  },
+  auto(){
+    if(this.autoTimer){ // pause
+      clearInterval(this.autoTimer); this.autoTimer=null;
+      gid('addAuto').classList.remove('on');
+      gid('addAuto').textContent='Add it ⚡';
+      return;
+    }
+    if(this.step>=this.NB){ this.reset(); }
+    gid('addAuto').classList.add('on');
+    gid('addAuto').textContent='⏸';
+    this.autoTimer=setInterval(()=>{ if(!this.next()){ } },900);
+  },
+  onEnter(){ this.build(); },
+  onLeave(){ clearInterval(this.autoTimer); this.autoTimer=null; },
+};
+
+gid('inA').addEventListener('input',e=>{
+  S2.a=+e.target.value; gid('valA').textContent=S2.a; S2.reset();
+});
+gid('inB').addEventListener('input',e=>{
+  S2.b=+e.target.value; gid('valB').textContent=S2.b; S2.reset();
+});
+gid('addStep').onclick =()=>S2.next();
+gid('addAuto').onclick =()=>S2.auto();
+gid('addReset').onclick=()=>S2.reset();
+
+/* ----------------------------- scene manager ------------------------------ */
+const scenes=[S1,S2];
+const sceneEls=[gid('scene1'),gid('scene2')];
+let cur=0;
+
+const dotsWrap=gid('dots');
+const labels=['Counting','Adding'];
+const dotEls=labels.map((l,i)=>{
+  const d=document.createElement('div'); d.className='dot';
+  d.innerHTML=`<span class="pip"></span><span class="dl">${l}</span>`;
+  d.onclick=()=>go(i); dotsWrap.appendChild(d); return d;
+});
+
+function applySceneUI(s){
+  els.subtitle.textContent=s.subtitle;
+  els.tag.textContent=s.tag; els.tag.style.color=s.tagColor; els.tag.style.borderColor=s.tagColor+'55';
+  els.capTitle.innerHTML=s.capTitle;
+  els.capSub.innerHTML=s.capSub;
+  dotEls.forEach((d,i)=>d.classList.toggle('active',i===cur));
+  sceneEls.forEach((e,i)=>e.classList.toggle('active',i===cur));
+}
+
+function go(i){
+  i=Math.max(0,Math.min(scenes.length-1,i));
+  if(i===cur) return;
+  scenes[cur].onLeave && scenes[cur].onLeave();
+  cur=i;
+  scenes[cur].onEnter && scenes[cur].onEnter();
+  applySceneUI(scenes[cur]);
+}
+
+// Scenes are switched only via the Counting / Adding labels — no nav buttons
+// and no arrow-key handler (arrows are reserved for deck navigation).
+
+/* boot */
+scenes[0].onEnter && scenes[0].onEnter();
+applySceneUI(scenes[0]);
+})();
+</script>
+
+</div></div></pluto-cell>
+<script>// MCPresPluto — Slide engine for Pluto notebooks
+// Uses Shadow DOM for complete CSS isolation from Pluto
+
+(function() {
+    "use strict";
+
+    var slides = [];
+    var currentSlide = 0;
+    var currentFragment = 0;
+    var observer = null;
+    var isSlideMode = false;
+    var reapplyScheduled = false;
+    var suppressObserver = false;
+    var isPrintMode = false;
+
+    // Shadow DOM state
+    var viewportEl = null;
+    var shadowRoot = null;
+    var contentEl = null;
+    // Light-DOM sibling of viewportEl that hosts externalized PlutoPlotly
+    // containers — they cannot live inside viewportEl (shadow host's light
+    // children are not rendered) and need a stable parent so the
+    // MutationObserver can ignore Plotly's internal subtree mutations.
+    var plotLayerEl = null;
+    // The slide element currently shown IN PLACE (light DOM, not moved into the
+    // shadow) because it contains a live WGLMakie/Bonito figure that cannot be
+    // relocated without Pluto re-rendering it. The observer ignores its subtree.
+    var inPlaceEl = null;
+
+    // --- Initialization ---
+
+    function waitForPluto() {
+        var cells = document.querySelectorAll("pluto-cell");
+        if (cells.length > 0) {
+            init();
+        } else {
+            requestAnimationFrame(waitForPluto);
+        }
+    }
+
+    function init() {
+        // Clean up any stale viewport from a previous script instance
+        var stale = document.getElementById("mcpres-viewport");
+        if (stale) stale.parentNode.removeChild(stale);
+        var staleLayer = document.getElementById("mcpres-plot-layer");
+        if (staleLayer) staleLayer.parentNode.removeChild(staleLayer);
+
+        watchToggle();
+        watchExportButton();
+        watchExportHtmlButton();
+    }
+
+    // --- Toggle ---
+
+    function watchToggle() {
+        var checkbox = document.getElementById("mcpres-toggle-input");
+        if (checkbox && !checkbox._mcpresWatched) {
+            checkbox._mcpresWatched = true;
+            checkbox.addEventListener("change", function() {
+                if (checkbox.checked) enterSlideMode();
+                else exitSlideMode();
+            });
+        }
+
+        setInterval(function() {
+            var cb = document.getElementById("mcpres-toggle-input");
+            if (cb && !cb._mcpresWatched) {
+                cb._mcpresWatched = true;
+                cb.addEventListener("change", function() {
+                    if (cb.checked) enterSlideMode();
+                    else exitSlideMode();
+                });
+                if (isSlideMode) cb.checked = true;
+            }
+        }, 1000);
+    }
+
+    // --- Export PDF button ---
+    // Wires the in-notebook button to enterPrintMode() + window.print(),
+    // restoring the notebook view once the print dialog closes.
+
+    function watchExportButton() {
+        var attach = function() {
+            var btn = document.getElementById("mcpres-export-pdf");
+            if (btn && !btn._mcpresWatched) {
+                btn._mcpresWatched = true;
+                btn.addEventListener("click", function() {
+                    enterPrintMode();
+                    // Two RAFs so the print layout is painted before the dialog opens
+                    requestAnimationFrame(function() {
+                        requestAnimationFrame(function() {
+                            var afterPrint = function() {
+                                exitPrintMode(false);
+                                window.removeEventListener("afterprint", afterPrint);
+                            };
+                            window.addEventListener("afterprint", afterPrint);
+                            window.print();
+                        });
+                    });
+                });
+            }
+        };
+        attach();
+        setInterval(attach, 1000);
+    }
+
+    // --- Export HTML button ---
+    // Triggers a browser download of Pluto's /notebookexport?id=... endpoint
+    // (the same artifact that MCPresPluto.export_html fetches from Julia).
+
+    function watchExportHtmlButton() {
+        var attach = function() {
+            var btn = document.getElementById("mcpres-export-html");
+            if (btn && !btn._mcpresWatched) {
+                btn._mcpresWatched = true;
+                btn.addEventListener("click", function() {
+                    var params = new URLSearchParams(window.location.search);
+                    var id = params.get("id");
+                    if (!id) {
+                        alert("Could not detect notebook id from URL.\n" +
+                              "Expected format: /edit?id=NOTEBOOK_ID");
+                        return;
+                    }
+                    var secret = params.get("secret");
+                    var url = "/notebookexport?id=" + encodeURIComponent(id);
+                    if (secret) url += "&secret=" + encodeURIComponent(secret);
+                    var a = document.createElement("a");
+                    a.href = url;
+                    a.download = "slides.html";
+                    a.style.display = "none";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            }
+        };
+        attach();
+        setInterval(attach, 1000);
+    }
+
+    // --- Shadow DOM construction ---
+
+    function getShadowOverrideCSS() {
+        return [
+            // 4:3 slide box sized to fit the viewport, defined once on the shadow
+            // host so footer/nav (siblings of #mcpres-content) can reference it.
+            // Beamer 4:3 geometry (128mm x 96mm): width = 4/3 * height, capped by
+            // whichever viewport dimension is the binding constraint.
+            ":host { --slide-w: min(100vw, 133.333vh); --slide-h: min(75vw, 100vh); }",
+
+            // Content container fills viewport and centers the slide box
+            "#mcpres-content { width: 100vw; height: 100vh; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; }",
+
+            // Slide is a centered 4:3 box; font scales with the box (no vw cap)
+            // so content keeps scaling proportionally at any screen size.
+            "#mcpres-content .mcpres-slide { width: var(--slide-w); height: var(--slide-h); overflow: hidden; position: relative; background: white; font-size: calc(var(--slide-w) * 0.014); }",
+
+            // Header (title bar) scaled up over the base 1.25em
+            "#mcpres-content .mcpres-title-bar, #mcpres-content .mcpres-title-left, #mcpres-content .mcpres-title-right { font-size: 1.8em; }",
+
+            // Single slide content — leave room for title + footer
+            "#mcpres-content .mcpres-content-single { height: calc(100% - 4.5em); overflow: hidden; padding-top: 0.3em; }",
+
+            // Double panels — fill available height; stretch so children get a height reference
+            "#mcpres-content .mcpres-double-panels { height: calc(100% - 4.5em); grid-template-columns: 47fr 2px 53fr; align-items: stretch; }",
+            "#mcpres-content .mcpres-panel-left, #mcpres-content .mcpres-panel-right { min-height: 0; }",
+
+            // Blank slide — fill the slide box, constrain children
+            "#mcpres-content .mcpres-content-blank { height: 100%; width: 100%; }",
+            "#mcpres-content .mcpres-content-blank > * { max-height: 100%; max-width: 100%; }",
+
+            // Footer — anchored to the slide box's bottom edge (offset by the
+            // pillar/letterbox margin), not the raw viewport.
+            "#mcpres-footer { display: flex; position: fixed; bottom: calc((100vh - var(--slide-h)) / 2); left: calc((100vw - var(--slide-w)) / 2); width: var(--slide-w); height: 2em; align-items: center; padding: 0 0.65em; font-family: 'Cabin', sans-serif; font-size: calc(var(--slide-w) * 0.01224); color: var(--mcpres-colour); opacity: var(--mcpres-page-opacity, 0.45); z-index: 1000; background: transparent; pointer-events: none; }",
+            "#mcpres-footer.mcpres-footer-hidden { display: none; }",
+            "#mcpres-footer-left { flex: 1; text-align: left; }",
+            "#mcpres-footer-center { flex: 0; width: 0; }",
+            "#mcpres-footer-right { flex: 1; text-align: right; padding-right: 0.3em; }",
+
+            // Navigation controls — anchored to the slide box's bottom-right
+            "#mcpres-nav { display: flex; position: fixed; bottom: calc((100vh - var(--slide-h)) / 2 + 2.2em); right: calc((100vw - var(--slide-w)) / 2 + 0.5em); gap: 0.3em; z-index: 1001; opacity: 0; transition: opacity 0.3s; }",
+            "#mcpres-nav:hover, #mcpres-nav.mcpres-nav-visible { opacity: 1; }",
+            "#mcpres-nav button { background: rgba(255,255,255,0.9); border: 1px solid var(--mcpres-colour); color: var(--mcpres-colour); cursor: pointer; font-size: 0.75em; padding: 0.2em 0.6em; border-radius: 3px; font-family: 'Cabin', sans-serif; pointer-events: auto; }",
+            "#mcpres-nav button:hover { background: var(--mcpres-colour); color: white; }",
+
+            // Images and SVGs — fit within their container, never overflow
+            // (exclude Plotly's .main-svg layers; they're handled below)
+            "#mcpres-content .mcpres-slide img, #mcpres-content .mcpres-slide svg:not(.main-svg) { max-width: 100%; max-height: 100%; height: auto; object-fit: contain; display: block; }",
+
+            // Plotly.js stacks several <svg class='main-svg'> layers (bg, plot,
+            // infolayer with titles/legend/annotations) using position:absolute
+            // via CSS injected into document.head. That CSS doesn't cross the
+            // shadow boundary, so without these rules the layers fall into flow
+            // layout and axis titles/legend/annotations render below the plot.
+            "#mcpres-content .js-plotly-plot, #mcpres-content .js-plotly-plot .plot-container { position: relative; }",
+            "#mcpres-content .js-plotly-plot .svg-container { position: relative; overflow: hidden; }",
+            "#mcpres-content .js-plotly-plot .svg-container > svg.main-svg, #mcpres-content .js-plotly-plot .svg-container > svg { position: absolute; top: 0; left: 0; }",
+
+            // Overlays fill the content area so images inherit the right max-height
+            "#mcpres-content .mcpres-content-single .mcpres-overlay, #mcpres-content .mcpres-panel-left .mcpres-overlay, #mcpres-content .mcpres-panel-right .mcpres-overlay { height: 100%; }",
+            "#mcpres-content .mcpres-content-blank .mcpres-overlay { max-height: 100%; }",
+
+            // KaTeX sizing inside slides
+            ".mcpres-slide .katex { font-size: 1.1em; }"
+        ].join("\n");
+    }
+
+    // Inject (once) the light-DOM CSS that styles an in-place Makie figure slide as
+    // a centered fullscreen 4:3 box over the white viewport overlay. Mirrors the
+    // single-slide rules from getShadowOverrideCSS(), but lives in document.head
+    // (light DOM) because the figure slide is never moved into the shadow root.
+    // NOTE: only translate/positioning is applied to the slide box — the canvas is
+    // never CSS-scaled (that would break WGLMakie's fixed winscale → offset clicks).
+    function ensureMakieInPlaceCSS() {
+        if (document.getElementById("mcpres-makie-inplace-css")) return;
+        var style = document.createElement("style");
+        style.id = "mcpres-makie-inplace-css";
+        style.textContent = [
+            ".mcpres-makie-fullscreen {",
+            "  position: fixed !important;",
+            "  top: 50% !important; left: 50% !important;",
+            "  transform: translate(-50%, -50%) !important;",
+            "  width: min(100vw, 133.333vh) !important;",
+            "  height: min(75vw, 100vh) !important;",
+            "  margin: 0 !important;",
+            "  background: white !important;",
+            "  overflow: hidden !important;",
+            "  z-index: 100001 !important;",
+            "  font-size: calc(min(100vw, 133.333vh) * 0.014) !important;",
+            "}",
+            ".mcpres-makie-fullscreen .mcpres-title-bar,",
+            ".mcpres-makie-fullscreen .mcpres-title-left,",
+            ".mcpres-makie-fullscreen .mcpres-title-right { font-size: 1.8em !important; }",
+            ".mcpres-makie-fullscreen .mcpres-content-single {",
+            "  height: calc(100% - 4.5em) !important;",
+            "  overflow: hidden !important;",
+            "  padding-top: 0.3em !important;",
+            "}"
+        ].join("\n");
+        document.head.appendChild(style);
+    }
+
+    function buildShadowDOM() {
+        // Create full-viewport overlay
+        viewportEl = document.createElement("div");
+        viewportEl.id = "mcpres-viewport";
+        viewportEl.style.cssText = "position:fixed;inset:0;z-index:99999;background:white;overflow:hidden;";
+        document.body.appendChild(viewportEl);
+
+        // Sibling light-DOM layer for externalized Plotly containers.
+        // Zero-size anchor — children use position:fixed so layout is unaffected.
+        plotLayerEl = document.createElement("div");
+        plotLayerEl.id = "mcpres-plot-layer";
+        plotLayerEl.style.cssText = "position:absolute;left:0;top:0;width:0;height:0;";
+        document.body.appendChild(plotLayerEl);
+
+        // Plotly's updatemenu (Play/Pause) buttons receive mousedown+mouseup but
+        // the browser does not synthesize a click — likely because the
+        // position:fixed externalization causes a subpixel layout shift during
+        // Plotly's mousedown handler and the browser classifies the gesture as
+        // a drag. Synthesize the click on mouseup so Plotly's animate handler
+        // fires. The slider ticks/drag work without this because they bind to
+        // mousedown/mousemove directly, not click.
+        plotLayerEl.addEventListener("mouseup", function(e) {
+            var btn = e.target && e.target.closest && e.target.closest(".updatemenu-button");
+            if (!btn) return;
+            btn.dispatchEvent(new MouseEvent("click", {
+                bubbles: true,
+                composed: true,
+                cancelable: true,
+                view: window,
+                clientX: e.clientX,
+                clientY: e.clientY,
+                button: 0
+            }));
+        });
+
+        // Attach shadow root
+        shadowRoot = viewportEl.attachShadow({ mode: "open" });
+
+        // Inject Google Fonts link
+        var fontLink = document.createElement("link");
+        fontLink.rel = "stylesheet";
+        fontLink.href = "https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,700;1,400;1,700&display=swap";
+        shadowRoot.appendChild(fontLink);
+
+        // Clone KaTeX stylesheets into shadow root
+        var links = document.querySelectorAll('link[rel="stylesheet"]');
+        for (var i = 0; i < links.length; i++) {
+            var href = links[i].getAttribute("href") || "";
+            if (href.indexOf("katex") !== -1) {
+                shadowRoot.appendChild(links[i].cloneNode(true));
+            }
+        }
+        // Also clone any inline <style> tags containing KaTeX rules
+        var styles = document.querySelectorAll("style");
+        for (var s = 0; s < styles.length; s++) {
+            if (styles[s].textContent.indexOf(".katex") !== -1) {
+                shadowRoot.appendChild(styles[s].cloneNode(true));
+            }
+        }
+
+        // Clone our mcpres CSS (find by CSS variable marker)
+        var docStyles = document.querySelectorAll("style");
+        for (var m = 0; m < docStyles.length; m++) {
+            if (docStyles[m].textContent.indexOf("--mcpres-colour") !== -1) {
+                shadowRoot.appendChild(docStyles[m].cloneNode(true));
+                break;
+            }
+        }
+
+        // Inject shadow-specific overrides
+        var overrideStyle = document.createElement("style");
+        overrideStyle.textContent = getShadowOverrideCSS();
+        shadowRoot.appendChild(overrideStyle);
+
+        // Create content container
+        contentEl = document.createElement("div");
+        contentEl.id = "mcpres-content";
+        shadowRoot.appendChild(contentEl);
+
+        // Create footer
+        var footer = document.createElement("div");
+        footer.id = "mcpres-footer";
+        footer.innerHTML =
+            '<div id="mcpres-footer-left"></div>' +
+            '<div id="mcpres-footer-center"></div>' +
+            '<div id="mcpres-footer-right"></div>';
+        shadowRoot.appendChild(footer);
+
+        // Populate footer from config
+        var config = document.getElementById("mcpres-config");
+        if (config) {
+            var author = config.dataset.author || "";
+            var place = config.dataset.place || "";
+            var date = config.dataset.date || "";
+            var parts = [author, place, date].filter(function(s) { return s; });
+            var left = footer.querySelector("#mcpres-footer-left");
+            if (left) left.textContent = parts.join(", ");
+        }
+
+        // Create navigation buttons
+        var nav = document.createElement("div");
+        nav.id = "mcpres-nav";
+        nav.innerHTML =
+            '<button id="mcpres-prev" title="Previous">\u25C0</button>' +
+            '<button id="mcpres-next" title="Next">\u25B6</button>';
+        shadowRoot.appendChild(nav);
+
+        nav.querySelector("#mcpres-prev").addEventListener("click", function() { changeSlide(-1); });
+        nav.querySelector("#mcpres-next").addEventListener("click", function() { changeSlide(1); });
+
+        // Mouse hover for nav visibility
+        viewportEl.addEventListener("mousemove", function(e) {
+            if (e.clientY > window.innerHeight - 60) {
+                nav.classList.add("mcpres-nav-visible");
+            } else {
+                nav.classList.remove("mcpres-nav-visible");
+            }
+        });
+    }
+
+    // --- Enter / Exit slide mode ---
+
+    // WGLMakie's check_screen() disposes its WebGL context when
+    // document.body.contains(canvas) is false, but Node.contains() does not pierce
+    // shadow boundaries. While in slide mode, treat any connected node (isConnected
+    // traverses shadow trees) as contained by body, so externalized figures — and
+    // figures transiently re-entering the shadow overlay during navigation — are
+    // never torn down. Scoped to document.body only; MCPresPluto's own containment
+    // checks use contentEl/viewportEl/plotLayerEl, so they are unaffected.
+    function installContainsShim() {
+        if (Object.prototype.hasOwnProperty.call(document.body, "contains")) return;
+        var body = document.body;
+        body.contains = function(node) {
+            if (node && node.isConnected) return true;
+            return Node.prototype.contains.call(body, node);
+        };
+    }
+
+    function uninstallContainsShim() {
+        if (Object.prototype.hasOwnProperty.call(document.body, "contains")) {
+            delete document.body.contains;
+        }
+    }
+
+    function enterSlideMode() {
+        isSlideMode = true;
+        installContainsShim();
+        suppressObserver = true;
+        gatherSlides();
+        buildShadowDOM();
+        currentSlide = 0;
+        currentFragment = 0;
+        showSlide(0, 0);
+        suppressObserver = false;
+        setupObserver();
+        document.addEventListener("keydown", handleKey);
+        window.addEventListener("resize", handleWindowResize);
+    }
+
+    function exitSlideMode() {
+        isSlideMode = false;
+        uninstallContainsShim();
+        suppressObserver = true;
+
+        // Return current slide to its Pluto cell before destroying viewport
+        returnCurrentSlide();
+
+        // Remove viewport overlay
+        if (viewportEl && viewportEl.parentNode) {
+            viewportEl.parentNode.removeChild(viewportEl);
+        }
+        viewportEl = null;
+        shadowRoot = null;
+        contentEl = null;
+
+        // Remove plot layer (returnCurrentSlide already restored its children)
+        if (plotLayerEl && plotLayerEl.parentNode) {
+            plotLayerEl.parentNode.removeChild(plotLayerEl);
+        }
+        plotLayerEl = null;
+
+        if (observer) {
+            observer.disconnect();
+            observer = null;
+        }
+        document.removeEventListener("keydown", handleKey);
+        window.removeEventListener("resize", handleWindowResize);
+
+        var cb = document.getElementById("mcpres-toggle-input");
+        if (cb) cb.checked = false;
+        suppressObserver = false;
+    }
+
+    // --- Slide gathering ---
+
+    function countFragments(slideDiv) {
+        var maxFragment = 0;
+
+        var pauses = slideDiv.querySelectorAll(".mcpres-pause");
+        maxFragment = pauses.length;
+
+        var overlays = slideDiv.querySelectorAll(".mcpres-overlay");
+        for (var i = 0; i < overlays.length; i++) {
+            var from = parseInt(overlays[i].getAttribute("data-mcpres-from") || "0", 10);
+            var to = parseInt(overlays[i].getAttribute("data-mcpres-to") || "9999", 10);
+            if (from > maxFragment) maxFragment = from;
+            if (to < 9999 && to > maxFragment) maxFragment = to;
+        }
+
+        return maxFragment;
+    }
+
+    function gatherSlides() {
+        slides = [];
+        var pageCounter = 1;
+
+        // Collect (slideDiv, partDiv, cell) tuples from either live or static DOM
+        var allCells = document.querySelectorAll("pluto-cell");
+        var entries = []; // {slideDiv, partDiv, cell}
+
+        if (allCells.length > 0) {
+            // Live Pluto mode: slides are children of pluto-cell elements
+            for (var i = 0; i < allCells.length; i++) {
+                var cell = allCells[i];
+                entries.push({
+                    slideDiv: cell.querySelector("[data-mcpres-slide]"),
+                    partDiv:  cell.querySelector("[data-mcpres-slide-part]"),
+                    cell: cell
+                });
+            }
+        } else {
+            // Static export mode: slide divs are directly in the DOM
+            var allSlideDivs = document.querySelectorAll("[data-mcpres-slide]");
+            for (var i = 0; i < allSlideDivs.length; i++) {
+                entries.push({ slideDiv: allSlideDivs[i], partDiv: null, cell: null });
+            }
+        }
+
+        for (var i = 0; i < entries.length; i++) {
+            var e = entries[i];
+            var slideDiv = e.slideDiv;
+            var partDiv  = e.partDiv;
+            var cell     = e.cell;
+
+            // slide_part() cells belong to the previous slide
+            if (!slideDiv && partDiv && slides.length > 0) {
+                if (cell) slides[slides.length - 1].extraCells.push(cell);
+                continue;
+            }
+
+            if (slideDiv) {
+                var type = slideDiv.getAttribute("data-mcpres-slide");
+                var slideObj = {
+                    cells: cell ? [cell] : [],
+                    extraCells: [],
+                    type: type,
+                    element: slideDiv,
+                    originParent: slideDiv.parentNode,
+                    originNextSibling: slideDiv.nextSibling,
+                    pageNum: 0,
+                    pageNum2: null,
+                    fragments: 0
+                };
+
+                if (type === "single") {
+                    slideObj.pageNum = pageCounter;
+                    pageCounter++;
+                } else if (type === "double") {
+                    slideObj.pageNum = pageCounter;
+                    pageCounter++;
+                    slideObj.pageNum2 = pageCounter;
+                    pageCounter++;
+                } else if (type === "static-double") {
+                    if (slides.length > 0) {
+                        var prev = slides[slides.length - 1];
+                        var prevLeftTitle = prev.element.querySelector(".mcpres-title-left");
+                        var curLeftTitle = slideDiv.querySelector(".mcpres-title-left");
+                        if (prevLeftTitle && curLeftTitle &&
+                            prevLeftTitle.textContent.trim() === curLeftTitle.textContent.trim() &&
+                            (prev.type === "double" || prev.type === "static-double")) {
+                            slideObj.pageNum = prev.pageNum;
+                            slideObj.pageNum2 = pageCounter;
+                            pageCounter++;
+                        } else {
+                            slideObj.pageNum = pageCounter;
+                            pageCounter++;
+                            slideObj.pageNum2 = pageCounter;
+                            pageCounter++;
+                        }
+                    } else {
+                        slideObj.pageNum = pageCounter;
+                        pageCounter++;
+                        slideObj.pageNum2 = pageCounter;
+                        pageCounter++;
+                    }
+                }
+                // blank: no page number, no increment
+
+                slideObj.fragments = countFragments(slideDiv);
+                slides.push(slideObj);
+            }
+        }
+    }
+
+    // --- Return current slide to its original location in the Pluto DOM ---
+
+    function returnCurrentSlide() {
+        if (currentSlide < 0 || currentSlide >= slides.length) return;
+        var slide = slides[currentSlide];
+        var el = slide.element;
+
+        // In-place Makie figure slide: it was never moved into the shadow, only
+        // styled fullscreen. Restore it by removing the class + extra-cell styling;
+        // the element stays in its Pluto cell (the figure is never disturbed).
+        if (slide._mcpresInPlace) {
+            el.classList.remove("mcpres-makie-fullscreen");
+            resetFragmentStyles(el);
+            for (var ci = 0; ci < slide.extraCells.length; ci++) {
+                var ic = slide.extraCells[ci];
+                if (ic._mcpresOrigStyle !== undefined) {
+                    ic.style.cssText = ic._mcpresOrigStyle;
+                    delete ic._mcpresOrigStyle;
+                }
+            }
+            slide._mcpresInPlace = false;
+            if (inPlaceEl === el) inPlaceEl = null;
+            return;
+        }
+
+        // Restore externalized PlutoPlotly containers unconditionally (must run
+        // even if the slide isn't currently in shadow, to keep cleanup idempotent).
+        if (slide.extraPlotContainers && slide.extraPlotContainers.length > 0) {
+            for (var p = 0; p < slide.extraPlotContainers.length; p++) {
+                var entry = slide.extraPlotContainers[p];
+                entry.observer.disconnect();
+                entry.container.style.cssText = '';
+                if (entry.placeholder.parentNode) {
+                    entry.placeholder.parentNode.replaceChild(entry.container, entry.placeholder);
+                } else if (entry.container.parentNode) {
+                    entry.container.parentNode.removeChild(entry.container);
+                }
+            }
+            slide.extraPlotContainers = [];
+        }
+
+        // Only act if the element is currently inside our shadow root
+        if (!contentEl || !contentEl.contains(el)) return;
+
+        // Reset any fragment/overlay inline styles before returning
+        resetFragmentStyles(el);
+
+        // Check if Pluto re-rendered this cell (a new slide element appeared)
+        var plutoCell = slide.cells[0];
+        var newSlideInCell = plutoCell.querySelector("[data-mcpres-slide]");
+
+        if (newSlideInCell) {
+            // Pluto re-rendered — discard old element, new one is in the cell
+            el.parentNode.removeChild(el);
+        } else {
+            // Normal case — put element back where it came from
+            try {
+                if (slide.originNextSibling && slide.originNextSibling.parentNode === slide.originParent) {
+                    slide.originParent.insertBefore(el, slide.originNextSibling);
+                } else if (slide.originParent && slide.originParent.parentNode) {
+                    slide.originParent.appendChild(el);
+                }
+            } catch (e) {
+                // Parent structure changed — just remove from shadow root
+                if (el.parentNode) el.parentNode.removeChild(el);
+            }
+        }
+
+        // Restore extra cells (slide_part cells) — remove fixed positioning
+        for (var i = 0; i < slide.extraCells.length; i++) {
+            var ecell = slide.extraCells[i];
+            if (ecell._mcpresOrigStyle !== undefined) {
+                ecell.style.cssText = ecell._mcpresOrigStyle;
+                delete ecell._mcpresOrigStyle;
+            }
+        }
+    }
+
+    function resetFragmentStyles(element) {
+        // Reset pause-hidden siblings
+        var pauses = element.querySelectorAll(".mcpres-pause");
+        for (var idx = 0; idx < pauses.length; idx++) {
+            var sibling = pauses[idx].nextElementSibling;
+            while (sibling && !sibling.classList.contains("mcpres-pause")) {
+                sibling.style.display = "";
+                sibling = sibling.nextElementSibling;
+            }
+        }
+        // Reset overlays
+        var overlays = element.querySelectorAll(".mcpres-overlay");
+        for (var i = 0; i < overlays.length; i++) {
+            overlays[i].style.display = "";
+            overlays[i].style.visibility = "";
+        }
+    }
+
+    // --- Show slide (move real element into shadow root) ---
+
+    function syncPlotGeometry(container, placeholder) {
+        var rect = placeholder.getBoundingClientRect();
+        container.style.top = rect.top + 'px';
+        container.style.left = rect.left + 'px';
+        container.style.width = rect.width + 'px';
+        container.style.height = rect.height + 'px';
+    }
+
+    function handleWindowResize() {
+        if (!isSlideMode || slides.length === 0) return;
+        var slide = slides[currentSlide];
+        if (!slide || !slide.extraPlotContainers) return;
+        for (var p = 0; p < slide.extraPlotContainers.length; p++) {
+            var entry = slide.extraPlotContainers[p];
+            syncPlotGeometry(entry.container, entry.placeholder);
+        }
+    }
+
+    function showSlide(index, fragmentIndex) {
+        if (slides.length === 0 || !shadowRoot || !contentEl) return;
+        if (index < 0 || index >= slides.length) return;
+
+        suppressObserver = true;
+
+        // Return previous slide to its Pluto cell
+        returnCurrentSlide();
+
+        currentSlide = index;
+        currentFragment = (typeof fragmentIndex === "number") ? fragmentIndex : 0;
+
+        // Move the real slide element into shadow root (preserves event handlers)
+        var slide = slides[currentSlide];
+
+        // Externalize PlutoPlotly containers BEFORE the slide enters shadow DOM:
+        // D3's event delegation cannot operate across a shadow boundary, so the
+        // containers stay in light DOM (in plotLayerEl, position:fixed) with
+        // placeholders left behind in the slide to track geometry.
+        slide.extraPlotContainers = [];
+        var plotContainers = slide.element.querySelectorAll('.plutoplotly-container');
+        for (var p = 0; p < plotContainers.length; p++) {
+            (function(container) {
+                var placeholder = document.createElement('div');
+                placeholder.setAttribute('data-mcpres-plotly-placeholder', 'true');
+                container.parentNode.replaceChild(placeholder, container);
+                plotLayerEl.appendChild(container);
+                container.style.cssText =
+                    'position:fixed !important;' +
+                    'z-index:100000 !important;' +
+                    'margin:0 !important;';
+                var observer = new ResizeObserver(function() {
+                    syncPlotGeometry(container, placeholder);
+                });
+                slide.extraPlotContainers.push({
+                    container: container,
+                    placeholder: placeholder,
+                    observer: observer
+                });
+            })(plotContainers[p]);
+        }
+
+        // Live WGLMakie/Bonito figures CANNOT leave their Pluto output wrapper:
+        // moving the figure DOM (even moving the whole slide into the shadow) makes
+        // Pluto continuously re-render the figure, which detaches/disposes it and
+        // triggers an endless re-show loop. So a slide that contains a Makie figure
+        // is shown IN PLACE — its element stays in its Pluto cell (light DOM, where
+        // the canvas renders and the slider is interactive) and is styled as a
+        // fullscreen slide on top of the white viewport overlay. All other slides
+        // move into the shadow overlay as before (full CSS isolation).
+        var isMakieSlide = !!slide.element.querySelector("canvas, .bonito-fragment");
+        if (isMakieSlide) {
+            ensureMakieInPlaceCSS();
+            slide._mcpresInPlace = true;
+            inPlaceEl = slide.element;
+            slide.element.classList.add("mcpres-makie-fullscreen");
+        } else {
+            slide._mcpresInPlace = false;
+            contentEl.appendChild(slide.element);
+        }
+
+        // Now that placeholders are laid out inside shadow, sync plot geometry
+        // and start observing each placeholder for size/position changes.
+        for (var q = 0; q < slide.extraPlotContainers.length; q++) {
+            var entry = slide.extraPlotContainers[q];
+            syncPlotGeometry(entry.container, entry.placeholder);
+            entry.observer.observe(entry.placeholder);
+        }
+
+        // Apply fragments and overlays on the real element
+        applyFragments(slide.element, currentFragment);
+        applyOverlays(slide.element, currentFragment);
+
+        // Position extra cells (slide_part) above the viewport overlay.
+        // They stay in the main DOM so Pluto bonds keep working.
+        for (var i = 0; i < slide.extraCells.length; i++) {
+            var cell = slide.extraCells[i];
+            cell._mcpresOrigStyle = cell.style.cssText;
+            cell.style.cssText =
+                "position:fixed !important;" +
+                "z-index:100000 !important;" +
+                "bottom:2.5em !important;" +
+                "left:50% !important;" +
+                "transform:translateX(-50%) !important;" +
+                "width:auto !important;" +
+                "max-width:60vw !important;" +
+                "margin:0 !important;" +
+                "padding:0.2em 1em !important;" +
+                "background:transparent !important;" +
+                "border:none !important;" +
+                "box-shadow:none !important;" +
+                "font-family:'Cabin',sans-serif !important;" +
+                "font-size:clamp(7pt,1vw,11pt) !important;" +
+                "color:var(--mcpres-colour) !important;" +
+                "opacity:0.7 !important;";
+        }
+
+        // Update footer
+        updateFooter(slide);
+
+        suppressObserver = false;
+    }
+
+    // --- Fragment system (pause markers) ---
+
+    function applyFragments(element, fragmentIndex) {
+        var pauses = element.querySelectorAll(".mcpres-pause");
+
+        for (var idx = 0; idx < pauses.length; idx++) {
+            var marker = pauses[idx];
+            var shouldShow = (idx < fragmentIndex);
+
+            var sibling = marker.nextElementSibling;
+            while (sibling && !sibling.classList.contains("mcpres-pause")) {
+                if (shouldShow) {
+                    sibling.style.display = "";
+                } else {
+                    sibling.style.display = "none";
+                }
+                sibling = sibling.nextElementSibling;
+            }
+        }
+    }
+
+    // --- Overlay system ---
+
+    function applyOverlays(element, fragmentIndex) {
+        var overlays = element.querySelectorAll(".mcpres-overlay");
+
+        for (var i = 0; i < overlays.length; i++) {
+            var el = overlays[i];
+            var from = parseInt(el.getAttribute("data-mcpres-from") || "0", 10);
+            var to = parseInt(el.getAttribute("data-mcpres-to") || "9999", 10);
+
+            if (fragmentIndex >= from && fragmentIndex <= to) {
+                el.style.display = "";
+                el.style.visibility = "";
+            } else {
+                el.style.display = "none";
+            }
+        }
+    }
+
+    // --- Footer ---
+
+    function updateFooter(slide) {
+        if (!shadowRoot) return;
+        var footer = shadowRoot.querySelector("#mcpres-footer");
+        if (!footer) return;
+
+        if (slide.type === "blank") {
+            footer.classList.add("mcpres-footer-hidden");
+        } else {
+            footer.classList.remove("mcpres-footer-hidden");
+
+            var right = shadowRoot.querySelector("#mcpres-footer-right");
+            if (right) {
+                if ((slide.type === "double" || slide.type === "static-double") && slide.pageNum2 !== null) {
+                    right.textContent = slide.pageNum + " - " + slide.pageNum2;
+                } else {
+                    right.textContent = String(slide.pageNum);
+                }
+            }
+        }
+    }
+
+    // --- Print Mode ---
+
+    function degradeInteractiveElements(container) {
+        // Replace interactive inputs with static text showing their current value
+        var inputs = container.querySelectorAll("input, select, textarea");
+        for (var i = 0; i < inputs.length; i++) {
+            var el = inputs[i];
+            var value = "";
+            if (el.tagName === "SELECT") {
+                var opt = el.options[el.selectedIndex];
+                value = opt ? opt.textContent : el.value;
+            } else if (el.type === "range") {
+                value = el.value;
+            } else if (el.type === "checkbox") {
+                value = el.checked ? "\u2611" : "\u2610";
+            } else {
+                value = el.value;
+            }
+            var span = document.createElement("span");
+            span.className = "mcpres-print-static-value";
+            span.textContent = value;
+            el.parentNode.replaceChild(span, el);
+        }
+        // Disable buttons (leave visible but clearly non-functional)
+        var buttons = container.querySelectorAll("button");
+        for (var b = 0; b < buttons.length; b++) {
+            buttons[b].disabled = true;
+            buttons[b].style.opacity = "0.5";
+            buttons[b].style.cursor = "default";
+        }
+    }
+
+    function triggerKaTeXOnPrintLayout() {
+        if (typeof renderMathInElement === "undefined") return;
+        var printSlides = document.querySelectorAll("#mcpres-print-layout [data-mcpres-slide]");
+        for (var i = 0; i < printSlides.length; i++) {
+            renderMathInElement(printSlides[i], {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ],
+                throwOnError: false
+            });
+        }
+    }
+
+    function enterPrintMode() {
+        // Exit slide mode first — returns all slides to Pluto DOM
+        exitSlideMode();
+
+        isPrintMode = true;
+
+        // Inject @page rule into <head> — must be in <head> for Chrome to honour it.
+        // margin: 0 suppresses Chrome's built-in date/URL header/footer strip.
+        var pageStyle = document.createElement("style");
+        pageStyle.id = "mcpres-page-rule";
+        pageStyle.textContent = "@page { size: A4 landscape; margin: 0; }";
+        document.head.appendChild(pageStyle);
+
+        // Re-gather slides (exitSlideMode cleared state)
+        gatherSlides();
+
+        // Create print layout container
+        var layout = document.createElement("div");
+        layout.id = "mcpres-print-layout";
+        document.body.appendChild(layout);
+
+        // "Back to slides" button
+        var backBtn = document.createElement("button");
+        backBtn.id = "mcpres-print-back";
+        backBtn.textContent = "\u25C0 Back to slides";
+        backBtn.addEventListener("click", function() { exitPrintMode(true); });
+        layout.appendChild(backBtn);
+
+        // Read config for footer
+        var config = document.getElementById("mcpres-config");
+        var author = "", place = "", date = "";
+        if (config) {
+            author = config.dataset.author || "";
+            place = config.dataset.place || "";
+            date = config.dataset.date || "";
+        }
+        var footerText = [author, place, date].filter(function(s) { return s; }).join(", ");
+
+        // Clone our mcpres CSS into main DOM style block for print pages
+        var printStyle = document.createElement("style");
+        printStyle.id = "mcpres-print-styles-clone";
+        var docStyles = document.querySelectorAll("style");
+        for (var m = 0; m < docStyles.length; m++) {
+            if (docStyles[m].textContent.indexOf("--mcpres-colour") !== -1) {
+                printStyle.textContent = docStyles[m].textContent;
+                break;
+            }
+        }
+        layout.appendChild(printStyle);
+
+        // Render each slide as a print page
+        for (var i = 0; i < slides.length; i++) {
+            var slide = slides[i];
+
+            // Clone the slide element (keep originals in Pluto DOM)
+            var clone = slide.element.cloneNode(true);
+
+            // Reveal all fragments and overlays
+            applyFragments(clone, 9999);
+            applyOverlays(clone, 9999);
+
+            // Create page wrapper
+            var page = document.createElement("div");
+            page.className = "mcpres-print-page";
+            page.appendChild(clone);
+
+            // Degrade interactive elements in clone (inputs, selects, buttons from Pluto bonds)
+            degradeInteractiveElements(clone);
+
+            // Include slide_part extra cells in the print page
+            for (var j = 0; j < slide.extraCells.length; j++) {
+                var extraClone = slide.extraCells[j].cloneNode(true);
+                extraClone.style.cssText = "";
+                extraClone.className = (extraClone.className || "") + " mcpres-print-extra-cell";
+                page.appendChild(extraClone);
+            }
+
+            // Footer
+            if (slide.type !== "blank") {
+                var footer = document.createElement("div");
+                footer.className = "mcpres-print-footer";
+
+                var footerLeft = document.createElement("div");
+                footerLeft.className = "mcpres-print-footer-left";
+                footerLeft.textContent = footerText;
+
+                var footerRight = document.createElement("div");
+                footerRight.className = "mcpres-print-footer-right";
+                if ((slide.type === "double" || slide.type === "static-double") && slide.pageNum2 !== null) {
+                    footerRight.textContent = slide.pageNum + " - " + slide.pageNum2;
+                } else {
+                    footerRight.textContent = String(slide.pageNum);
+                }
+
+                footer.appendChild(footerLeft);
+                footer.appendChild(footerRight);
+                page.appendChild(footer);
+            }
+
+            layout.appendChild(page);
+        }
+
+        // Apply page breaks inline — only on non-last pages to avoid trailing blank page
+        var pages = layout.querySelectorAll(".mcpres-print-page");
+        for (var p = 0; p < pages.length - 1; p++) {
+            pages[p].style.breakAfter = "page";
+            pages[p].style.pageBreakAfter = "always";
+        }
+        if (pages.length > 0) {
+            pages[pages.length - 1].style.breakAfter = "auto";
+            pages[pages.length - 1].style.pageBreakAfter = "auto";
+        }
+
+        // Trigger KaTeX re-render on cloned slides
+        triggerKaTeXOnPrintLayout();
+
+        // Hide Pluto notebook content
+        var notebook = document.querySelector("pluto-notebook");
+        if (notebook) notebook.style.display = "none";
+
+        // Listen for keyboard (Escape to exit)
+        document.addEventListener("keydown", handlePrintKey);
+
+        // Scroll to top
+        window.scrollTo(0, 0);
+    }
+
+    function exitPrintMode(reenterSlides) {
+        isPrintMode = false;
+
+        // Remove @page rule injected into <head>
+        var pageStyle = document.getElementById("mcpres-page-rule");
+        if (pageStyle && pageStyle.parentNode) pageStyle.parentNode.removeChild(pageStyle);
+
+        // Remove print layout
+        var layout = document.getElementById("mcpres-print-layout");
+        if (layout && layout.parentNode) layout.parentNode.removeChild(layout);
+
+        // Restore Pluto notebook visibility
+        var notebook = document.querySelector("pluto-notebook");
+        if (notebook) notebook.style.display = "";
+
+        document.removeEventListener("keydown", handlePrintKey);
+
+        if (reenterSlides) {
+            enterSlideMode();
+        }
+    }
+
+    function handlePrintKey(e) {
+        if (e.key === "Escape") {
+            e.preventDefault();
+            exitPrintMode(true);
+        }
+    }
+
+    // --- Navigation ---
+
+    function changeSlide(delta) {
+        if (slides.length === 0) return;
+
+        var slide = slides[currentSlide];
+
+        if (delta > 0) {
+            if (currentFragment < slide.fragments) {
+                currentFragment++;
+                showSlide(currentSlide, currentFragment);
+            } else if (currentSlide < slides.length - 1) {
+                showSlide(currentSlide + 1, 0);
+            }
+        } else if (delta < 0) {
+            if (currentFragment > 0) {
+                currentFragment--;
+                showSlide(currentSlide, currentFragment);
+            } else if (currentSlide > 0) {
+                var prev = slides[currentSlide - 1];
+                showSlide(currentSlide - 1, prev.fragments);
+            }
+        }
+    }
+
+    function handleKey(e) {
+        var tag = e.target.tagName;
+        if (tag === "TEXTAREA" || tag === "INPUT" || e.target.isContentEditable) return;
+
+        switch (e.key) {
+            case "ArrowRight":
+            case "PageDown":
+            case " ":
+                e.preventDefault();
+                changeSlide(1);
+                break;
+            case "ArrowLeft":
+            case "PageUp":
+                e.preventDefault();
+                changeSlide(-1);
+                break;
+            case "Escape":
+                e.preventDefault();
+                exitSlideMode();
+                break;
+            case "Home":
+                e.preventDefault();
+                showSlide(0, 0);
+                break;
+            case "End":
+                e.preventDefault();
+                if (slides.length > 0) {
+                    var last = slides[slides.length - 1];
+                    showSlide(slides.length - 1, last.fragments);
+                }
+                break;
+            case "p":
+            case "P":
+                e.preventDefault();
+                enterPrintMode();
+                break;
+        }
+    }
+
+    // --- MutationObserver ---
+    // Watches real DOM for Pluto cell changes, re-gathers slides
+
+    function setupObserver() {
+        if (observer) observer.disconnect();
+
+        observer = new MutationObserver(function(mutations) {
+            if (!isSlideMode) return;
+            if (suppressObserver) return;
+            if (reapplyScheduled) return;
+
+            // Only react to actual node additions/removals outside our viewport
+            var dominated = true;
+            for (var i = 0; i < mutations.length; i++) {
+                var m = mutations[i];
+                if (viewportEl && viewportEl.contains(m.target)) continue;
+                if (plotLayerEl && plotLayerEl.contains(m.target)) continue;
+                // Ignore mutations inside an in-place Makie figure slide (the live
+                // figure and KaTeX re-renders mutate it constantly; reacting would
+                // re-show it endlessly).
+                if (inPlaceEl && inPlaceEl.contains(m.target)) continue;
+                if (m.type === "childList" && (m.addedNodes.length > 0 || m.removedNodes.length > 0)) {
+                    dominated = false;
+                    break;
+                }
+            }
+            if (dominated) return;
+
+            reapplyScheduled = true;
+            requestAnimationFrame(function() {
+                reapplyScheduled = false;
+                if (!isSlideMode) return;
+
+                suppressObserver = true;
+
+                // Return current slide to DOM (or discard if Pluto re-rendered)
+                returnCurrentSlide();
+                gatherSlides();
+                if (currentSlide < slides.length) {
+                    showSlide(currentSlide, currentFragment);
+                } else if (slides.length > 0) {
+                    showSlide(slides.length - 1, 0);
+                }
+                suppressObserver = false;
+            });
+        });
+
+        requestAnimationFrame(function() {
+            if (isSlideMode && observer) {
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+        });
+    }
+
+    // --- Start ---
+    waitForPluto();
+
+    // Global API for external tools (Playwright, DevTools)
+    window.__mcpres = {
+        enterSlideMode: enterSlideMode,
+        exitSlideMode: exitSlideMode,
+        enterPrintMode: enterPrintMode,
+        exitPrintMode: exitPrintMode,
+        getSlideCount: function() { return slides.length; }
+    };
+
+})();
+</script>
+<script>
+document.getElementById('enterBtn').onclick=()=>window.__mcpres.enterSlideMode();
+document.getElementById('exitBtn').onclick=()=>window.__mcpres.exitSlideMode();
+function findRoot(){ // in-place keeps it in light DOM; fall back to any shadow
+  let r=document.getElementById('bb-root'); if(r) return r;
+  for(const e of document.body.querySelectorAll('*')) if(e.shadowRoot){const x=e.shadowRoot.querySelector('#bb-root'); if(x) return x;}
+  return null; }
+setTimeout(()=>{ try{
+  window.__mcpres.enterSlideMode();
+  setTimeout(()=>{
+    const root=findRoot(), st=document.getElementById('selftest');
+    if(!root){st.textContent='self-test: FAIL — scene not found';st.style.color='#ff5470';return;}
+    const inPlace=!!document.querySelector('.mcpres-makie-fullscreen');
+    const before=root.querySelector('#decBig').textContent;
+    root.querySelectorAll('.bit')[0].click();
+    const after=root.querySelector('#decBig').textContent, ok=before!==after;
+    st.textContent='self-test: '+(ok?'PASS ✓ — slide mode is '+(inPlace?'in-place':'shadow')+'; clicking a box changed '+before+' → '+after:'FAIL — click did nothing');
+    st.style.color=ok?'#7CFFB2':'#ff5470';
+    window.__mcpres.exitSlideMode();
+  },700);
+}catch(e){document.getElementById('selftest').textContent='self-test ERROR: '+e;} },600);
+</script></body></html>

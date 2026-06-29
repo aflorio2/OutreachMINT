@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bits as Cannonballs — Reversible Logic</title>
+<style>
+  :root{
+    --bg:#05060d;
+    --ink:#eef2ff;
+    --muted:#8b93b8;
+    --warm:#ffb24a;     /* the "1" / up slit */
+    --cool:#6ad7ff;     /* the "0" / down slit */
+    --elec:#7CFFB2;     /* gates / operations */
+    --warn:#ff5470;     /* carry (later) */
+    --line:#1c2238;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(1200px 800px at 50% -10%, #11162b 0%, var(--bg) 60%);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden;height:100vh;display:flex;flex-direction:column;
+  }
+  header{text-align:center;padding:14px 16px 6px;flex:0 0 auto}
+  header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
+  header h1 .a{color:var(--cool)}
+  header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;transition:opacity .3s}
+
+  .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
+  .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+  .tag{position:absolute;top:14px;left:14px;z-index:5;font-size:12px;letter-spacing:2px;
+    font-weight:700;text-transform:uppercase;padding:6px 11px;border-radius:8px;
+    background:#0008;backdrop-filter:blur(4px);border:1px solid var(--line);transition:color .3s,border-color .3s}
+
+  .sctrl{position:absolute;top:14px;right:14px;z-index:6;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .stepbtn{font-size:13px;color:var(--ink);background:#121734;border:1px solid var(--line);
+    border-radius:9px;padding:7px 14px;cursor:pointer;transition:background .15s;font-weight:600}
+  .stepbtn:hover{background:#1b2350}
+  .stepbtn.up{border-color:#ffb24a55;color:#ffd089}
+  .stepbtn.dn{border-color:#6ad7ff55;color:#bdecff}
+
+  .caption{position:absolute;left:16px;bottom:16px;right:16px;z-index:5;max-width:min(640px,74%);
+    background:#0009;border:1px solid #ffffff22;border-radius:12px;padding:11px 14px;
+    backdrop-filter:blur(5px);transition:opacity .3s}
+  .caption .ct{font-size:clamp(13px,1.5vw,17px);font-weight:700;line-height:1.25}
+  .caption .cs{font-size:clamp(11px,1.2vw,13.5px);color:#c9d1f5;margin-top:4px;line-height:1.35}
+  .caption b.warm{color:var(--warm)} .caption b.cool{color:var(--cool)}
+  .caption b.elec{color:var(--elec)} .caption b.warn{color:var(--warn)}
+
+  .readout{position:absolute;left:16px;bottom:96px;z-index:5;font-size:clamp(13px,1.6vw,18px);
+    color:#c9d1f5;font-variant-numeric:tabular-nums;min-height:1.4em;transition:opacity .3s}
+  .readout b.w{color:var(--warm)} .readout b.c{color:var(--cool)} .readout b.e{color:var(--elec)}
+
+  .controls{flex:0 0 auto;padding:12px 24px 18px;display:flex;flex-direction:column;align-items:center;gap:9px}
+  .dots{display:flex;gap:18px;align-items:center}
+  .dot{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;opacity:.55;transition:opacity .2s}
+  .dot.active{opacity:1}
+  .dot .pip{width:11px;height:11px;border-radius:50%;background:#39406a;transition:background .2s,box-shadow .2s}
+  .dot.active .pip{background:var(--cool);box-shadow:0 0 12px var(--cool)}
+  .dot .dl{font-size:11.5px;color:var(--muted);letter-spacing:.3px}
+  .dot.active .dl{color:var(--ink);font-weight:700}
+  .navrow{display:flex;align-items:center;gap:16px}
+  button.nav{background:#121734;color:var(--ink);border:1px solid var(--line);border-radius:10px;
+    width:46px;height:40px;font-size:18px;cursor:pointer;transition:background .15s,transform .1s}
+  button.nav:hover{background:#1b2350} button.nav:active{transform:scale(.94)}
+  button.nav:disabled{opacity:.3;cursor:default}
+  .hint{color:var(--muted);font-size:12px;text-align:center}
+  .hint b{color:var(--ink)}
+</style>
+</head>
+<body>
+  <header>
+    <h1>Bits as <span class="a">Cannonballs</span></h1>
+    <p id="subtitle"></p>
+  </header>
+
+  <div class="stage">
+    <div class="panel" id="panel">
+      <canvas id="cv"></canvas>
+      <div class="tag" id="tag"></div>
+      <div class="sctrl" id="sctrl"></div>
+      <div class="readout" id="readout"></div>
+      <div class="caption">
+        <div class="ct" id="capTitle"></div>
+        <div class="cs" id="capSub"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="dots" id="dots"></div>
+    <div class="navrow">
+      <button class="nav" id="prev" title="Previous (&#8592;)">&#9664;</button>
+      <button class="nav" id="next" title="Next (&#8594;)">&#9654;</button>
+    </div>
+    <div class="hint">Use <b>&#9664; &#9654;</b> or the <b>arrow keys</b> to move between panels &middot; fire the cannon to send a bit.</div>
+  </div>
+
+<script>
+"use strict";
+/* ============================================================================
+   BITS AS CANNONBALLS  —  reversible logic on slit-paths
+     1) Bit      : one shot, up slit = 1 / down slit = 0; rides that lane.
+     2) NOT       : a crossover swaps the lanes — same ball, opposite value.
+   Reuses the double-slit look (glowing source, barrier with two slits).
+   ========================================================================== */
+
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const panel = document.getElementById('panel');
+
+let W=0,H=0,DPR=1,G={};
+const lerp=(a,b,u)=>a+(b-a)*u;
+const smooth=u=>u*u*(3-2*u);
+
+function computeGeom(){
+  G.sx   = W*0.10;
+  G.cy   = H*0.50;
+  G.bx   = W*0.40;
+  G.bw   = Math.max(7, W*0.010);
+  G.rx   = W*0.87;
+  G.gap  = H*0.34;
+  G.sH   = Math.max(10, H*0.05);
+  G.sTop = G.cy - G.gap/2;
+  G.sBot = G.cy + G.gap/2;
+  G.gateX= W*0.635;
+  G.cw   = Math.max(52, W*0.085);
+  // two-channel geometry (CNOT and beyond): control on top, target below
+  G.cyC  = H*0.31; G.cyT = H*0.69; G.gap2 = H*0.15;
+  G.sH2  = Math.max(8, H*0.034);
+  G.cTop = G.cyC - G.gap2/2; G.cBot = G.cyC + G.gap2/2;
+  G.tTop = G.cyT - G.gap2/2; G.tBot = G.cyT + G.gap2/2;
+}
+function resize(){
+  const r=panel.getBoundingClientRect();
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=r.width;H=r.height;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  computeGeom();
+}
+new ResizeObserver(resize).observe(panel);
+
+const C={warm:'#ffb24a',cool:'#6ad7ff',elec:'#7CFFB2',muted:'#8b93b8',ink:'#eef2ff'};
+const ySlit=v=>v?G.sTop:G.sBot;
+const colOf=v=>v?C.warm:C.cool;
+
+/* ----------------------------- shared drawing ----------------------------- */
+function clearBG(){
+  const g=ctx.createLinearGradient(0,0,W,0);
+  g.addColorStop(0,'#070a18');g.addColorStop(1,'#04050b');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+}
+function rrect(x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+}
+function drawLanes(hasGate){
+  ctx.save();ctx.setLineDash([5,8]);ctx.lineWidth=1.5;
+  const x0=G.gateX-G.cw, x1=G.gateX+G.cw;
+  [[G.sTop,C.warm],[G.sBot,C.cool]].forEach(p=>{
+    ctx.strokeStyle=p[1]+'40';
+    if(hasGate){
+      ctx.beginPath();ctx.moveTo(G.bx+G.bw/2,p[0]);ctx.lineTo(x0,p[0]);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x1,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();
+    }else{
+      ctx.beginPath();ctx.moveTo(G.bx+G.bw/2,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();
+    }
+  });
+  ctx.restore();
+}
+function drawBarrier(){
+  const x=G.bx;
+  ctx.fillStyle='rgba(180,190,225,0.92)';
+  ctx.fillRect(x-G.bw/2,0,G.bw,G.sTop-G.sH);
+  ctx.fillRect(x-G.bw/2,G.sTop+G.sH,G.bw,(G.sBot-G.sH)-(G.sTop+G.sH));
+  ctx.fillRect(x-G.bw/2,G.sBot+G.sH,G.bw,H-(G.sBot+G.sH));
+  ctx.save();ctx.shadowBlur=12;
+  [[G.sTop,C.warm],[G.sBot,C.cool]].forEach(p=>{
+    ctx.shadowColor=p[1];ctx.strokeStyle=p[1];ctx.globalAlpha=.55;ctx.lineWidth=G.bw;
+    ctx.beginPath();ctx.moveTo(x,p[0]-G.sH);ctx.lineTo(x,p[0]+G.sH);ctx.stroke();
+  });
+  ctx.restore();
+  ctx.font='700 13px Inter,system-ui';ctx.textAlign='center';
+  ctx.fillStyle=C.warm;ctx.fillText('1',x-24,G.sTop+5);
+  ctx.fillStyle=C.cool;ctx.fillText('0',x-24,G.sBot+5);
+}
+function drawCannon(){
+  ctx.save();ctx.shadowColor=C.warm;ctx.shadowBlur=18;
+  ctx.beginPath();ctx.arc(G.sx,G.cy,Math.max(7,H*0.014),0,7);ctx.fillStyle=C.warm;ctx.fill();
+  ctx.restore();
+  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  ctx.fillText('cannon',G.sx,G.cy+H*0.05);
+}
+function drawReadout(landed){
+  [[G.sTop,C.warm,'1',1],[G.sBot,C.cool,'0',0]].forEach(z=>{
+    const on=landed===z[3];
+    const r=Math.max(13,H*0.028);
+    ctx.beginPath();ctx.arc(G.rx,z[0],r,0,7);
+    ctx.fillStyle=on?z[1]:'#0d1226';
+    if(on){ctx.save();ctx.shadowColor=z[1];ctx.shadowBlur=20;ctx.fill();ctx.restore();}else ctx.fill();
+    ctx.lineWidth=2;ctx.strokeStyle=z[1]+(on?'':'66');ctx.stroke();
+    ctx.font='800 15px Inter,system-ui';ctx.textAlign='center';
+    ctx.fillStyle=on?'#10131f':z[1];ctx.fillText(z[2],G.rx,z[0]+5);
+  });
+  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  ctx.fillText('readout',G.rx,G.sBot+H*0.05);
+}
+function drawNOTgate(){
+  const x0=G.gateX-G.cw, x1=G.gateX+G.cw;
+  const pad=Math.max(30,H*0.085);
+  const yT=G.sTop-pad, yB=G.sBot+pad, r=14;
+  const L=Math.max(34,W*0.05), m=Math.max(16,H*0.045);
+  const tT=G.sTop-m, tB=G.sBot+m, mcy=(tT+tB)/2, mry=(tB-tT)/2;
+  const mxL=x0-L, mxR=x1+L;
+  // tube fills + box fill (slight tint, so it can become a black box later)
+  ctx.save();ctx.fillStyle='rgba(12,16,30,0.30)';
+  ctx.fillRect(mxL,tT,x0-mxL,tB-tT);
+  ctx.fillRect(x1,tT,mxR-x1,tB-tT);
+  rrect(x0,yT,x1-x0,yB-yT,r);ctx.fill();
+  ctx.restore();
+  ctx.save();
+  ctx.strokeStyle=C.elec;ctx.lineWidth=2.5;ctx.shadowColor=C.elec;ctx.shadowBlur=8;ctx.lineJoin='round';ctx.lineCap='round';
+  // box border — open at both throats (tT..tB) where the tubes join
+  ctx.beginPath();
+  ctx.moveTo(x0,tT);
+  ctx.lineTo(x0,yT+r);ctx.arcTo(x0,yT,x0+r,yT,r);
+  ctx.lineTo(x1-r,yT);ctx.arcTo(x1,yT,x1,yT+r,r);
+  ctx.lineTo(x1,tT);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x0,tB);
+  ctx.lineTo(x0,yB-r);ctx.arcTo(x0,yB,x0+r,yB,r);
+  ctx.lineTo(x1-r,yB);ctx.arcTo(x1,yB,x1,yB-r,r);
+  ctx.lineTo(x1,tB);
+  ctx.stroke();
+  // tube walls + open rims
+  ctx.beginPath();
+  ctx.moveTo(x0,tT);ctx.lineTo(mxL,tT);ctx.moveTo(x0,tB);ctx.lineTo(mxL,tB);
+  ctx.moveTo(x1,tT);ctx.lineTo(mxR,tT);ctx.moveTo(x1,tB);ctx.lineTo(mxR,tB);
+  ctx.stroke();
+  ctx.beginPath();ctx.ellipse(mxL,mcy,7,mry,0,0,7);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(mxR,mcy,7,mry,0,0,7);ctx.stroke();
+  ctx.restore();
+  // the crossover inside the box
+  ctx.save();
+  ctx.strokeStyle=C.elec;ctx.lineWidth=3;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x0,G.sTop);ctx.lineTo(x1,G.sBot);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x0,G.sBot);ctx.lineTo(x1,G.sTop);ctx.stroke();
+  ctx.restore();
+  ctx.font='800 '+Math.max(14,Math.round(H*0.045))+'px Inter,system-ui';
+  ctx.textAlign='center';ctx.fillStyle=C.elec;
+  ctx.fillText('NOT',G.gateX,yT-10);
+}
+
+/* ----- parametric helpers for multi-channel scenes (CNOT, ...) ----- */
+function mkbtn(text,cls,onclick){
+  const b=document.createElement('button');
+  b.className='stepbtn'+(cls?' '+cls:'');b.textContent=text;b.onclick=onclick;return b;
+}
+function crossYabs(x,yIn,yOut){
+  const a=G.gateX-G.cw, b=G.gateX+G.cw;
+  if(x<=a) return yIn; if(x>=b) return yOut;
+  return lerp(yIn,yOut,(x-a)/(b-a));
+}
+function drawCannonAt(y){
+  ctx.save();ctx.shadowColor=C.warm;ctx.shadowBlur=16;
+  ctx.beginPath();ctx.arc(G.sx,y,Math.max(6,H*0.013),0,7);ctx.fillStyle=C.warm;ctx.fill();
+  ctx.restore();
+}
+function drawBarrierMulti(slits,sH){
+  const x=G.bx;
+  ctx.fillStyle='rgba(180,190,225,0.92)';
+  let prev=0;
+  slits.forEach(s=>{ ctx.fillRect(x-G.bw/2,prev,G.bw,(s.y-sH)-prev); prev=s.y+sH; });
+  ctx.fillRect(x-G.bw/2,prev,G.bw,H-prev);
+  ctx.save();ctx.shadowBlur=10;
+  slits.forEach(s=>{ ctx.shadowColor=s.color;ctx.strokeStyle=s.color;ctx.globalAlpha=.55;ctx.lineWidth=G.bw;
+    ctx.beginPath();ctx.moveTo(x,s.y-sH);ctx.lineTo(x,s.y+sH);ctx.stroke(); });
+  ctx.restore();
+  ctx.font='700 12px Inter,system-ui';ctx.textAlign='center';
+  slits.forEach(s=>{ if(s.lab){ctx.fillStyle=s.color;ctx.fillText(s.lab,x-22,s.y+4);} });
+}
+function drawLanesMulti(){
+  ctx.save();ctx.setLineDash([5,8]);ctx.lineWidth=1.5;
+  const x0=G.gateX-G.cw, x1=G.gateX+G.cw, sx=G.bx+G.bw/2;
+  [[G.cTop,C.warm],[G.cBot,C.cool]].forEach(p=>{ctx.strokeStyle=p[1]+'40';
+    ctx.beginPath();ctx.moveTo(sx,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();});
+  [[G.tTop,C.warm],[G.tBot,C.cool]].forEach(p=>{ctx.strokeStyle=p[1]+'40';
+    ctx.beginPath();ctx.moveTo(sx,p[0]);ctx.lineTo(x0,p[0]);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x1,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();});
+  ctx.restore();
+}
+function drawReadoutPair(yA,yB,landed){
+  const rr=Math.max(11,(yB-yA)*0.22);
+  [[yA,C.warm,'1',1],[yB,C.cool,'0',0]].forEach(z=>{
+    const on=landed===z[3];
+    ctx.beginPath();ctx.arc(G.rx,z[0],rr,0,7);ctx.fillStyle=on?z[1]:'#0d1226';
+    if(on){ctx.save();ctx.shadowColor=z[1];ctx.shadowBlur=18;ctx.fill();ctx.restore();}else ctx.fill();
+    ctx.lineWidth=2;ctx.strokeStyle=z[1]+(on?'':'66');ctx.stroke();
+    ctx.font='800 13px Inter,system-ui';ctx.textAlign='center';ctx.fillStyle=on?'#10131f':z[1];
+    ctx.fillText(z[2],G.rx,z[0]+5);
+  });
+}
+/* generic gate box on an arbitrary lane pair; crosses only when active */
+function drawGateBox(yA,yB,active,label){
+  const x0=G.gateX-G.cw, x1=G.gateX+G.cw, laneGap=yB-yA;
+  const pad=Math.max(26,laneGap*0.34), m=Math.max(14,laneGap*0.20), r=14;
+  const yT=yA-pad, yBo=yB+pad, L=Math.max(34,W*0.05);
+  const tT=yA-m, tB=yB+m, mcy=(tT+tB)/2, mry=(tB-tT)/2, mxL=x0-L, mxR=x1+L;
+  ctx.save();ctx.fillStyle='rgba(12,16,30,0.30)';
+  ctx.fillRect(mxL,tT,x0-mxL,tB-tT);ctx.fillRect(x1,tT,mxR-x1,tB-tT);
+  rrect(x0,yT,x1-x0,yBo-yT,r);ctx.fill();ctx.restore();
+  ctx.save();
+  ctx.strokeStyle=C.elec;ctx.lineWidth=2.5;ctx.shadowColor=C.elec;ctx.shadowBlur=8;ctx.lineJoin='round';ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x0,tT);ctx.lineTo(x0,yT+r);ctx.arcTo(x0,yT,x0+r,yT,r);
+  ctx.lineTo(x1-r,yT);ctx.arcTo(x1,yT,x1,yT+r,r);ctx.lineTo(x1,tT);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x0,tB);ctx.lineTo(x0,yBo-r);ctx.arcTo(x0,yBo,x0+r,yBo,r);
+  ctx.lineTo(x1-r,yBo);ctx.arcTo(x1,yBo,x1,yBo-r,r);ctx.lineTo(x1,tB);ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x0,tT);ctx.lineTo(mxL,tT);ctx.moveTo(x0,tB);ctx.lineTo(mxL,tB);
+  ctx.moveTo(x1,tT);ctx.lineTo(mxR,tT);ctx.moveTo(x1,tB);ctx.lineTo(mxR,tB);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(mxL,mcy,7,mry,0,0,7);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(mxR,mcy,7,mry,0,0,7);ctx.stroke();
+  ctx.restore();
+  if(active){
+    ctx.save();ctx.strokeStyle=C.elec;ctx.lineWidth=3;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x0,yA);ctx.lineTo(x1,yB);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x0,yB);ctx.lineTo(x1,yA);ctx.stroke();ctx.restore();
+  }else{
+    ctx.save();ctx.setLineDash([5,8]);ctx.lineWidth=1.6;
+    ctx.strokeStyle=C.warm+'66';ctx.beginPath();ctx.moveTo(x0,yA);ctx.lineTo(x1,yA);ctx.stroke();
+    ctx.strokeStyle=C.cool+'66';ctx.beginPath();ctx.moveTo(x0,yB);ctx.lineTo(x1,yB);ctx.stroke();ctx.restore();
+  }
+  ctx.font='800 '+Math.max(13,Math.round(laneGap*0.12+6))+'px Inter,system-ui';
+  ctx.textAlign='center';ctx.fillStyle=C.elec;ctx.fillText(label||'NOT',G.gateX,yT-9);
+}
+/* control dot on the control 1-lane + linkage down to the target box */
+function drawControlLink(active){
+  const x=G.gateX, yDot=G.cTop;
+  const boxTop=G.tTop-Math.max(26,(G.tBot-G.tTop)*0.34);
+  ctx.save();
+  ctx.strokeStyle=active?C.elec:'#7CFFB244';ctx.lineWidth=2.5;ctx.lineCap='round';
+  if(active){ctx.shadowColor=C.elec;ctx.shadowBlur=8;}
+  ctx.beginPath();ctx.moveTo(x,yDot);ctx.lineTo(x,boxTop);ctx.stroke();
+  ctx.beginPath();ctx.arc(x,yDot,7,0,7);
+  ctx.fillStyle=active?C.elec:'#0c101e';ctx.fill();
+  ctx.strokeStyle=active?C.elec:'#7CFFB288';ctx.stroke();
+  ctx.restore();
+}
+
+/* path the ball follows along the lanes, with optional crossover at the gate */
+function laneY(x,vin,vout,hasGate){
+  if(!hasGate || vin===vout) return ySlit(vin);
+  const a=G.gateX-G.cw, b=G.gateX+G.cw;
+  if(x<=a) return ySlit(vin);
+  if(x>=b) return ySlit(vout);
+  return lerp(ySlit(vin),ySlit(vout),(x-a)/(b-a));
+}
+
+/* =========================================================================
+   GENERIC SCENE (parametrised by hasNOT)
+   ========================================================================= */
+function makeScene(cfg){
+  return {
+    tag:cfg.tag, tagColor:cfg.tagColor, subtitle:cfg.subtitle,
+    capTitle:cfg.capTitle, capSub:cfg.capSub, hasNOT:cfg.hasNOT,
+    ball:null, landed:null, vin:null,
+    fire(v){
+      this.landed=null; this.vin=v;
+      this.ball={vin:v, vout:this.hasNOT?(1-v):v, x:G.sx, y:G.cy, phase:'toSlit'};
+      document.getElementById('readout').innerHTML='Firing&hellip;';
+    },
+    reset(){ this.ball=null; this.landed=null; this.vin=null;
+      document.getElementById('readout').innerHTML=cfg.idle; },
+    step(dt){
+      const b=this.ball; if(!b) return;
+      const vx=W*0.42*dt;
+      if(b.phase==='toSlit'){
+        const tx=G.bx, ty=ySlit(b.vin);
+        const dx=tx-G.sx, dy=ty-G.cy, L=Math.hypot(dx,dy)||1;
+        b.x+=dx/L*vx; b.y+=dy/L*vx;
+        if(b.x>=G.bx){ b.x=G.bx; b.y=ty; b.phase='lane'; }
+      } else {
+        b.x+=vx; b.y=laneY(b.x,b.vin,b.vout,this.hasNOT);
+        if(b.x>=G.rx){
+          this.landed=b.vout; this.ball=null;
+          document.getElementById('readout').innerHTML=cfg.result(b.vin,b.vout);
+        }
+      }
+    },
+    draw(){
+      clearBG();
+      drawLanes(this.hasNOT);
+      drawReadout(this.landed);
+      if(this.hasNOT) drawNOTgate();
+      drawBarrier();
+      drawCannon();
+      const b=this.ball;
+      if(b){
+        ctx.save();ctx.shadowColor=colOf(b.x<G.gateX?b.vin:b.vout);ctx.shadowBlur=14;
+        ctx.beginPath();ctx.arc(b.x,b.y,Math.max(5,H*0.012),0,7);
+        ctx.fillStyle=colOf(b.x<G.gateX?b.vin:b.vout);ctx.fill();ctx.restore();
+      }
+    },
+    buildControls(el){
+      el.innerHTML='';const self=this;
+      el.append(
+        mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
+        mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
+        mkbtn('↻','',()=>self.reset())
+      );
+    },
+    onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+    onLeave(){ this.ball=null; },
+  };
+}
+
+const S1=makeScene({
+  tag:'1 · Bit', tagColor:'var(--warm)',
+  subtitle:'Fire one ball at a wall with two slits. Which slit it goes through IS the bit.',
+  capTitle:'A bit is <b class="warm">which slit</b> the ball took.',
+  capSub:'Aim <b class="warm">up</b> and the ball goes through the top slit &mdash; we call that <b class="warm">1</b>. Aim <b class="cool">down</b>, bottom slit, <b class="cool">0</b>. After the slit it rides that lane to the readout.',
+  hasNOT:false,
+  idle:'Press <b class="w">Fire &#9650;</b> or <b class="c">Fire &#9660;</b> to send a bit.',
+  result:(vin,vout)=>'The ball took the '+(vout?'<b class="w">up</b> slit &rarr; bit = <b class="w">1</b>':'<b class="c">down</b> slit &rarr; bit = <b class="c">0</b>'),
+});
+
+const S2=makeScene({
+  tag:'2 · NOT gate', tagColor:'var(--elec)',
+  subtitle:'A gate is a switch on the lanes. The simplest one just crosses them over.',
+  capTitle:'<b class="elec">NOT</b> swaps the lanes &mdash; same ball, flipped bit.',
+  capSub:'The crossover sends an <b class="warm">up</b> ball out on the <b class="cool">down</b> lane and vice-versa. Nothing is created or destroyed: one ball in, one ball out. That &ldquo;count stays the same&rdquo; rule is what makes it <b class="elec">reversible</b>.',
+  hasNOT:true,
+  idle:'Fire a bit and watch the <b class="e">NOT</b> gate flip it.',
+  result:(vin,vout)=>'In <b class="'+(vin?'w':'c')+'">'+vin+'</b> &rarr; <b class="e">NOT</b> &rarr; out <b class="'+(vout?'w':'c')+'">'+vout+'</b>',
+});
+
+/* =========================================================================
+   SCENE 3 — CNOT: a control bit decides whether NOT fires on the target
+   ========================================================================= */
+const S3={
+  tag:'3 · CNOT gate', tagColor:'var(--elec)',
+  subtitle:'Two bits now. A control bit decides whether the NOT fires on the target.',
+  capTitle:'<b class="elec">CNOT</b>: flip the target only if the control is <b class="warm">1</b>.',
+  capSub:'The top bit is the <b class="elec">control</b>. If its ball rides the <b class="warm">up&nbsp;(1)</b> lane it trips the switch and the <b class="cool">target</b> box crosses; if the control is <b class="cool">0</b> the target sails straight through. The control itself is never changed — two balls in, two balls out.',
+  cin:1, tin:0, cball:null, tball:null, cLanded:null, tLanded:null, _sync:null,
+  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  buildControls(el){
+    el.innerHTML='';const self=this;
+    const cB=mkbtn('','',()=>{self.cin^=1;self._sync();self.reset();});
+    const tB=mkbtn('','',()=>{self.tin^=1;self._sync();self.reset();});
+    el.append(cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('↻','',()=>self.reset()));
+    this._sync=function(){
+      cB.textContent='control '+(self.cin?'▲ 1':'▼ 0');cB.className='stepbtn '+(self.cin?'up':'dn');
+      tB.textContent='target '+(self.tin?'▲ 1':'▼ 0');tB.className='stepbtn '+(self.tin?'up':'dn');
+    };this._sync();
+  },
+  reset(){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;
+    this.setReadout('Set the <b class="e">control</b> and <b class="w">target</b>, then press <b>Run</b>.'); },
+  run(){
+    this.cLanded=this.tLanded=null;
+    const active=this.cin===1, tout=active?(1-this.tin):this.tin;
+    this.cball={x:G.sx,y:G.cyC,sy:(this.cin?G.cTop:G.cBot),vin:this.cin,phase:'toSlit'};
+    this.tball={x:G.sx,y:G.cyT,syIn:(this.tin?G.tTop:G.tBot),syOut:(tout?G.tTop:G.tBot),vin:this.tin,vout:tout,phase:'toSlit'};
+    this.setReadout('Running&hellip;');
+  },
+  _result(){
+    if(this.cball||this.tball)return;
+    if(this.cLanded==null&&this.tLanded==null)return;
+    const cin=this.cLanded,tout=this.tLanded;
+    this.setReadout('control <b class="'+(cin?'w':'c')+'">'+cin+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">CNOT</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+  },
+  step(dt){
+    const vx=W*0.42*dt;
+    let b=this.cball;
+    if(b){
+      if(b.phase==='toSlit'){const dx=G.bx-G.sx,dy=b.sy-G.cyC,L=Math.hypot(dx,dy)||1;b.x+=dx/L*vx;b.y+=dy/L*vx;if(b.x>=G.bx){b.x=G.bx;b.y=b.sy;b.phase='lane';}}
+      else{b.x+=vx;b.y=b.sy;if(b.x>=G.rx){this.cLanded=b.vin;this.cball=null;this._result();}}
+    }
+    b=this.tball;
+    if(b){
+      if(b.phase==='toSlit'){const dx=G.bx-G.sx,dy=b.syIn-G.cyT,L=Math.hypot(dx,dy)||1;b.x+=dx/L*vx;b.y+=dy/L*vx;if(b.x>=G.bx){b.x=G.bx;b.y=b.syIn;b.phase='lane';}}
+      else{b.x+=vx;b.y=crossYabs(b.x,b.syIn,b.syOut);if(b.x>=G.rx){this.tLanded=b.vout;this.tball=null;this._result();}}
+    }
+  },
+  draw(){
+    clearBG();
+    drawLanesMulti();
+    drawReadoutPair(G.cTop,G.cBot,this.cLanded);
+    drawReadoutPair(G.tTop,G.tBot,this.tLanded);
+    drawGateBox(G.tTop,G.tBot,this.cin===1,'NOT');
+    drawControlLink(this.cin===1);
+    drawBarrierMulti([{y:G.cTop,color:C.warm,lab:'1'},{y:G.cBot,color:C.cool,lab:'0'},
+                      {y:G.tTop,color:C.warm,lab:'1'},{y:G.tBot,color:C.cool,lab:'0'}],G.sH2);
+    drawCannonAt(G.cyC);drawCannonAt(G.cyT);
+    ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.fillText('control',G.sx,G.cTop-12);
+    ctx.fillText('target',G.sx,G.tBot+18);
+    const drawB=(b,vbefore,vafter)=>{const v=b.x<G.gateX?vbefore:vafter,col=colOf(v);
+      ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
+      ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
+    if(this.cball)drawB(this.cball,this.cin,this.cin);
+    if(this.tball)drawB(this.tball,this.tin,this.tball.vout);
+  },
+  onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+  onLeave(){ this.cball=this.tball=null; },
+};
+
+/* ----------------------------- scene manager ------------------------------ */
+const scenes=[S1,S2,S3];
+const labels=['Bit','NOT','CNOT'];
+let cur=0;
+
+const els={
+  subtitle:document.getElementById('subtitle'),
+  tag:document.getElementById('tag'),
+  capTitle:document.getElementById('capTitle'),
+  capSub:document.getElementById('capSub'),
+  prev:document.getElementById('prev'),
+  next:document.getElementById('next'),
+};
+const dotsWrap=document.getElementById('dots');
+const dotEls=labels.map((l,i)=>{
+  const d=document.createElement('div');d.className='dot';
+  d.innerHTML='<span class="pip"></span><span class="dl">'+l+'</span>';
+  d.onclick=()=>go(i);dotsWrap.appendChild(d);return d;
+});
+function applySceneUI(s){
+  els.subtitle.innerHTML=s.subtitle;
+  els.tag.textContent=s.tag;els.tag.style.color=s.tagColor;els.tag.style.borderColor=s.tagColor+'55';
+  els.capTitle.innerHTML=s.capTitle;els.capSub.innerHTML=s.capSub;
+  dotEls.forEach((d,i)=>d.classList.toggle('active',i===cur));
+  els.prev.disabled=cur===0;els.next.disabled=cur===scenes.length-1;
+}
+function go(i){
+  i=Math.max(0,Math.min(scenes.length-1,i));
+  if(i===cur){return;}
+  scenes[cur].onLeave&&scenes[cur].onLeave();
+  cur=i;
+  scenes[cur].onEnter&&scenes[cur].onEnter();
+  applySceneUI(scenes[cur]);
+}
+els.prev.onclick=()=>go(cur-1);
+els.next.onclick=()=>go(cur+1);
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')go(cur+1);
+  if(e.key==='ArrowLeft')go(cur-1);
+});
+
+/* ------------------------------- main loop -------------------------------- */
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  scenes[cur].step(dt);
+  scenes[cur].draw();
+  requestAnimationFrame(frame);
+}
+resize();
+scenes[0].onEnter();
+applySceneUI(scenes[0]);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
