@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qubits as Cannonballs — Superposition</title>
+<style>
+  :root{
+    --bg:#05060d;
+    --ink:#eef2ff;
+    --muted:#8b93b8;
+    --warm:#ffb24a;     /* the "1" / up slit */
+    --cool:#6ad7ff;     /* the "0" / down slit */
+    --elec:#7CFFB2;     /* gates / operations */
+    --warn:#ff5470;     /* carry (later) */
+    --mist:#b9a8ff;     /* superposition / cloud */
+    --line:#1c2238;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(1200px 800px at 50% -10%, #11162b 0%, var(--bg) 60%);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden;height:100vh;display:flex;flex-direction:column;
+  }
+  header{text-align:center;padding:14px 16px 6px;flex:0 0 auto}
+  header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
+  header h1 .a{color:var(--cool)}
+  header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;transition:opacity .3s}
+
+  .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
+  .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+  .tag{position:absolute;top:14px;left:14px;z-index:5;font-size:12px;letter-spacing:2px;
+    font-weight:700;text-transform:uppercase;padding:6px 11px;border-radius:8px;
+    background:#0008;backdrop-filter:blur(4px);border:1px solid var(--line);transition:color .3s,border-color .3s}
+
+  .sctrl{position:absolute;top:14px;right:14px;z-index:6;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .stepbtn{font-size:13px;color:var(--ink);background:#121734;border:1px solid var(--line);
+    border-radius:9px;padding:7px 14px;cursor:pointer;transition:background .15s;font-weight:600}
+  .stepbtn:hover{background:#1b2350}
+  .stepbtn.up{border-color:#ffb24a55;color:#ffd089}
+  .stepbtn.dn{border-color:#6ad7ff55;color:#bdecff}
+  .stepbtn.mist{border-color:#b9a8ff66;color:#d7ccff}
+
+  .caption{position:absolute;left:16px;bottom:16px;right:16px;z-index:5;max-width:min(640px,74%);
+    background:#0009;border:1px solid #ffffff22;border-radius:12px;padding:11px 14px;
+    backdrop-filter:blur(5px);transition:opacity .3s}
+  .caption .ct{font-size:clamp(13px,1.5vw,17px);font-weight:700;line-height:1.25}
+  .caption .cs{font-size:clamp(11px,1.2vw,13.5px);color:#c9d1f5;margin-top:4px;line-height:1.35}
+  .caption b.warm{color:var(--warm)} .caption b.cool{color:var(--cool)}
+  .caption b.elec{color:var(--elec)} .caption b.warn{color:var(--warn)} .caption b.mist{color:var(--mist)}
+
+  .readout{position:absolute;left:16px;bottom:96px;z-index:5;font-size:clamp(13px,1.6vw,18px);
+    color:#c9d1f5;font-variant-numeric:tabular-nums;min-height:1.4em;transition:opacity .3s}
+  .readout b.w{color:var(--warm)} .readout b.c{color:var(--cool)} .readout b.e{color:var(--elec)} .readout b.m{color:var(--mist)}
+  .panel.wsmode .readout{display:none}
+  .panel.wsmode .caption{display:none}
+
+  .controls{flex:0 0 auto;padding:12px 24px 18px;display:flex;flex-direction:column;align-items:center;gap:9px}
+  .dots{display:flex;gap:18px;align-items:center}
+  .dot{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;opacity:.55;transition:opacity .2s}
+  .dot.active{opacity:1}
+  .dot .pip{width:11px;height:11px;border-radius:50%;background:#39406a;transition:background .2s,box-shadow .2s}
+  .dot.active .pip{background:var(--cool);box-shadow:0 0 12px var(--cool)}
+  .dot .dl{font-size:11.5px;color:var(--muted);letter-spacing:.3px}
+  .dot.active .dl{color:var(--ink);font-weight:700}
+  .navrow{display:flex;align-items:center;gap:16px}
+  button.nav{background:#121734;color:var(--ink);border:1px solid var(--line);border-radius:10px;
+    width:46px;height:40px;font-size:18px;cursor:pointer;transition:background .15s,transform .1s}
+  button.nav:hover{background:#1b2350} button.nav:active{transform:scale(.94)}
+  button.nav:disabled{opacity:.3;cursor:default}
+  .hint{color:var(--muted);font-size:12px;text-align:center}
+  .hint b{color:var(--ink)}
+
+  /* base-2 worksheet (adder panel only) — HTML element, can overlap the controls */
+  .wsheet{position:fixed;left:22px;bottom:12px;z-index:30;display:none;
+    background:rgba(11,16,32,0.94);border:1px solid var(--line);border-radius:11px;
+    padding:8px 12px 9px;font-family:'Inter',system-ui,sans-serif}
+  .wsheet.show{display:block}
+  .wsh-head{display:flex;justify-content:space-between;align-items:center;gap:22px;margin-bottom:4px}
+  .wsh-head b{font-size:12px;font-weight:700;color:var(--ink)}
+  .wsh-badge{font-size:11px;font-weight:700;color:var(--elec)}
+  .wsh-grid{border-collapse:collapse;font-variant-numeric:tabular-nums}
+  .wsh-grid td{width:24px;height:22px;text-align:center;font-size:15px;font-weight:800;color:var(--ink)}
+  .wsh-grid td.wsh-lab{width:auto;text-align:right;padding-right:8px;font-size:11px;font-weight:600;color:var(--muted)}
+  .wsh-grid tr.wsh-carry td{height:16px;font-size:12px;color:var(--warn)}
+  .wsh-grid tr.wsh-sum td{color:var(--elec)}
+  .wsh-grid tr.wsh-sum td.wsh-lab{color:var(--elec)}
+  .wsh-grid td.wa{color:var(--warm)!important} .wsh-grid td.wz{color:var(--muted)!important}
+  .wsh-grid hr{border:none;border-top:1.5px solid #3a4160;margin:1px 0}
+</style>
+</head>
+<body>
+  <header>
+    <h1><span class="a">Qubits</span> as Cannonballs</h1>
+    <p id="subtitle"></p>
+  </header>
+
+  <div class="stage">
+    <div class="panel" id="panel">
+      <canvas id="cv"></canvas>
+      <div class="tag" id="tag"></div>
+      <div class="sctrl" id="sctrl"></div>
+      <div class="readout" id="readout"></div>
+      <div class="caption">
+        <div class="ct" id="capTitle"></div>
+        <div class="cs" id="capSub"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="dots" id="dots"></div>
+    <div class="navrow">
+      <button class="nav" id="prev" title="Previous (&#8592;)">&#9664;</button>
+      <button class="nav" id="next" title="Next (&#8594;)">&#9654;</button>
+    </div>
+    <div class="hint">Use <b>&#9664; &#9654;</b> or the <b>arrow keys</b> to move between panels &middot; fire the cannon to send a qubit.</div>
+  </div>
+
+  <div class="wsheet" id="wsheet">
+    <div class="wsh-head"><b>binary addition</b><span class="wsh-badge" id="wshBadge">0/6</span></div>
+    <table class="wsh-grid">
+      <tr class="wsh-carry"><td class="wsh-lab">carry</td><td id="wsC4"></td><td id="wsC2"></td><td></td></tr>
+      <tr><td class="wsh-lab">A</td><td></td><td id="wsA2"></td><td id="wsA1"></td></tr>
+      <tr><td class="wsh-lab">+B</td><td></td><td id="wsB2"></td><td id="wsB1"></td></tr>
+      <tr class="wsh-rule"><td></td><td colspan="3"><hr></td></tr>
+      <tr class="wsh-sum"><td class="wsh-lab">Sum</td><td id="wsS4"></td><td id="wsS2"></td><td id="wsS1"></td></tr>
+    </table>
+  </div>
+
+<script>
+"use strict";
+/* ============================================================================
+   QUBITS AS CANNONBALLS  —  quantum version of the slit-path deck
+     1) Qubit    : one shot, up slit = 1 / down slit = 0 — OR BOTH at once
+                   (superposition), drawn as a "mist" cloud holding |1> and |0>.
+                   Measuring it collapses the cloud to a single answer.
+     2+) NOT / CNOT / Toffoli / adder  (still classical for now; converted next).
+   Mist/cloud notation after Economou & Barnes, "Hello Quantum World!".
+   ========================================================================== */
+
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const panel = document.getElementById('panel');
+
+let W=0,H=0,DPR=1,G={};
+const lerp=(a,b,u)=>a+(b-a)*u;
+const smooth=u=>u*u*(3-2*u);
+
+function computeGeom(){
+  G.sx   = W*0.10;
+  G.cy   = H*0.50;
+  G.bx   = W*0.40;
+  G.bw   = Math.max(7, W*0.010);
+  G.rx   = W*0.87;
+  G.gap  = H*0.34;
+  G.sH   = Math.max(10, H*0.05);
+  G.sTop = G.cy - G.gap/2;
+  G.sBot = G.cy + G.gap/2;
+  G.gateX= W*0.635;
+  G.cw   = Math.max(52, W*0.085);
+  // two-channel geometry (CNOT and beyond): control on top, target below
+  G.cyC  = H*0.31; G.cyT = H*0.69; G.gap2 = H*0.15;
+  G.sH2  = Math.max(8, H*0.034);
+  G.cTop = G.cyC - G.gap2/2; G.cBot = G.cyC + G.gap2/2;
+  G.tTop = G.cyT - G.gap2/2; G.tBot = G.cyT + G.gap2/2;
+  // three-channel geometry (Toffoli): control1, control2, target
+  G.t3a=H*0.20; G.t3b=H*0.48; G.t3c=H*0.76; G.gap3=H*0.12; G.sH3=Math.max(7,H*0.026);
+  G.a1T=G.t3a-G.gap3/2; G.a1B=G.t3a+G.gap3/2;
+  G.a2T=G.t3b-G.gap3/2; G.a2B=G.t3b+G.gap3/2;
+  G.a3T=G.t3c-G.gap3/2; G.a3B=G.t3c+G.gap3/2;
+  // 2-bit adder: 6 bit channels, 6 gate columns
+  const aTop=H*0.10, aBot=H*0.80; G.adCy=[];
+  for(let i=0;i<6;i++) G.adCy.push(aTop+i*(aBot-aTop)/5);
+  G.adLG=Math.max(20,H*0.052); G.adSH=Math.max(5,H*0.016);
+  G.adGW=Math.max(13,(G.rx-G.bx)*0.028);
+  G.adGX=[0.12,0.27,0.42,0.57,0.72,0.87].map(f=>G.bx+(G.rx-G.bx)*f);
+}
+function resize(){
+  const r=panel.getBoundingClientRect();
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=r.width;H=r.height;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  computeGeom();
+}
+new ResizeObserver(resize).observe(panel);
+
+const C={warm:'#ffb24a',cool:'#6ad7ff',elec:'#7CFFB2',muted:'#8b93b8',ink:'#eef2ff',mist:'#b9a8ff'};
+const ySlit=v=>v?G.sTop:G.sBot;
+const colOf=v=>v?C.warm:C.cool;
+
+/* ----------------------------- shared drawing ----------------------------- */
+function clearBG(){
+  const g=ctx.createLinearGradient(0,0,W,0);
+  g.addColorStop(0,'#070a18');g.addColorStop(1,'#04050b');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+}
+function rrect(x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+}
+function drawLanes(hasGate){
+  ctx.save();ctx.setLineDash([5,8]);ctx.lineWidth=1.5;
+  const x0=G.gateX-G.cw, x1=G.gateX+G.cw;
+  [[G.sTop,C.warm],[G.sBot,C.cool]].forEach(p=>{
+    ctx.strokeStyle=p[1]+'40';
+    if(hasGate){
+      ctx.beginPath();ctx.moveTo(G.bx+G.bw/2,p[0]);ctx.lineTo(x0,p[0]);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x1,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();
+    }else{
+      ctx.beginPath();ctx.moveTo(G.bx+G.bw/2,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();
+    }
+  });
+  ctx.restore();
+}
+function drawBarrier(){
+  const x=G.bx;
+  ctx.fillStyle='rgba(180,190,225,0.92)';
+  ctx.fillRect(x-G.bw/2,0,G.bw,G.sTop-G.sH);
+  ctx.fillRect(x-G.bw/2,G.sTop+G.sH,G.bw,(G.sBot-G.sH)-(G.sTop+G.sH));
+  ctx.fillRect(x-G.bw/2,G.sBot+G.sH,G.bw,H-(G.sBot+G.sH));
+  ctx.save();ctx.shadowBlur=12;
+  [[G.sTop,C.warm],[G.sBot,C.cool]].forEach(p=>{
+    ctx.shadowColor=p[1];ctx.strokeStyle=p[1];ctx.globalAlpha=.55;ctx.lineWidth=G.bw;
+    ctx.beginPath();ctx.moveTo(x,p[0]-G.sH);ctx.lineTo(x,p[0]+G.sH);ctx.stroke();
+  });
+  ctx.restore();
+  ctx.font='700 13px Inter,system-ui';ctx.textAlign='center';
+  ctx.fillStyle=C.warm;ctx.fillText('1',x-24,G.sTop+5);
+  ctx.fillStyle=C.cool;ctx.fillText('0',x-24,G.sBot+5);
+}
+function drawCannon(){
+  ctx.save();ctx.shadowColor=C.warm;ctx.shadowBlur=18;
+  ctx.beginPath();ctx.arc(G.sx,G.cy,Math.max(7,H*0.014),0,7);ctx.fillStyle=C.warm;ctx.fill();
+  ctx.restore();
+  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  ctx.fillText('cannon',G.sx,G.cy+H*0.05);
+}
+function drawReadout(landed){
+  [[G.sTop,C.warm,'1',1],[G.sBot,C.cool,'0',0]].forEach(z=>{
+    const on=landed===z[3];
+    const r=Math.max(13,H*0.028);
+    ctx.beginPath();ctx.arc(G.rx,z[0],r,0,7);
+    ctx.fillStyle=on?z[1]:'#0d1226';
+    if(on){ctx.save();ctx.shadowColor=z[1];ctx.shadowBlur=20;ctx.fill();ctx.restore();}else ctx.fill();
+    ctx.lineWidth=2;ctx.strokeStyle=z[1]+(on?'':'66');ctx.stroke();
+    ctx.font='800 15px Inter,system-ui';ctx.textAlign='center';
+    ctx.fillStyle=on?'#10131f':z[1];ctx.fillText(z[2],G.rx,z[0]+5);
+  });
+  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  ctx.fillText('readout',G.rx,G.sBot+H*0.05);
+}
+
+/* fuzzy probability blob (double-slit slide style): radial-gradient ellipse */
+function blob(px,py,rx,ry,color){
+  ctx.save();
+  ctx.translate(px,py);ctx.scale(rx,ry);
+  const g=ctx.createRadialGradient(0,0,0,0,0,1);
+  g.addColorStop(0,color);g.addColorStop(0.55,color+'cc');g.addColorStop(1,color+'00');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,1,0,7);ctx.fill();
+  ctx.restore();
+}
+/* scalloped cumulus silhouette: a solid elliptical body + bumpy rim puffs.
+   Filling the union of these subpaths gives the classic fluffy-cloud outline. */
+function cloudPath(cx,cy,rx,ry){
+  const big=Math.max(rx,ry);
+  const n=Math.max(12,Math.round((rx+ry)/13));
+  ctx.beginPath();
+  ctx.ellipse(cx,cy,rx*0.80,ry*0.80,0,0,Math.PI*2);          // solid body
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2;
+    const br=(0.22+0.06*Math.sin(a*3+0.6))*big;              // irregular bumps
+    const bx=cx+Math.cos(a)*rx*0.80, by=cy+Math.sin(a)*ry*0.80;
+    ctx.moveTo(bx+br,by);ctx.arc(bx,by,br,0,Math.PI*2);       // rim puff
+  }
+}
+/* mist cell positions: the two basis configs sit compactly inside the cloud */
+function mistCellY(v){ const sep=Math.max(13,H*0.028)*1.55; return G.cy + (v? -sep : sep); }
+/* faint guide paths: source -> each slit -> each cloud cell (both at once) */
+function drawSuperPaths(alpha){
+  ctx.save();ctx.globalAlpha=alpha;ctx.lineWidth=1.3;ctx.setLineDash([3,5]);
+  [[G.sTop,C.warm,1],[G.sBot,C.cool,0]].forEach(p=>{
+    ctx.strokeStyle=p[1];ctx.beginPath();
+    ctx.moveTo(G.sx,G.cy);ctx.lineTo(G.bx,p[0]);ctx.lineTo(G.rx,mistCellY(p[2]));ctx.stroke();
+  });
+  ctx.restore();
+}
+/* guide paths through a NOT gate: each branch rides its lane, crosses at the
+   gate, and lands in the OPPOSITE cloud cell (1->0, 0->1). */
+function drawSuperPathsNOT(alpha){
+  ctx.save();ctx.globalAlpha=alpha;ctx.lineWidth=1.3;ctx.setLineDash([3,5]);
+  const a=G.gateX-G.cw, b=G.gateX+G.cw;
+  [[G.sTop,G.sBot,1],[G.sBot,G.sTop,0]].forEach(p=>{
+    ctx.strokeStyle=colOf(p[2]);ctx.beginPath();
+    ctx.moveTo(G.sx,G.cy);ctx.lineTo(a,p[0]);ctx.lineTo(b,p[1]);
+    ctx.lineTo(G.rx,mistCellY(1-p[2]));ctx.stroke();
+  });
+  ctx.restore();
+}
+
+/* -------- QUANTUM: the "mist" cloud readout (Economou & Barnes notation) -----
+   A superposition is one cloud holding both basis configurations |1> and |0>,
+   stacked on the up/down slit lanes and split by a bar. `intensity` fades the
+   cloud out as it collapses; `measured` (0/1/null) is the surviving outcome;
+   `collapse` (0..1) drives the collapse animation. */
+function drawMistCloud(intensity, measured, collapse){
+  const xr=G.rx, r=Math.max(13,H*0.028), cyMid=G.cy, sep=r*1.55;
+  const y1=mistCellY(1), y0=mistCellY(0);     // 1 (warm) up, 0 (cool) down — compact
+  const crx=r+58, cry=sep+r+26;
+  intensity=Math.max(0,Math.min(1,intensity));
+  // soft fluffy cloud body (filled scalloped silhouette + glow, no hard border)
+  if(intensity>0.002){
+    ctx.save();
+    ctx.globalAlpha=intensity;
+    const R=Math.max(crx,cry);
+    const grd=ctx.createRadialGradient(xr,cyMid,r*0.4,xr,cyMid,R*1.05);
+    grd.addColorStop(0,'rgba(198,184,255,0.32)');
+    grd.addColorStop(0.6,'rgba(180,164,255,0.16)');
+    grd.addColorStop(1,'rgba(180,164,255,0)');
+    ctx.shadowColor='rgba(185,168,255,0.55)';ctx.shadowBlur=22;
+    cloudPath(xr,cyMid,crx,cry);ctx.fillStyle=grd;ctx.fill();
+    // a second pass with no shadow for a denser core
+    ctx.shadowBlur=0;cloudPath(xr,cyMid,crx*0.96,cry*0.96);ctx.fillStyle=grd;ctx.fill();
+    ctx.restore();
+    // bar between the two basis configurations (Hello Quantum World notation)
+    ctx.save();ctx.globalAlpha=intensity*0.85;
+    ctx.strokeStyle='rgba(205,194,255,0.75)';ctx.lineWidth=1.6;
+    const bw=crx*0.6;
+    ctx.beginPath();ctx.moveTo(xr-bw,cyMid);ctx.lineTo(xr+bw,cyMid);ctx.stroke();
+    ctx.restore();
+  }
+  // the two basis cells; both glow while in mist, one survives on collapse
+  [[y1,C.warm,'1',1],[y0,C.cool,'0',0]].forEach(z=>{
+    const chosen = measured===z[3];
+    let a = intensity*0.92;          // cell brightness inside the mist
+    let rr = r;
+    if(collapse>0){
+      a  = chosen ? 1 : intensity*0.92;
+      rr = chosen ? r*(1+0.16*collapse) : r*(1-0.3*collapse);
+    }
+    a=Math.max(0,a);
+    ctx.save();
+    ctx.globalAlpha=a;
+    ctx.beginPath();ctx.arc(xr,z[0],rr,0,7);
+    ctx.fillStyle=z[1];
+    if(chosen||intensity>0.4){ctx.shadowColor=z[1];ctx.shadowBlur=chosen?20:14;}
+    ctx.fill();
+    ctx.lineWidth=2;ctx.strokeStyle=z[1];ctx.stroke();
+    ctx.font='800 15px Inter,system-ui';ctx.textAlign='center';ctx.fillStyle='#10131f';
+    ctx.fillText(z[2],xr,z[0]+5);
+    ctx.restore();
+  });
+  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  ctx.fillText(collapse>=1?'readout':'cloud · both at once',xr,cyMid+cry+14);
+}
+
+function drawNOTgate(){
+  const x0=G.gateX-G.cw, x1=G.gateX+G.cw;
+  const pad=Math.max(30,H*0.085);
+  const yT=G.sTop-pad, yB=G.sBot+pad, r=14;
+  const L=Math.max(34,W*0.05), m=Math.max(16,H*0.045);
+  const tT=G.sTop-m, tB=G.sBot+m, mcy=(tT+tB)/2, mry=(tB-tT)/2;
+  const mxL=x0-L, mxR=x1+L;
+  // tube fills + box fill (slight tint, so it can become a black box later)
+  ctx.save();ctx.fillStyle='rgba(12,16,30,0.30)';
+  ctx.fillRect(mxL,tT,x0-mxL,tB-tT);
+  ctx.fillRect(x1,tT,mxR-x1,tB-tT);
+  rrect(x0,yT,x1-x0,yB-yT,r);ctx.fill();
+  ctx.restore();
+  ctx.save();
+  ctx.strokeStyle=C.elec;ctx.lineWidth=2.5;ctx.shadowColor=C.elec;ctx.shadowBlur=8;ctx.lineJoin='round';ctx.lineCap='round';
+  // box border — open at both throats (tT..tB) where the tubes join
+  ctx.beginPath();
+  ctx.moveTo(x0,tT);
+  ctx.lineTo(x0,yT+r);ctx.arcTo(x0,yT,x0+r,yT,r);
+  ctx.lineTo(x1-r,yT);ctx.arcTo(x1,yT,x1,yT+r,r);
+  ctx.lineTo(x1,tT);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x0,tB);
+  ctx.lineTo(x0,yB-r);ctx.arcTo(x0,yB,x0+r,yB,r);
+  ctx.lineTo(x1-r,yB);ctx.arcTo(x1,yB,x1,yB-r,r);
+  ctx.lineTo(x1,tB);
+  ctx.stroke();
+  // tube walls + open rims
+  ctx.beginPath();
+  ctx.moveTo(x0,tT);ctx.lineTo(mxL,tT);ctx.moveTo(x0,tB);ctx.lineTo(mxL,tB);
+  ctx.moveTo(x1,tT);ctx.lineTo(mxR,tT);ctx.moveTo(x1,tB);ctx.lineTo(mxR,tB);
+  ctx.stroke();
+  ctx.beginPath();ctx.ellipse(mxL,mcy,7,mry,0,0,7);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(mxR,mcy,7,mry,0,0,7);ctx.stroke();
+  ctx.restore();
+  // the crossover inside the box
+  ctx.save();
+  ctx.strokeStyle=C.elec;ctx.lineWidth=3;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x0,G.sTop);ctx.lineTo(x1,G.sBot);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x0,G.sBot);ctx.lineTo(x1,G.sTop);ctx.stroke();
+  ctx.restore();
+}
+
+/* ----- parametric helpers for multi-channel scenes (CNOT, ...) ----- */
+function mkbtn(text,cls,onclick){
+  const b=document.createElement('button');
+  b.className='stepbtn'+(cls?' '+cls:'');b.textContent=text;b.onclick=onclick;return b;
+}
+function crossYabs(x,yIn,yOut){
+  const a=G.gateX-G.cw, b=G.gateX+G.cw;
+  if(x<=a) return yIn; if(x>=b) return yOut;
+  return lerp(yIn,yOut,(x-a)/(b-a));
+}
+/* one qubit = one shape: circle, square or triangle (cannon + end state) */
+function shapeAt(cx,cy,rad,shape){
+  ctx.beginPath();
+  if(shape==='square'){ const s=rad*1.75; ctx.rect(cx-s/2,cy-s/2,s,s); }
+  else if(shape==='triangle'){ const s=rad*2.15, h=s*0.866;
+    ctx.moveTo(cx,cy-2*h/3); ctx.lineTo(cx+s/2,cy+h/3); ctx.lineTo(cx-s/2,cy+h/3); ctx.closePath(); }
+  else if(shape==='diamond'){ const s=rad*1.34; ctx.moveTo(cx,cy-s);ctx.lineTo(cx+s,cy);ctx.lineTo(cx,cy+s);ctx.lineTo(cx-s,cy);ctx.closePath(); }
+  else if(shape==='pentagon'||shape==='hexagon'){ const sides=shape==='pentagon'?5:6, rr=rad*1.2, off=shape==='pentagon'?-Math.PI/2:0;
+    for(let i=0;i<sides;i++){const a=off+i*2*Math.PI/sides, x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr; i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.closePath(); }
+  else { ctx.arc(cx,cy,rad,0,7); }
+}
+function drawCannonAt(y,shape,col){
+  col=col||C.warm;
+  ctx.save();ctx.shadowColor=col;ctx.shadowBlur=16;
+  shapeAt(G.sx,y,Math.max(6,H*0.014),shape);ctx.fillStyle=col;ctx.fill();
+  ctx.restore();
+}
+function drawBarrierMulti(slits,sH){
+  const x=G.bx;
+  ctx.fillStyle='rgba(180,190,225,0.92)';
+  let prev=0;
+  slits.forEach(s=>{ ctx.fillRect(x-G.bw/2,prev,G.bw,(s.y-sH)-prev); prev=s.y+sH; });
+  ctx.fillRect(x-G.bw/2,prev,G.bw,H-prev);
+  ctx.save();ctx.shadowBlur=10;
+  slits.forEach(s=>{ ctx.shadowColor=s.color;ctx.strokeStyle=s.color;ctx.globalAlpha=.55;ctx.lineWidth=G.bw;
+    ctx.beginPath();ctx.moveTo(x,s.y-sH);ctx.lineTo(x,s.y+sH);ctx.stroke(); });
+  ctx.restore();
+  ctx.font='700 12px Inter,system-ui';ctx.textAlign='center';
+  slits.forEach(s=>{ if(s.lab){ctx.fillStyle=s.color;ctx.fillText(s.lab,x-22,s.y+4);} });
+}
+function drawLanesMulti(){
+  ctx.save();ctx.setLineDash([5,8]);ctx.lineWidth=1.5;
+  const x0=G.gateX-G.cw, x1=G.gateX+G.cw, sx=G.bx+G.bw/2;
+  [[G.cTop,C.warm],[G.cBot,C.cool]].forEach(p=>{ctx.strokeStyle=p[1]+'40';
+    ctx.beginPath();ctx.moveTo(sx,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();});
+  [[G.tTop,C.warm],[G.tBot,C.cool]].forEach(p=>{ctx.strokeStyle=p[1]+'40';
+    ctx.beginPath();ctx.moveTo(sx,p[0]);ctx.lineTo(x0,p[0]);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x1,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();});
+  ctx.restore();
+}
+function drawReadoutPair(yA,yB,landed,shape){
+  const rr=Math.max(11,(yB-yA)*0.22);
+  [[yA,C.warm,'1',1],[yB,C.cool,'0',0]].forEach(z=>{
+    const on=landed===z[3];
+    shapeAt(G.rx,z[0],rr,shape);ctx.fillStyle=on?z[1]:'#0d1226';
+    if(on){ctx.save();ctx.shadowColor=z[1];ctx.shadowBlur=18;ctx.fill();ctx.restore();}else ctx.fill();
+    ctx.lineWidth=2;ctx.strokeStyle=z[1]+(on?'':'66');ctx.stroke();
+    ctx.font='800 13px Inter,system-ui';ctx.textAlign='center';ctx.fillStyle=on?'#10131f':z[1];
+    ctx.fillText(z[2],G.rx,z[0]+5);
+  });
+}
+/* generic gate box on an arbitrary lane pair; crosses only when active */
+function drawGateBox(yA,yB,active,label){
+  const x0=G.gateX-G.cw, x1=G.gateX+G.cw, laneGap=yB-yA;
+  const pad=Math.max(26,laneGap*0.34), m=Math.max(14,laneGap*0.20), r=14;
+  const yT=yA-pad, yBo=yB+pad, L=Math.max(34,W*0.05);
+  const tT=yA-m, tB=yB+m, mcy=(tT+tB)/2, mry=(tB-tT)/2, mxL=x0-L, mxR=x1+L;
+  ctx.save();ctx.fillStyle='rgba(12,16,30,0.30)';
+  ctx.fillRect(mxL,tT,x0-mxL,tB-tT);ctx.fillRect(x1,tT,mxR-x1,tB-tT);
+  rrect(x0,yT,x1-x0,yBo-yT,r);ctx.fill();ctx.restore();
+  ctx.save();
+  ctx.strokeStyle=C.elec;ctx.lineWidth=2.5;ctx.shadowColor=C.elec;ctx.shadowBlur=8;ctx.lineJoin='round';ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x0,tT);ctx.lineTo(x0,yT+r);ctx.arcTo(x0,yT,x0+r,yT,r);
+  ctx.lineTo(x1-r,yT);ctx.arcTo(x1,yT,x1,yT+r,r);ctx.lineTo(x1,tT);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x0,tB);ctx.lineTo(x0,yBo-r);ctx.arcTo(x0,yBo,x0+r,yBo,r);
+  ctx.lineTo(x1-r,yBo);ctx.arcTo(x1,yBo,x1,yBo-r,r);ctx.lineTo(x1,tB);ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x0,tT);ctx.lineTo(mxL,tT);ctx.moveTo(x0,tB);ctx.lineTo(mxL,tB);
+  ctx.moveTo(x1,tT);ctx.lineTo(mxR,tT);ctx.moveTo(x1,tB);ctx.lineTo(mxR,tB);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(mxL,mcy,7,mry,0,0,7);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(mxR,mcy,7,mry,0,0,7);ctx.stroke();
+  ctx.restore();
+  if(active){
+    ctx.save();ctx.strokeStyle=C.elec;ctx.lineWidth=3;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x0,yA);ctx.lineTo(x1,yB);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x0,yB);ctx.lineTo(x1,yA);ctx.stroke();ctx.restore();
+  }else{
+    ctx.save();ctx.setLineDash([5,8]);ctx.lineWidth=1.6;
+    ctx.strokeStyle=C.warm+'66';ctx.beginPath();ctx.moveTo(x0,yA);ctx.lineTo(x1,yA);ctx.stroke();
+    ctx.strokeStyle=C.cool+'66';ctx.beginPath();ctx.moveTo(x0,yB);ctx.lineTo(x1,yB);ctx.stroke();ctx.restore();
+  }
+}
+/* control dot on the control 1-lane + linkage down to the target box */
+function drawControlLink(active){
+  const x=G.gateX, yDot=G.cTop;
+  const boxTop=G.tTop-Math.max(26,(G.tBot-G.tTop)*0.34);
+  ctx.save();
+  ctx.strokeStyle=active?C.elec:'#7CFFB244';ctx.lineWidth=2.5;ctx.lineCap='round';
+  if(active){ctx.shadowColor=C.elec;ctx.shadowBlur=8;}
+  ctx.beginPath();ctx.moveTo(x,yDot);ctx.lineTo(x,boxTop);ctx.stroke();
+  ctx.beginPath();ctx.arc(x,yDot,7,0,7);
+  ctx.fillStyle=active?C.elec:'#0c101e';ctx.fill();
+  ctx.strokeStyle=active?C.elec:'#7CFFB288';ctx.stroke();
+  ctx.restore();
+}
+/* dashed lanes for an arbitrary list of channels (gated ones split at the box) */
+function drawChannelLanes(channels){
+  ctx.save();ctx.setLineDash([5,8]);ctx.lineWidth=1.5;
+  const x0=G.gateX-G.cw, x1=G.gateX+G.cw, sx=G.bx+G.bw/2;
+  channels.forEach(ch=>{
+    [[ch.yT,C.warm],[ch.yB,C.cool]].forEach(p=>{ctx.strokeStyle=p[1]+'40';
+      if(ch.gated){ctx.beginPath();ctx.moveTo(sx,p[0]);ctx.lineTo(x0,p[0]);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x1,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();}
+      else{ctx.beginPath();ctx.moveTo(sx,p[0]);ctx.lineTo(G.rx,p[0]);ctx.stroke();}});
+  });
+  ctx.restore();
+}
+/* one vertical linkage tapping several control dots; bright only when active */
+function drawControlLinks(dotYs,ons,active,boxTop){
+  const x=G.gateX, top=Math.min.apply(null,dotYs);
+  ctx.save();
+  ctx.strokeStyle=active?C.elec:'#7CFFB244';ctx.lineWidth=2.5;ctx.lineCap='round';
+  if(active){ctx.shadowColor=C.elec;ctx.shadowBlur=8;}
+  ctx.beginPath();ctx.moveTo(x,top);ctx.lineTo(x,boxTop);ctx.stroke();
+  ctx.restore();
+  dotYs.forEach((y,i)=>{const on=ons[i];ctx.save();
+    ctx.beginPath();ctx.arc(x,y,7,0,7);
+    if(on){ctx.shadowColor=C.elec;ctx.shadowBlur=8;}
+    ctx.fillStyle=on?C.elec:'#0c101e';ctx.fill();
+    ctx.lineWidth=2.5;ctx.strokeStyle=on?C.elec:'#7CFFB288';ctx.stroke();ctx.restore();});
+}
+
+/* path the ball follows along the lanes, with optional crossover at the gate */
+function laneY(x,vin,vout,hasGate){
+  if(!hasGate || vin===vout) return ySlit(vin);
+  const a=G.gateX-G.cw, b=G.gateX+G.cw;
+  if(x<=a) return ySlit(vin);
+  if(x>=b) return ySlit(vout);
+  return lerp(ySlit(vin),ySlit(vout),(x-a)/(b-a));
+}
+
+/* =========================================================================
+   SCENE 1 — QUBIT: up (1), down (0), or BOTH at once (superposition / mist)
+   ========================================================================= */
+const S1={
+  tag:'1 · Qubit', tagColor:'var(--mist)',
+  subtitle:'Fire one ball at the two slits. Now it can take the up slit, the down slit — or both at once.',
+  capTitle:'A qubit can be <b class="warm">1</b>, <b class="cool">0</b>, or a <b class="mist">mist</b> of both.',
+  capSub:'A classical bit must pick one slit. A <b class="mist">qubit</b> can go through <b class="warm">both slits at once</b> — a <b class="mist">superposition</b>. We draw that as a <b class="mist">cloud</b> holding both possibilities, <b class="warm">1</b> and <b class="cool">0</b>, until we <b>measure</b> — then it collapses to a single answer.',
+  ball:null, ghosts:null, landed:null, mist:false, collapse:0, measured:null,
+  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  reset(){
+    this.ball=null;this.ghosts=null;this.landed=null;this.mist=false;this.collapse=0;this.measured=null;
+    this.setReadout('Fire a definite <b class="w">1</b> / <b class="c">0</b>, or <b class="m">both</b> for a superposition.');
+  },
+  fire(v){
+    this.reset();
+    this.ball={vin:v,x:G.sx,y:G.cy,phase:'toSlit'};
+    this.setReadout('Firing&hellip;');
+  },
+  fireSuper(){
+    this.reset();
+    this.ball={sup:true,t:0};
+    this.setReadout('Firing through <b class="m">both</b> slits at once&hellip;');
+  },
+  measure(){
+    if(!this.mist||this.collapse>0) return;
+    this.measured = Math.random()<0.5 ? 0 : 1;
+    this.collapse = 0.0001;
+    this.setReadout('Measuring&hellip;');
+  },
+  step(dt){
+    const vx=W*0.42*dt;
+    const b=this.ball;
+    if(b){
+      if(b.sup){
+        b.t += dt*0.6;
+        if(b.t>=1){
+          this.ball=null; this.mist=true;
+          this.setReadout('Superposition: <b class="w">1</b> and <b class="c">0</b> at once — a <b class="m">cloud</b>. Press <b>Measure</b> to look.');
+        }
+      } else {
+        if(b.phase==='toSlit'){
+          const tx=G.bx, ty=ySlit(b.vin), dx=tx-G.sx, dy=ty-G.cy, L=Math.hypot(dx,dy)||1;
+          b.x+=dx/L*vx; b.y+=dy/L*vx;
+          if(b.x>=G.bx){ b.x=G.bx; b.y=ty; b.phase='lane'; }
+        } else {
+          b.x+=vx; b.y=ySlit(b.vin);
+          if(b.x>=G.rx){
+            this.landed=b.vin; this.ball=null;
+            this.setReadout(b.vin
+              ? 'The ball took the <b class="w">up</b> slit &rarr; qubit = <b class="w">1</b> (definite).'
+              : 'The ball took the <b class="c">down</b> slit &rarr; qubit = <b class="c">0</b> (definite).');
+          }
+        }
+      }
+    }
+    if(this.collapse>0 && this.collapse<1){
+      this.collapse=Math.min(1,this.collapse+dt*1.6);
+      if(this.collapse>=1){
+        this.mist=false; this.landed=this.measured;
+        this.setReadout('Measured <b class="'+(this.measured?'w':'c')+'">'+this.measured+'</b> — the <b class="m">cloud</b> collapsed to one answer. Fire <b class="m">both</b> again to retry.');
+      }
+    }
+  },
+  draw(){
+    clearBG();
+    drawLanes(false);
+    if(this.mist || this.collapse>0){
+      const inten = this.collapse>0 ? (1-this.collapse) : 1;
+      drawMistCloud(inten, this.measured, this.collapse);
+    } else {
+      drawReadout(this.landed);
+    }
+    drawBarrier();
+    drawCannon();
+    const b=this.ball;
+    if(b){
+      if(b.sup){
+        const t=b.t;
+        drawSuperPaths(0.18);
+        const startR=Math.max(4,H*0.013), bigRx=Math.max(7,H*0.02);
+        const spanRy=G.gap/2+G.sH, coreR=Math.max(4,H*0.011);
+        const cloudRy=mistCellY(0)-G.cy+Math.max(13,H*0.028);
+        if(t<0.5){
+          // one fuzzy wave-packet fans out to cover BOTH slits at once
+          const u=t/0.5, px=lerp(G.sx,G.bx,u);
+          blob(px,G.cy,lerp(startR,bigRx,u),lerp(startR,spanRy,u),C.mist);
+        } else {
+          // past the slits: the two paths ride the lanes and merge into the cloud
+          const u=(t-0.5)/0.5, px=lerp(G.bx,G.rx,u);
+          blob(px,G.cy,bigRx*(1-0.45*u),lerp(spanRy,cloudRy,u),C.mist);
+          blob(px,lerp(G.sTop,mistCellY(1),u),coreR*1.7,coreR*1.7,C.warm);
+          blob(px,lerp(G.sBot,mistCellY(0),u),coreR*1.7,coreR*1.7,C.cool);
+        }
+      } else {
+        ctx.save();ctx.shadowColor=colOf(b.vin);ctx.shadowBlur=14;
+        ctx.beginPath();ctx.arc(b.x,b.y,Math.max(5,H*0.012),0,7);
+        ctx.fillStyle=colOf(b.vin);ctx.fill();ctx.restore();
+      }
+    }
+  },
+  buildControls(el){
+    el.innerHTML='';const self=this;
+    el.append(
+      mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
+      mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
+      mkbtn('Fire ◐ both','mist',()=>self.fireSuper()),
+      mkbtn('Measure','',()=>self.measure()),
+      mkbtn('↻','',()=>self.reset())
+    );
+  },
+  onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+  onLeave(){ this.ball=null; this.ghosts=null; },
+};
+
+/* =========================================================================
+   GENERIC SCENE (parametrised by hasNOT) — used by the classical NOT scene
+   ========================================================================= */
+function makeScene(cfg){
+  return {
+    tag:cfg.tag, tagColor:cfg.tagColor, subtitle:cfg.subtitle,
+    capTitle:cfg.capTitle, capSub:cfg.capSub, hasNOT:cfg.hasNOT,
+    ball:null, landed:null, vin:null,
+    fire(v){
+      this.landed=null; this.vin=v;
+      this.ball={vin:v, vout:this.hasNOT?(1-v):v, x:G.sx, y:G.cy, phase:'toSlit'};
+      document.getElementById('readout').innerHTML='Firing&hellip;';
+    },
+    reset(){ this.ball=null; this.landed=null; this.vin=null;
+      document.getElementById('readout').innerHTML=cfg.idle; },
+    step(dt){
+      const b=this.ball; if(!b) return;
+      const vx=W*0.42*dt;
+      if(b.phase==='toSlit'){
+        const tx=G.bx, ty=ySlit(b.vin);
+        const dx=tx-G.sx, dy=ty-G.cy, L=Math.hypot(dx,dy)||1;
+        b.x+=dx/L*vx; b.y+=dy/L*vx;
+        if(b.x>=G.bx){ b.x=G.bx; b.y=ty; b.phase='lane'; }
+      } else {
+        b.x+=vx; b.y=laneY(b.x,b.vin,b.vout,this.hasNOT);
+        if(b.x>=G.rx){
+          this.landed=b.vout; this.ball=null;
+          document.getElementById('readout').innerHTML=cfg.result(b.vin,b.vout);
+        }
+      }
+    },
+    draw(){
+      clearBG();
+      drawLanes(this.hasNOT);
+      drawReadout(this.landed);
+      if(this.hasNOT) drawNOTgate();
+      drawBarrier();
+      drawCannon();
+      const b=this.ball;
+      if(b){
+        ctx.save();ctx.shadowColor=colOf(b.x<G.gateX?b.vin:b.vout);ctx.shadowBlur=14;
+        ctx.beginPath();ctx.arc(b.x,b.y,Math.max(5,H*0.012),0,7);
+        ctx.fillStyle=colOf(b.x<G.gateX?b.vin:b.vout);ctx.fill();ctx.restore();
+      }
+    },
+    buildControls(el){
+      el.innerHTML='';const self=this;
+      el.append(
+        mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
+        mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
+        mkbtn('↻','',()=>self.reset())
+      );
+    },
+    onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+    onLeave(){ this.ball=null; },
+  };
+}
+
+/* =========================================================================
+   SCENE 2 — NOT on a qubit: the gate flips EVERY branch of the cloud at once
+   ========================================================================= */
+const S2={
+  tag:'2 · NOT gate', tagColor:'var(--elec)',
+  subtitle:'The same crossover gate — but now it can act on a whole cloud at once.',
+  capTitle:'<b class="elec">NOT</b> flips <b class="mist">every branch</b> of the superposition at once.',
+  capSub:'A definite bit just swaps lanes, as before. But fire <b class="mist">both</b> and the gate flips <b class="warm">1</b>&rarr;<b class="cool">0</b> <i>and</i> <b class="cool">0</b>&rarr;<b class="warm">1</b> in a single pass — the whole <b class="mist">cloud</b> is transformed together. The balanced cloud maps back to itself, yet each branch really did flip: a first taste of <b class="mist">quantum parallelism</b>.',
+  ball:null, landed:null, mist:false, collapse:0, measured:null,
+  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  reset(){
+    this.ball=null;this.landed=null;this.mist=false;this.collapse=0;this.measured=null;
+    this.setReadout('Fire a definite <b class="w">1</b>/<b class="c">0</b>, or <b class="m">both</b>, through the <b class="e">NOT</b>.');
+  },
+  fire(v){
+    this.reset();
+    this.ball={vin:v,vout:1-v,x:G.sx,y:G.cy,phase:'toSlit'};
+    this.setReadout('Firing&hellip;');
+  },
+  fireSuper(){
+    this.reset();
+    this.ball={sup:true,t:0};
+    this.setReadout('Sending <b class="m">both</b> branches through the <b class="e">NOT</b>&hellip;');
+  },
+  measure(){
+    if(!this.mist||this.collapse>0) return;
+    this.measured = Math.random()<0.5 ? 0 : 1;
+    this.collapse = 0.0001;
+    this.setReadout('Measuring&hellip;');
+  },
+  step(dt){
+    const vx=W*0.42*dt;
+    const b=this.ball;
+    if(b){
+      if(b.sup){
+        b.t += dt*0.5;
+        if(b.t>=1){
+          this.ball=null; this.mist=true;
+          this.setReadout('<b class="e">NOT</b> flipped <b>both</b> branches at once (<b class="w">1</b>&harr;<b class="c">0</b>). Still a <b class="m">cloud</b> — <b>Measure</b> to look.');
+        }
+      } else {
+        if(b.phase==='toSlit'){
+          const tx=G.bx, ty=ySlit(b.vin), dx=tx-G.sx, dy=ty-G.cy, L=Math.hypot(dx,dy)||1;
+          b.x+=dx/L*vx; b.y+=dy/L*vx;
+          if(b.x>=G.bx){ b.x=G.bx; b.y=ty; b.phase='lane'; }
+        } else {
+          b.x+=vx; b.y=laneY(b.x,b.vin,b.vout,true);
+          if(b.x>=G.rx){
+            this.landed=b.vout; this.ball=null;
+            this.setReadout('In <b class="'+(b.vin?'w':'c')+'">'+b.vin+'</b> &rarr; <b class="e">NOT</b> &rarr; out <b class="'+(b.vout?'w':'c')+'">'+b.vout+'</b> (definite).');
+          }
+        }
+      }
+    }
+    if(this.collapse>0 && this.collapse<1){
+      this.collapse=Math.min(1,this.collapse+dt*1.6);
+      if(this.collapse>=1){
+        this.mist=false; this.landed=this.measured;
+        this.setReadout('Measured <b class="'+(this.measured?'w':'c')+'">'+this.measured+'</b> — the cloud collapsed. Fire <b class="m">both</b> again to retry.');
+      }
+    }
+  },
+  draw(){
+    clearBG();
+    drawLanes(true);
+    if(this.mist || this.collapse>0){
+      const inten = this.collapse>0 ? (1-this.collapse) : 1;
+      drawMistCloud(inten, this.measured, this.collapse);
+    } else {
+      drawReadout(this.landed);
+    }
+    drawNOTgate();
+    drawBarrier();
+    drawCannon();
+    const b=this.ball;
+    if(b){
+      if(b.sup){
+        const t=b.t;
+        drawSuperPathsNOT(0.18);
+        const startR=Math.max(4,H*0.013), bigRx=Math.max(7,H*0.02);
+        const spanRy=G.gap/2+G.sH, coreR=Math.max(4,H*0.011);
+        const cloudRy=mistCellY(0)-G.cy+Math.max(13,H*0.028);
+        if(t<0.30){
+          // wave-packet fans out to cover BOTH slits at once
+          const u=t/0.30, px=lerp(G.sx,G.bx,u);
+          blob(px,G.cy,lerp(startR,bigRx,u),lerp(startR,spanRy,u),C.mist);
+        } else {
+          // both branches ride the lanes, CROSS at the gate, merge into the cloud
+          const u=(t-0.30)/0.70, x=lerp(G.bx,G.rx,u);
+          const xc=G.rx-(G.rx-G.bx)*0.14;
+          blob(x,G.cy,bigRx*(1-0.4*u),lerp(spanRy,cloudRy,Math.min(1,u*1.15)),C.mist);
+          [[G.sTop,G.sBot,1],[G.sBot,G.sTop,0]].forEach(p=>{
+            let y=crossYabs(x,p[0],p[1]);
+            const val = x<G.gateX ? p[2] : 1-p[2];
+            if(x>xc){ const k=(x-xc)/(G.rx-xc); y=lerp(y,mistCellY(val),k); }
+            blob(x,y,coreR*1.7,coreR*1.7,colOf(val));
+          });
+        }
+      } else {
+        const col=colOf(b.x<G.gateX?b.vin:b.vout);
+        ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;
+        ctx.beginPath();ctx.arc(b.x,b.y,Math.max(5,H*0.012),0,7);
+        ctx.fillStyle=col;ctx.fill();ctx.restore();
+      }
+    }
+  },
+  buildControls(el){
+    el.innerHTML='';const self=this;
+    el.append(
+      mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
+      mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
+      mkbtn('Fire ◐ both','mist',()=>self.fireSuper()),
+      mkbtn('Measure','',()=>self.measure()),
+      mkbtn('↻','',()=>self.reset())
+    );
+  },
+  onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+  onLeave(){ this.ball=null; },
+};
+
+/* =========================================================================
+   SCENE 3 — CNOT: a control bit decides whether NOT fires on the target
+   ========================================================================= */
+/* one cell of a configuration: a shape (square=control, circle=target) + value */
+function drawCell(shape,x,y,rr,val,glow,intensity){
+  const col=colOf(val);
+  ctx.save();
+  if(glow||intensity>0.4){ctx.shadowColor=col;ctx.shadowBlur=glow?18:12;}
+  shapeAt(x,y,rr,shape);ctx.fillStyle=col;ctx.fill();
+  ctx.lineWidth=2;ctx.strokeStyle=col;ctx.stroke();
+  ctx.shadowBlur=0;ctx.fillStyle='#10131f';const fz=Math.max(8,Math.round(rr*1.0));ctx.font='800 '+fz+'px Inter,system-ui';ctx.textAlign='center';
+  ctx.fillText(String(val),x,y+fz*0.35);
+  ctx.restore();
+}
+/* the joint output cloud: N configurations (each ▪control + ●target), stacked
+   and separated by bars. Labelled "entangled" only when the caller says so. */
+function drawJointCloud(configs, measured, collapse, intensity, entangled){
+  const N=configs.length, xr=G.rx, cyMid=G.cy;
+  const r=Math.max(9, N>2?H*0.020:H*0.024), dx=Math.max(15,W*0.022);
+  const rowSep = N>1 ? Math.min(H*0.115, (H*0.34)/N) : 0;
+  const totalH=(N-1)*rowSep;
+  const rows=configs.map((cf,i)=>({cv:cf.c,tv:cf.t,y:cyMid-totalH/2+i*rowSep}));
+  const crx=dx+r+26, cry=totalH/2+r+24;
+  intensity=Math.max(0,Math.min(1,intensity));
+  if(intensity>0.002){
+    ctx.save();ctx.globalAlpha=intensity;
+    const R=Math.max(crx,cry);
+    const grd=ctx.createRadialGradient(xr,cyMid,r*0.4,xr,cyMid,R*1.05);
+    grd.addColorStop(0,'rgba(198,184,255,0.30)');grd.addColorStop(0.6,'rgba(180,164,255,0.15)');grd.addColorStop(1,'rgba(180,164,255,0)');
+    ctx.shadowColor='rgba(185,168,255,0.5)';ctx.shadowBlur=22;
+    cloudPath(xr,cyMid,crx,cry);ctx.fillStyle=grd;ctx.fill();
+    ctx.shadowBlur=0;cloudPath(xr,cyMid,crx*0.96,cry*0.96);ctx.fillStyle=grd;ctx.fill();
+    ctx.restore();
+    ctx.save();ctx.globalAlpha=intensity*0.8;ctx.strokeStyle='rgba(205,194,255,0.7)';ctx.lineWidth=1.5;
+    for(let i=1;i<N;i++){const by=(rows[i-1].y+rows[i].y)/2;ctx.beginPath();ctx.moveTo(xr-crx*0.6,by);ctx.lineTo(xr+crx*0.6,by);ctx.stroke();}
+    ctx.restore();
+  }
+  rows.forEach((row,idx)=>{
+    const chosen=measured===idx;
+    let a=intensity*0.92, sc=1;
+    if(collapse>0){a=chosen?1:intensity*0.92;sc=chosen?1+0.10*collapse:1-0.3*collapse;}
+    a=Math.max(0,a);
+    ctx.save();ctx.globalAlpha=a;
+    ctx.strokeStyle='rgba(205,194,255,0.4)';ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(xr-dx,row.y);ctx.lineTo(xr+dx,row.y);ctx.stroke();
+    drawCell('square',xr-dx,row.y,r*sc,row.cv,chosen,intensity);
+    drawCell('circle',xr+dx,row.y,r*sc,row.tv,chosen,intensity);
+    ctx.restore();
+  });
+  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  const lab=collapse>=1?'measured · ▪ control  ● target':((entangled?'entangled':'superposed')+' cloud · ▪ control  ● target');
+  ctx.fillText(lab,xr,cyMid+cry+15);
+}
+/* control link in superposition (mist) style: both control values tap the gate */
+function drawQControlLink(){
+  const x=G.gateX, boxTop=G.tTop-Math.max(26,(G.tBot-G.tTop)*0.34);
+  ctx.save();ctx.setLineDash([4,5]);ctx.strokeStyle=C.mist;ctx.globalAlpha=0.85;ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(x,G.cTop);ctx.lineTo(x,boxTop);ctx.stroke();ctx.setLineDash([]);
+  ctx.beginPath();ctx.arc(x,G.cTop,6,0,7);ctx.globalAlpha=0.7;ctx.fillStyle=C.mist;ctx.fill();
+  ctx.globalAlpha=0.95;ctx.lineWidth=2;ctx.strokeStyle=C.mist;ctx.stroke();
+  ctx.restore();
+}
+
+const S3={
+  tag:'3 · CNOT gate', tagColor:'var(--elec)',
+  subtitle:'Two qubits. Each can be 0, 1, or a cloud of both — and the gate can tie them together.',
+  capTitle:'<b class="elec">CNOT</b> on a superposed control makes an <b class="mist">entangled</b> cloud.',
+  capSub:'With a definite control it is the old story: control <b class="warm">1</b> flips the <b>target</b>, control <b class="cool">0</b> leaves it. Put the <b class="mist">control</b> in a cloud of both and the gate acts on each branch at once — the result is one cloud of two <i>linked</i> pairs, so measuring either qubit decides the other: <b class="mist">entanglement</b>. Superpose the <b class="mist">target</b> too and you get a bigger cloud — but if the control is definite, the qubits stay independent (a plain superposition, not entangled).',
+  cin:1, tin:0, cball:null, tball:null, cLanded:null, tLanded:null, _sync:null,
+  sup:null, mist:false, collapse:0, measured:null,
+  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  configList(){
+    const cv=this.cin===2?[1,0]:[this.cin];
+    const tv=this.tin===2?[1,0]:[this.tin];
+    const out=[];
+    cv.forEach(c=>tv.forEach(t=>out.push({c, t:t^c})));
+    out.sort((a,b)=> b.c-a.c || b.t-a.t);
+    return out;
+  },
+  quantum(){ return this.cin===2 || this.tin===2; },
+  entangled(){ return this.cin===2 && this.tin<2; },
+  buildControls(el){
+    el.innerHTML='';const self=this;
+    const cB=mkbtn('','',()=>{self.cin=(self.cin+1)%3;self._sync();self.reset();});
+    const tB=mkbtn('','',()=>{self.tin=(self.tin+1)%3;self._sync();self.reset();});
+    el.append(cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    this._sync=function(){
+      cB.textContent='control '+(self.cin===2?'◐ both':(self.cin?'▲ 1':'▼ 0'));
+      cB.className='stepbtn '+(self.cin===2?'mist':(self.cin?'up':'dn'));
+      tB.textContent='target '+(self.tin===2?'◐ both':(self.tin?'▲ 1':'▼ 0'));
+      tB.className='stepbtn '+(self.tin===2?'mist':(self.tin?'up':'dn'));
+    };this._sync();
+  },
+  reset(){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;this.sup=null;this.mist=false;this.collapse=0;this.measured=null;
+    this.setReadout(this.quantum()
+      ? 'At least one qubit is a <b class="m">cloud</b>. Press <b>Run</b>, then <b>Measure</b>.'
+      : 'Set the <b class="e">control</b> and <b class="w">target</b>, then press <b>Run</b>.'); },
+  run(){
+    this.measured=null;this.collapse=0;this.mist=false;
+    if(this.quantum()){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;this.sup={t:0};this.setReadout('Running all branches&hellip;');return; }
+    this.cLanded=this.tLanded=null;
+    const active=this.cin===1, tout=active?(1-this.tin):this.tin;
+    this.cball={x:G.sx,y:G.cyC,sy:(this.cin?G.cTop:G.cBot),vin:this.cin,phase:'toSlit'};
+    this.tball={x:G.sx,y:G.cyT,syIn:(this.tin?G.tTop:G.tBot),syOut:(tout?G.tTop:G.tBot),vin:this.tin,vout:tout,phase:'toSlit'};
+    this.setReadout('Running&hellip;');
+  },
+  measure(){ if(!this.mist||this.collapse>0)return; this.measured=Math.floor(Math.random()*this.configList().length); this.collapse=0.0001; this.setReadout('Measuring&hellip;'); },
+  _result(){
+    if(this.cball||this.tball)return;
+    if(this.cLanded==null&&this.tLanded==null)return;
+    const cin=this.cLanded,tout=this.tLanded;
+    this.setReadout('control <b class="'+(cin?'w':'c')+'">'+cin+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">CNOT</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+  },
+  step(dt){
+    if(this.sup){ this.sup.t+=dt*0.5; if(this.sup.t>=1){ this.sup=null; this.mist=true;
+      const cfgs=this.configList(), ent=this.entangled();
+      const list=cfgs.map(c=>'▪'+c.c+'●'+c.t).join(' &nbsp;|&nbsp; ');
+      this.setReadout((ent?'<b class="m">Entangled!</b> ':'<b class="m">Superposition.</b> ')+'The cloud holds '+list+'. <b>Measure</b> to collapse'+(ent?' — the two always agree.':'.')); } }
+    if(this.collapse>0 && this.collapse<1){ this.collapse=Math.min(1,this.collapse+dt*1.6);
+      if(this.collapse>=1){ const cfgs=this.configList(), c=cfgs[this.measured]||cfgs[0], ent=this.entangled();
+        this.setReadout('Measured ▪<b class="'+(c.c?'w':'c')+'">'+c.c+'</b> ●<b class="'+(c.t?'w':'c')+'">'+c.t+'</b>'+(ent?' — measuring one fixed the other. <b class="m">Entanglement</b>.':'.')); } }
+    const vx=W*0.42*dt;
+    let b=this.cball;
+    if(b){
+      if(b.phase==='toSlit'){const dx=G.bx-G.sx,dy=b.sy-G.cyC,L=Math.hypot(dx,dy)||1;b.x+=dx/L*vx;b.y+=dy/L*vx;if(b.x>=G.bx){b.x=G.bx;b.y=b.sy;b.phase='lane';}}
+      else{b.x+=vx;b.y=b.sy;if(b.x>=G.rx){this.cLanded=b.vin;this.cball=null;this._result();}}
+    }
+    b=this.tball;
+    if(b){
+      if(b.phase==='toSlit'){const dx=G.bx-G.sx,dy=b.syIn-G.cyT,L=Math.hypot(dx,dy)||1;b.x+=dx/L*vx;b.y+=dy/L*vx;if(b.x>=G.bx){b.x=G.bx;b.y=b.syIn;b.phase='lane';}}
+      else{b.x+=vx;b.y=crossYabs(b.x,b.syIn,b.syOut);if(b.x>=G.rx){this.tLanded=b.vout;this.tball=null;this._result();}}
+    }
+  },
+  drawQuantum(){
+    drawLanesMulti();
+    const cfgs=this.configList(), ent=this.entangled();
+    if(this.mist || this.collapse>0){ const inten=this.collapse>0?(1-this.collapse):1; drawJointCloud(cfgs,this.measured,this.collapse,inten,ent); }
+    drawGateBox(G.tTop,G.tBot,this.cin!==0,'NOT');
+    if(this.cin===2) drawQControlLink(); else drawControlLink(this.cin===1);
+    drawBarrierMulti([{y:G.cTop,color:C.warm,lab:'1'},{y:G.cBot,color:C.cool,lab:'0'},
+                      {y:G.tTop,color:C.warm,lab:'1'},{y:G.tBot,color:C.cool,lab:'0'}],G.sH2);
+    drawCannonAt(G.cyC,'square',this.cin===2?C.mist:colOf(this.cin));
+    drawCannonAt(G.cyT,'circle',this.tin===2?C.mist:colOf(this.tin));
+    ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.fillText('control',G.sx,G.cTop-12);ctx.fillText('target',G.sx,G.tBot+18);
+    if(this.sup){
+      const t=this.sup.t, coreR=Math.max(4,H*0.011), startR=Math.max(4,H*0.012), spanRyC=G.gap2/2+G.sH2;
+      const cS=this.cin===2, tS=this.tin===2, gateL=G.gateX-G.cw;
+      const cvals=cS?[1,0]:[this.cin], tvals=tS?[1,0]:[this.tin];
+      const crisp=(px,py,col,al)=>{ctx.save();ctx.globalAlpha=al;ctx.shadowColor=col;ctx.shadowBlur=14;
+        ctx.beginPath();ctx.arc(px,py,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
+      const fuzz=(px,py,col,al)=>{ctx.save();ctx.globalAlpha=al;blob(px,py,coreR*1.7,coreR*1.7,col);ctx.restore();};
+      if(t<0.30){
+        // approach: each qubit goes to its slit(s). superposed => fans (mist); definite => crisp ball.
+        const u=t/0.30, px=lerp(G.sx,G.bx,u), gr=Math.max(7,H*0.017);
+        if(cS) blob(px,G.cyC,lerp(startR,gr,u),lerp(startR,spanRyC,u),C.mist);
+        else   crisp(px,lerp(G.cyC,this.cin?G.cTop:G.cBot,u),colOf(this.cin),1);
+        if(tS) blob(px,G.cyT,lerp(startR,gr,u),lerp(startR,spanRyC,u),C.mist);
+        else   crisp(px,lerp(G.cyT,this.tin?G.tTop:G.tBot,u),colOf(this.tin),1);
+      } else {
+        // travel: cores ride their lanes (target crosses at the gate), then dissolve
+        // into the joint cloud over the last stretch (crossfade as k: 0 -> 1).
+        const u=(t-0.30)/0.70, x=lerp(G.bx,G.rx,u);
+        const xc=G.rx-(G.rx-G.bx)*0.16, k=x>xc?(x-xc)/(G.rx-xc):0, a=1-k;
+        cvals.forEach(cv=>{ const y=cv?G.cTop:G.cBot; cS?fuzz(x,y,colOf(cv),a):crisp(x,y,colOf(cv),a); });
+        if(x<=gateL){
+          tvals.forEach(tv=>{ const y=tv?G.tTop:G.tBot; tS?fuzz(x,y,colOf(tv),a):crisp(x,y,colOf(tv),a); });
+        } else if(!cS){
+          // definite control: target just shifts by the control value (flip iff control=1)
+          tvals.forEach(tv=>{ const tY=tv?G.tTop:G.tBot, lv=tv^this.cin, oY=lv?G.tTop:G.tBot;
+            const y=this.cin?crossYabs(x,tY,oY):tY, val=x<G.gateX?tv:lv;
+            tS?fuzz(x,y,colOf(val),a):crisp(x,y,colOf(val),a); });
+        } else {
+          // superposed control: every target branch splits (stay + flip) => entangling
+          tvals.forEach(tv=>{ const tY=tv?G.tTop:G.tBot, oY=(1-tv)?G.tTop:G.tBot;
+            fuzz(x,tY,colOf(tv),a*0.95);
+            const yc=crossYabs(x,tY,oY), val=x<G.gateX?tv:1-tv;
+            fuzz(x,yc,colOf(val),a*0.95); });
+        }
+        if(k>0) drawJointCloud(cfgs,null,0,k,ent);
+      }
+    }
+  },
+  draw(){
+    clearBG();
+    if(this.quantum()){ this.drawQuantum(); return; }
+    drawLanesMulti();
+    drawReadoutPair(G.cTop,G.cBot,this.cLanded,'square');
+    drawReadoutPair(G.tTop,G.tBot,this.tLanded,'circle');
+    drawGateBox(G.tTop,G.tBot,this.cin===1,'NOT');
+    drawControlLink(this.cin===1);
+    drawBarrierMulti([{y:G.cTop,color:C.warm,lab:'1'},{y:G.cBot,color:C.cool,lab:'0'},
+                      {y:G.tTop,color:C.warm,lab:'1'},{y:G.tBot,color:C.cool,lab:'0'}],G.sH2);
+    drawCannonAt(G.cyC,'square',colOf(this.cin));drawCannonAt(G.cyT,'circle',colOf(this.tin));
+    ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.fillText('control',G.sx,G.cTop-12);
+    ctx.fillText('target',G.sx,G.tBot+18);
+    const drawB=(b,vbefore,vafter)=>{const v=b.x<G.gateX?vbefore:vafter,col=colOf(v);
+      ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
+      ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
+    if(this.cball)drawB(this.cball,this.cin,this.cin);
+    if(this.tball)drawB(this.tball,this.tin,this.tball.vout);
+  },
+  onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+  onLeave(){ this.cball=this.tball=null;this.sup=null; },
+};
+
+/* =========================================================================
+   SCENE 4 — TOFFOLI (CCNOT): target flips only if BOTH controls are 1
+   ========================================================================= */
+/* generic joint cloud: N configurations, each a row of M shape-cells
+   (used by Toffoli with ▲ ■ ●; auto-sizes for up to 8 rows) */
+function drawConfigCloud(configs, shapes, measured, collapse, intensity, entangled, legend){
+  const N=configs.length, M=shapes.length, xr=G.rx, cyMid=G.cy;
+  const rowSep = N>1 ? Math.min(H*0.10, (H*0.58)/N) : 0;
+  const r = N>1 ? Math.min(H*0.022, rowSep*0.42) : H*0.022;
+  const cdx = r*2.4;
+  const totalH=(N-1)*rowSep, x0=xr-(M-1)*cdx/2;
+  const rows=configs.map((vals,i)=>({vals,y:cyMid-totalH/2+i*rowSep}));
+  const crx=(M-1)*cdx/2 + r + 24, cry=totalH/2 + r + 22;
+  intensity=Math.max(0,Math.min(1,intensity));
+  if(intensity>0.002){
+    ctx.save();ctx.globalAlpha=intensity;
+    const R=Math.max(crx,cry);
+    const grd=ctx.createRadialGradient(xr,cyMid,r*0.4,xr,cyMid,R*1.05);
+    grd.addColorStop(0,'rgba(198,184,255,0.30)');grd.addColorStop(0.6,'rgba(180,164,255,0.15)');grd.addColorStop(1,'rgba(180,164,255,0)');
+    ctx.shadowColor='rgba(185,168,255,0.5)';ctx.shadowBlur=22;
+    cloudPath(xr,cyMid,crx,cry);ctx.fillStyle=grd;ctx.fill();
+    ctx.shadowBlur=0;cloudPath(xr,cyMid,crx*0.96,cry*0.96);ctx.fillStyle=grd;ctx.fill();
+    ctx.restore();
+    ctx.save();ctx.globalAlpha=intensity*0.78;ctx.strokeStyle='rgba(205,194,255,0.62)';ctx.lineWidth=1.3;
+    for(let i=1;i<N;i++){const by=(rows[i-1].y+rows[i].y)/2;ctx.beginPath();ctx.moveTo(xr-crx*0.62,by);ctx.lineTo(xr+crx*0.62,by);ctx.stroke();}
+    ctx.restore();
+  }
+  rows.forEach((row,idx)=>{
+    const chosen=measured===idx;
+    let a=intensity*0.92, sc=1;
+    if(collapse>0){a=chosen?1:intensity*0.92;sc=chosen?1+0.10*collapse:1-0.3*collapse;}
+    a=Math.max(0,a);
+    ctx.save();ctx.globalAlpha=a;
+    ctx.strokeStyle='rgba(205,194,255,0.32)';ctx.lineWidth=1.1;
+    ctx.beginPath();ctx.moveTo(x0,row.y);ctx.lineTo(x0+(M-1)*cdx,row.y);ctx.stroke();
+    for(let m=0;m<M;m++) drawCell(shapes[m], x0+m*cdx, row.y, r*sc, row.vals[m], chosen, intensity);
+    ctx.restore();
+  });
+  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  const lab=collapse>=1?('measured · '+legend):((entangled?'entangled':'superposed')+' cloud · '+legend);
+  ctx.fillText(lab,xr,cyMid+cry+14);
+}
+
+const TOF_SHAPES=['triangle','square','circle'], TOF_LEGEND='▲■ controls  ● target';
+const S4={
+  tag:'4 · Toffoli gate', tagColor:'var(--elec)',
+  subtitle:'Three qubits. The target flips only when BOTH controls are 1 — and each can be a cloud.',
+  capTitle:'<b class="elec">Toffoli</b>: flip the target only if <b class="warm">both</b> controls are 1.',
+  capSub:'It is an <b class="elec">AND</b>-controlled flip: the <b>target ●</b> crosses only when the <b>triangle ▲</b> and <b>square ■</b> are both <b class="warm">1</b>. Put the controls in a <b class="mist">cloud</b> and the gate writes that AND into the target, entangling all three. Superpose only the target and nothing links up — just a bigger superposition.',
+  c1:1, c2:1, tin:0, b1:null, b2:null, b3:null, l1:null, l2:null, l3:null, _sync:null,
+  sup:null, mist:false, collapse:0, measured:null,
+  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  active(){ return this.c1===1 && this.c2===1; },
+  quantum(){ return this.c1===2||this.c2===2||this.tin===2; },
+  configList(){
+    const av=this.c1===2?[1,0]:[this.c1], bv=this.c2===2?[1,0]:[this.c2], tvv=this.tin===2?[1,0]:[this.tin];
+    const out=[]; av.forEach(a=>bv.forEach(b=>tvv.forEach(t=>out.push([a,b,t^(a&b)]))));
+    out.sort((p,q)=> q[0]-p[0] || q[1]-p[1] || q[2]-p[2]);
+    return out;
+  },
+  entangled(){
+    const cfg=this.configList(), proj=[new Set(),new Set(),new Set()];
+    cfg.forEach(c=>c.forEach((v,i)=>proj[i].add(v)));
+    return cfg.length !== proj[0].size*proj[1].size*proj[2].size;
+  },
+  buildControls(el){
+    el.innerHTML='';const self=this;
+    const cyc=p=>()=>{self[p]=(self[p]+1)%3;self._sync();self.reset();};
+    const cA=mkbtn('','',cyc('c1')), cB=mkbtn('','',cyc('c2')), tB=mkbtn('','',cyc('tin'));
+    el.append(cA,cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    const lab=(sym,s)=>sym+' '+(s===2?'◐':(s?'1':'0')), cls=s=>'stepbtn '+(s===2?'mist':(s?'up':'dn'));
+    this._sync=function(){
+      cA.textContent=lab('▲',self.c1);cA.className=cls(self.c1);
+      cB.textContent=lab('■',self.c2);cB.className=cls(self.c2);
+      tB.textContent=lab('●',self.tin);tB.className=cls(self.tin);
+    };this._sync();
+  },
+  reset(){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;this.sup=null;this.mist=false;this.collapse=0;this.measured=null;
+    this.setReadout(this.quantum()
+      ? 'At least one qubit is a <b class="m">cloud</b>. Press <b>Run</b>, then <b>Measure</b>.'
+      : 'Set the two <b class="e">controls</b> (▲ ■) and the <b class="w">target</b> (●), then press <b>Run</b>.'); },
+  measure(){ if(!this.mist||this.collapse>0)return; this.measured=Math.floor(Math.random()*this.configList().length); this.collapse=0.0001; this.setReadout('Measuring&hellip;'); },
+  run(){
+    this.measured=null;this.collapse=0;this.mist=false;
+    if(this.quantum()){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;this.sup={t:0};this.setReadout('Running all branches&hellip;');return; }
+    this.l1=this.l2=this.l3=null;const act=this.active(),tout=act?(1-this.tin):this.tin;
+    this.b1={x:G.sx,y:G.t3a,sy:(this.c1?G.a1T:G.a1B),vin:this.c1,cy:G.t3a,phase:'toSlit'};
+    this.b2={x:G.sx,y:G.t3b,sy:(this.c2?G.a2T:G.a2B),vin:this.c2,cy:G.t3b,phase:'toSlit'};
+    this.b3={x:G.sx,y:G.t3c,syIn:(this.tin?G.a3T:G.a3B),syOut:(tout?G.a3T:G.a3B),vin:this.tin,vout:tout,cy:G.t3c,phase:'toSlit'};
+    this.setReadout('Running&hellip;');
+  },
+  _result(){
+    if(this.b1||this.b2||this.b3)return;
+    if(this.l1==null&&this.l2==null&&this.l3==null)return;
+    const tout=this.l3;
+    this.setReadout('controls <b class="'+(this.l1?'w':'c')+'">'+this.l1+'</b> <b class="'+(this.l2?'w':'c')+'">'+this.l2+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">Toffoli</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+  },
+  step(dt){
+    if(this.sup){ this.sup.t+=dt*0.5; if(this.sup.t>=1){ this.sup=null; this.mist=true;
+      const cfgs=this.configList(), ent=this.entangled();
+      const list=cfgs.map(c=>'▲'+c[0]+'■'+c[1]+'●'+c[2]).join(' &nbsp;|&nbsp; ');
+      this.setReadout((ent?'<b class="m">Entangled!</b> ':'<b class="m">Superposition.</b> ')+'Cloud of '+cfgs.length+': '+list+'. <b>Measure</b> to collapse.'); } }
+    if(this.collapse>0 && this.collapse<1){ this.collapse=Math.min(1,this.collapse+dt*1.6);
+      if(this.collapse>=1){ const cfgs=this.configList(), c=cfgs[this.measured]||cfgs[0], ent=this.entangled();
+        this.setReadout('Measured ▲<b class="'+(c[0]?'w':'c')+'">'+c[0]+'</b> ■<b class="'+(c[1]?'w':'c')+'">'+c[1]+'</b> ●<b class="'+(c[2]?'w':'c')+'">'+c[2]+'</b>'+(ent?' — one measurement fixed all three. <b class="m">Entanglement</b>.':'.')); } }
+    const vx=W*0.42*dt;
+    const moveStraight=(b,set)=>{
+      if(b.phase==='toSlit'){const dx=G.bx-G.sx,dy=b.sy-b.cy,L=Math.hypot(dx,dy)||1;b.x+=dx/L*vx;b.y+=dy/L*vx;if(b.x>=G.bx){b.x=G.bx;b.y=b.sy;b.phase='lane';}return false;}
+      b.x+=vx;b.y=b.sy;if(b.x>=G.rx){set(b.vin);return true;}return false;
+    };
+    if(this.b1&&moveStraight(this.b1,v=>this.l1=v)){this.b1=null;this._result();}
+    if(this.b2&&moveStraight(this.b2,v=>this.l2=v)){this.b2=null;this._result();}
+    const b=this.b3;
+    if(b){
+      if(b.phase==='toSlit'){const dx=G.bx-G.sx,dy=b.syIn-b.cy,L=Math.hypot(dx,dy)||1;b.x+=dx/L*vx;b.y+=dy/L*vx;if(b.x>=G.bx){b.x=G.bx;b.y=b.syIn;b.phase='lane';}}
+      else{b.x+=vx;b.y=crossYabs(b.x,b.syIn,b.syOut);if(b.x>=G.rx){this.l3=b.vout;this.b3=null;this._result();}}
+    }
+  },
+  drawLinks(){
+    const x=G.gateX, boxTop=G.a3T-Math.max(26,(G.a3B-G.a3T)*0.34);
+    const anySup=this.c1===2||this.c2===2, bothOne=this.c1===1&&this.c2===1;
+    ctx.save();ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.strokeStyle=anySup?C.mist:(bothOne?C.elec:'#7CFFB244');
+    if(bothOne){ctx.shadowColor=C.elec;ctx.shadowBlur=8;}
+    ctx.beginPath();ctx.moveTo(x,Math.min(G.a1T,G.a2T));ctx.lineTo(x,boxTop);ctx.stroke();ctx.restore();
+    [[G.a1T,this.c1],[G.a2T,this.c2]].forEach(d=>{const s=d[1],col=s===2?C.mist:(s===1?C.elec:'#7CFFB2');
+      ctx.save();ctx.beginPath();ctx.arc(x,d[0],6,0,7);
+      ctx.globalAlpha=s===0?0.3:0.9;if(s!==0){ctx.shadowColor=col;ctx.shadowBlur=6;}
+      ctx.fillStyle=s===0?'#0c101e':col;ctx.fill();
+      ctx.globalAlpha=0.95;ctx.lineWidth=2;ctx.strokeStyle=col;ctx.stroke();ctx.restore();});
+  },
+  drawQuantum(){
+    drawChannelLanes([{yT:G.a1T,yB:G.a1B,gated:false},{yT:G.a2T,yB:G.a2B,gated:false},{yT:G.a3T,yB:G.a3B,gated:true}]);
+    const cfgs=this.configList(), ent=this.entangled();
+    if(this.mist||this.collapse>0){ const inten=this.collapse>0?(1-this.collapse):1;
+      drawConfigCloud(cfgs,TOF_SHAPES,this.measured,this.collapse,inten,ent,TOF_LEGEND); }
+    const canFlip=(this.c1!==0)&&(this.c2!==0);
+    drawGateBox(G.a3T,G.a3B,canFlip,'NOT');
+    this.drawLinks();
+    drawBarrierMulti([{y:G.a1T,color:C.warm,lab:'1'},{y:G.a1B,color:C.cool,lab:'0'},
+                      {y:G.a2T,color:C.warm,lab:'1'},{y:G.a2B,color:C.cool,lab:'0'},
+                      {y:G.a3T,color:C.warm,lab:'1'},{y:G.a3B,color:C.cool,lab:'0'}],G.sH3);
+    drawCannonAt(G.t3a,'triangle',this.c1===2?C.mist:colOf(this.c1));
+    drawCannonAt(G.t3b,'square',this.c2===2?C.mist:colOf(this.c2));
+    drawCannonAt(G.t3c,'circle',this.tin===2?C.mist:colOf(this.tin));
+    ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);ctx.fillText('target',G.sx,G.a3B+18);
+    if(this.sup){
+      const t=this.sup.t, coreR=Math.max(4,H*0.010), startR=Math.max(4,H*0.011), spanRy=G.gap3/2+G.sH3;
+      const c1S=this.c1===2,c2S=this.c2===2,tS=this.tin===2,gateL=G.gateX-G.cw;
+      const av=c1S?[1,0]:[this.c1], bv=c2S?[1,0]:[this.c2], tv=tS?[1,0]:[this.tin];
+      const alwaysFlip=(this.c1===1)&&(this.c2===1), canFlip2=(this.c1!==0)&&(this.c2!==0);
+      const crisp=(px,py,col,al)=>{ctx.save();ctx.globalAlpha=al;ctx.shadowColor=col;ctx.shadowBlur=13;ctx.beginPath();ctx.arc(px,py,Math.max(4,H*0.010),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
+      const fuzz=(px,py,col,al)=>{ctx.save();ctx.globalAlpha=al;blob(px,py,coreR*1.7,coreR*1.7,col);ctx.restore();};
+      if(t<0.30){
+        const u=t/0.30, px=lerp(G.sx,G.bx,u), gr=Math.max(6,H*0.015);
+        if(c1S) blob(px,G.t3a,lerp(startR,gr,u),lerp(startR,spanRy,u),C.mist); else crisp(px,lerp(G.t3a,this.c1?G.a1T:G.a1B,u),colOf(this.c1),1);
+        if(c2S) blob(px,G.t3b,lerp(startR,gr,u),lerp(startR,spanRy,u),C.mist); else crisp(px,lerp(G.t3b,this.c2?G.a2T:G.a2B,u),colOf(this.c2),1);
+        if(tS)  blob(px,G.t3c,lerp(startR,gr,u),lerp(startR,spanRy,u),C.mist); else crisp(px,lerp(G.t3c,this.tin?G.a3T:G.a3B,u),colOf(this.tin),1);
+      } else {
+        const u=(t-0.30)/0.70, x=lerp(G.bx,G.rx,u);
+        const xc=G.rx-(G.rx-G.bx)*0.16, k=x>xc?(x-xc)/(G.rx-xc):0, a=1-k;
+        av.forEach(v=>{const y=v?G.a1T:G.a1B; c1S?fuzz(x,y,colOf(v),a):crisp(x,y,colOf(v),a);});
+        bv.forEach(v=>{const y=v?G.a2T:G.a2B; c2S?fuzz(x,y,colOf(v),a):crisp(x,y,colOf(v),a);});
+        if(x<=gateL){ tv.forEach(v=>{const y=v?G.a3T:G.a3B; tS?fuzz(x,y,colOf(v),a):crisp(x,y,colOf(v),a);}); }
+        else if(alwaysFlip){ tv.forEach(v=>{const lv=1-v,y=crossYabs(x,v?G.a3T:G.a3B,lv?G.a3T:G.a3B),val=x<G.gateX?v:lv; tS?fuzz(x,y,colOf(val),a):crisp(x,y,colOf(val),a);}); }
+        else if(canFlip2){ tv.forEach(v=>{const sy=v?G.a3T:G.a3B; fuzz(x,sy,colOf(v),a*0.92);
+          const ly=(1-v)?G.a3T:G.a3B, yc=crossYabs(x,sy,ly), val=x<G.gateX?v:1-v; fuzz(x,yc,colOf(val),a*0.92);}); }
+        else { tv.forEach(v=>{const y=v?G.a3T:G.a3B; tS?fuzz(x,y,colOf(v),a):crisp(x,y,colOf(v),a);}); }
+        if(k>0) drawConfigCloud(cfgs,TOF_SHAPES,null,0,k,ent,TOF_LEGEND);
+      }
+    }
+  },
+  draw(){
+    clearBG();
+    if(this.quantum()){ this.drawQuantum(); return; }
+    drawChannelLanes([{yT:G.a1T,yB:G.a1B,gated:false},{yT:G.a2T,yB:G.a2B,gated:false},{yT:G.a3T,yB:G.a3B,gated:true}]);
+    drawReadoutPair(G.a1T,G.a1B,this.l1,'triangle');
+    drawReadoutPair(G.a2T,G.a2B,this.l2,'square');
+    drawReadoutPair(G.a3T,G.a3B,this.l3,'circle');
+    drawGateBox(G.a3T,G.a3B,this.active(),'NOT');
+    const boxTop=G.a3T-Math.max(26,(G.a3B-G.a3T)*0.34);
+    drawControlLinks([G.a1T,G.a2T],[this.c1===1,this.c2===1],this.active(),boxTop);
+    drawBarrierMulti([{y:G.a1T,color:C.warm,lab:'1'},{y:G.a1B,color:C.cool,lab:'0'},
+                      {y:G.a2T,color:C.warm,lab:'1'},{y:G.a2B,color:C.cool,lab:'0'},
+                      {y:G.a3T,color:C.warm,lab:'1'},{y:G.a3B,color:C.cool,lab:'0'}],G.sH3);
+    drawCannonAt(G.t3a,'triangle',colOf(this.c1));drawCannonAt(G.t3b,'square',colOf(this.c2));drawCannonAt(G.t3c,'circle',colOf(this.tin));
+    ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);
+    ctx.fillText('target',G.sx,G.a3B+18);
+    const drawB=(b,vb,va)=>{const v=b.x<G.gateX?vb:va,col=colOf(v);
+      ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
+      ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
+    if(this.b1)drawB(this.b1,this.c1,this.c1);
+    if(this.b2)drawB(this.b2,this.c2,this.c2);
+    if(this.b3)drawB(this.b3,this.tin,this.b3.vout);
+  },
+  onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+  onLeave(){ this.b1=this.b2=this.b3=null;this.sup=null; },
+};
+
+/* =========================================================================
+   SCENE 5 — THE 2-BIT ADDER: six bits, a switchyard of 3 Toffoli + 3 CNOT
+   wires: 0:a0 1:b0 2:c1(=0) 3:a1 4:b1 5:c2(=0)   outputs s0=b0 s1=b1 s2=c2
+   ========================================================================= */
+/* the parallel result: a cloud of every A+B sum (adder, quantum mode) */
+function drawSumCloud(probs, measured, collapse, intensity){
+  const N=probs.length, xr=W*0.83, cyMid=G.cy;
+  const rowSep = N>1 ? Math.min(H*0.085,(H*0.60)/N) : 0;
+  const fs = Math.max(10, Math.min(15, N>1?rowSep*0.62:15));
+  const totalH=(N-1)*rowSep;
+  const rows=probs.map((p,i)=>({p,y:cyMid-totalH/2+i*rowSep}));
+  const crx=Math.max(50,W*0.064), cry=totalH/2+fs+16;
+  intensity=Math.max(0,Math.min(1,intensity));
+  if(intensity>0.002){
+    ctx.save();ctx.globalAlpha=intensity;
+    const R=Math.max(crx,cry);
+    const grd=ctx.createRadialGradient(xr,cyMid,fs,xr,cyMid,R*1.05);
+    grd.addColorStop(0,'rgba(198,184,255,0.30)');grd.addColorStop(0.6,'rgba(180,164,255,0.15)');grd.addColorStop(1,'rgba(180,164,255,0)');
+    ctx.shadowColor='rgba(185,168,255,0.5)';ctx.shadowBlur=22;
+    cloudPath(xr,cyMid,crx,cry);ctx.fillStyle=grd;ctx.fill();
+    ctx.shadowBlur=0;cloudPath(xr,cyMid,crx*0.96,cry*0.96);ctx.fillStyle=grd;ctx.fill();
+    ctx.restore();
+    if(N>1){ctx.save();ctx.globalAlpha=intensity*0.6;ctx.strokeStyle='rgba(205,194,255,0.5)';ctx.lineWidth=1;
+      for(let i=1;i<N;i++){const by=(rows[i-1].y+rows[i].y)/2;ctx.beginPath();ctx.moveTo(xr-crx*0.6,by);ctx.lineTo(xr+crx*0.6,by);ctx.stroke();}ctx.restore();}
+  }
+  ctx.font='700 '+fs+'px Inter,system-ui';ctx.textBaseline='middle';
+  rows.forEach((row,idx)=>{
+    const chosen=measured===idx; let a=intensity*0.95;
+    if(collapse>0) a=chosen?1:intensity*0.95;
+    a=Math.max(0,a);
+    const p=row.p, lhs=p.a+' + '+p.b+' ', rhs='= '+p.s;
+    ctx.textAlign='left';
+    const wl=ctx.measureText(lhs).width, wr=ctx.measureText(rhs).width, sx=xr-(wl+wr)/2;
+    ctx.globalAlpha=a; ctx.fillStyle='#dfe5ff'; ctx.fillText(lhs,sx,row.y);
+    ctx.globalAlpha=Math.max(a,chosen?1:a); ctx.fillStyle=chosen?'#bff0d0':C.elec; ctx.fillText(rhs,sx+wl,row.y);
+  });
+  ctx.globalAlpha=1; ctx.textBaseline='alphabetic';
+  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  ctx.fillText(collapse>=1?'measured — one sum':'cloud of sums · every A+B at once', xr, cyMid+cry+14);
+}
+/* explicit output state (few branches): the FULL six-qubit output register.
+   The adder is reversible — six wires in, six out. Shape marks each wire's
+   register (▲ A-bits, ■ B-bits, ● carry-bits); after the adder the B-bits hold
+   s0,s1 and the top carry holds s2, while c1 is a leftover ("garbage") carry. */
+const REG_SHAPES=['diamond','circle','pentagon','hexagon','square','triangle']; // one per wire
+const REG_LABELS=['a0','s0','c1','a1','s1','s2'];
+const REG_SUM=[1,4,5]; // the answer wires: s0, s1, s2
+function drawRegStateCloud(items, measured, collapse, intensity){
+  const N=items.length, M=6, xr=W*0.79, cyMid=G.cy;
+  const r=Math.max(8,H*0.016), cdx=r*2.05;
+  const rowSep=N>1?Math.max(3.4*r,H*0.11):0;
+  const totalH=(N-1)*rowSep;
+  const labW=Math.max(32,W*0.034), gap=9, decW=Math.max(30,W*0.03), cellsW=(M-1)*cdx;
+  const blockW=labW+gap+cellsW+gap+decW, x0=xr-blockW/2;
+  const labRX=x0+labW, c0x=x0+labW+gap, decX=c0x+cellsW+gap+r;
+  const rows=items.map((it,i)=>({it,y:cyMid-totalH/2+i*rowSep}));
+  const crx=blockW/2+16, cry=totalH/2+r+30;
+  intensity=Math.max(0,Math.min(1,intensity));
+  if(intensity>0.002){
+    ctx.save();ctx.globalAlpha=intensity;
+    const R=Math.max(crx,cry);
+    const grd=ctx.createRadialGradient(xr,cyMid,r*0.4,xr,cyMid,R*1.05);
+    grd.addColorStop(0,'rgba(198,184,255,0.30)');grd.addColorStop(0.6,'rgba(180,164,255,0.15)');grd.addColorStop(1,'rgba(180,164,255,0)');
+    ctx.shadowColor='rgba(185,168,255,0.5)';ctx.shadowBlur=22;
+    cloudPath(xr,cyMid,crx,cry);ctx.fillStyle=grd;ctx.fill();
+    ctx.shadowBlur=0;cloudPath(xr,cyMid,crx*0.96,cry*0.96);ctx.fillStyle=grd;ctx.fill();
+    ctx.restore();
+    if(N>1){ctx.save();ctx.globalAlpha=intensity*0.75;ctx.strokeStyle='rgba(205,194,255,0.6)';ctx.lineWidth=1.3;
+      for(let i=1;i<N;i++){const by=(rows[i-1].y+rows[i].y)/2;ctx.beginPath();ctx.moveTo(xr-crx*0.62,by);ctx.lineTo(xr+crx*0.62,by);ctx.stroke();}ctx.restore();}
+    ctx.save();ctx.globalAlpha=intensity*0.9;ctx.textAlign='center';ctx.font='600 9px Inter,system-ui';
+    for(let m=0;m<M;m++){ ctx.fillStyle=(m===1||m===4||m===5)?C.elec:C.muted; ctx.fillText(REG_LABELS[m], c0x+m*cdx, rows[0].y-r-7); }
+    ctx.restore();
+  }
+  ctx.textBaseline='middle';
+  rows.forEach((row,idx)=>{
+    const it=row.it, chosen=measured===idx; let a=intensity*0.95, sc=1;
+    if(collapse>0){a=chosen?1:intensity*0.95;sc=chosen?1+0.08*collapse:1-0.3*collapse;}
+    a=Math.max(0,a);
+    ctx.save();ctx.globalAlpha=a;ctx.textAlign='right';ctx.font='600 11px Inter,system-ui';ctx.fillStyle='#c9d1f5';
+    ctx.fillText(it.A+'+'+it.B, labRX, row.y);ctx.restore();
+    ctx.save();ctx.globalAlpha=chosen?1:a;
+    for(let m=0;m<M;m++){ const isSum=REG_SUM.indexOf(m)>=0, cr=(r*sc)*(isSum?1:0.5);
+      drawCell(REG_SHAPES[m], c0x+m*cdx, row.y, cr, it.wires[m], chosen, intensity); }
+    ctx.restore();
+    ctx.save();ctx.globalAlpha=chosen?1:a;ctx.textAlign='left';ctx.font='800 13px Inter,system-ui';
+    ctx.fillStyle=chosen?'#bff0d0':C.elec;ctx.fillText('= '+it.s, decX, row.y);ctx.restore();
+  });
+  ctx.textBaseline='alphabetic';
+  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  ctx.fillText(collapse>=1?'measured — one 6-qubit state':'output register · big = sum s₂s₁s₀,  small = garbage', xr, cyMid+cry+14);
+}
+const ADD_CSUB='Chain the gates into a machine that adds two 2-bit numbers.';
+const ADD_QSUB='Feed the adder a superposition of inputs and it computes every sum at once.';
+const ADD_QCAP={
+  t:'One run, <b class="mist">every sum at once</b>.',
+  s:'Put the inputs in a <b class="mist">cloud</b> of all values and the same six-gate adder computes <b class="warm">A</b>+<b class="cool">B</b> for <b>every</b> pair simultaneously &mdash; the output is a <b class="mist">cloud of sums</b>. That parallel power is the heart of quantum computing. The catch: <b class="warn">measuring</b> collapses the cloud to just <b>one</b> random sum, so a real quantum algorithm must first steer the useful answer to the top.'
+};
+const S5={
+  tag:'5 · 2-bit adder', tagColor:'var(--elec)',
+  subtitle:'Chain the gates into a machine that adds two 2-bit numbers.',
+  capTitle:'The whole <b class="elec">adder</b>: gates chained into a switchyard.',
+  capSub:'Six bits flow left&rarr;right &mdash; the numbers <b class="warm">A</b> and <b class="cool">B</b> plus two blank <b>carry</b> bits. Three Toffolis and three CNOTs route the balls so the output lanes spell <b class="e">A + B</b>. Count them: six balls in, six out &mdash; still reversible.',
+  A:2, B:1, stage:0, prog:0, running:false, landed:null, sim:null, _sync:null,
+  labels:['a0','b0','c1','a1','b1','c2'],
+  gates:[{c:[0,1],tg:2},{c:[0],tg:1},{c:[3,4],tg:5},{c:[3],tg:4},{c:[2,4],tg:5},{c:[2],tg:4}],
+  STAGE:[
+    {t:'The workspace: six bits, no gates yet.',
+     s:'<b class="warm">a0, a1</b> are the bits of number <b class="warm">A</b>; <b class="cool">b0, b1</b> are number <b class="cool">B</b>; <b>c1, c2</b> are blank <b>carry</b> bits (start at 0). Fire &mdash; each ball flies straight to its readout. Nothing is added yet.'},
+    {t:'Ones column &mdash; write the carry.',
+     s:'The first <b class="elec">Toffoli</b> sets c1 = a0 AND b0: the carry out of the ones column.'},
+    {t:'Ones column &mdash; write the sum (half adder done).',
+     s:'A <b class="elec">CNOT</b> turns b0 into a0 XOR b0 = <b class="elec">s0</b>. Try <b class="warm">1</b>+<b class="warm">1</b>: sum 0, carry 1.'},
+    {t:'Twos column &mdash; write its carry.',
+     s:'A second <b class="elec">Toffoli</b> sets c2 = a1 AND b1.'},
+    {t:'Twos column &mdash; partial sum.',
+     s:'A <b class="elec">CNOT</b> folds a1 into b1 (a1 XOR b1) &mdash; not finished until the carry arrives.'},
+    {t:'Carry the 1 &mdash; into the twos column.',
+     s:'A <b class="elec">Toffoli</b> adds the ones-column carry c1 into c2 (when b1 is set).'},
+    {t:'Final sum bit &mdash; the adder is complete.',
+     s:'The last <b class="elec">CNOT</b> folds c1 into b1 = <b class="elec">s1</b>. Output lanes now spell <b class="elec">A + B</b>. Six balls in, six out.'}
+  ],
+  setStage(s){
+    this.stage=s;const c=this.STAGE[s];this.capTitle=c.t;this.capSub=c.s;
+    const ct=document.getElementById('capTitle'),cs=document.getElementById('capSub');
+    if(ct)ct.innerHTML=c.t;if(cs)cs.innerHTML=c.s;
+    this.prog=0;this.running=false;this.landed=null;this.simulate();
+    this.setReadout(s===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+s+' gate'+(s>1?'s':'')+' built so far.');
+    if(this._sync)this._sync();
+  },
+  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  qrun:false, qprog:0, qmist:false, qcollapse:0, qmeasured:null,
+  quantum(){ return this.A>=4 || this.B>=4; },
+  Aset(){ return this.A<4?[this.A]:(this.A===4?[2,3]:[0,1,2,3]); },
+  Bset(){ return this.B<4?[this.B]:[0,1,2,3]; },
+  configs(){ const out=[]; this.Aset().forEach(a=>this.Bset().forEach(b=>out.push({A:a,B:b}))); return out; },
+  explicit(){ return this.quantum() && this.configs().length<=4; },
+  problems(){ return this.configs().map(c=>({a:c.A,b:c.B,s:c.A+c.B})); },
+  simAt(A,B){ const a0=A&1,a1=(A>>1)&1,b0=B&1,b1=(B>>1)&1;
+    const inVals=[a0,b0,0,a1,b1,0], vals=inVals.slice(), events=[[],[],[],[],[],[]],gact=[],gctrl=[];
+    this.gates.forEach((g,gi)=>{const cvals=g.c.map(ci=>vals[ci]);gctrl.push(cvals);const active=cvals.every(v=>v===1);gact.push(active);
+      if(active){const t=g.tg;events[t].push({x:G.adGX[gi],to:1-vals[t]});vals[t]^=1;}});
+    return {inVals,outVals:vals,events,gact,gctrl}; },
+  laneYFor(sim,i,x){ const w=2*G.adGW;let v=sim.inVals[i];
+    for(const e of sim.events[i]){ if(x>=e.x+w/2){v=e.to;continue;} if(x>e.x-w/2){const t=(x-(e.x-w/2))/w;return lerp(this.bitLane(i,v),this.bitLane(i,e.to),t);} return this.bitLane(i,v);} return this.bitLane(i,v); },
+  valAtFor(sim,i,x){ let v=sim.inVals[i];for(const e of sim.events[i]){if(x>=e.x)v=e.to;else break;}return v; },
+  setCap(t,s){ this.capTitle=t;this.capSub=s;const ct=document.getElementById('capTitle'),cs=document.getElementById('capSub');if(ct)ct.innerHTML=t;if(cs)cs.innerHTML=s; },
+  qreset(){ this.qrun=false;this.qprog=0;this.qmist=false;this.qcollapse=0;this.qmeasured=null;
+    this.setReadout('Inputs are a <b class="m">cloud</b>. Press <b>Run</b> to add them all at once, then <b>Measure</b>.'); },
+  afterSet(){
+    const panel=document.getElementById('panel');
+    if(this.quantum()){
+      panel.classList.remove('wsmode');
+      document.getElementById('wsheet').classList.remove('show');
+      this.stage=6; this.qreset();
+      this.subtitle=ADD_QSUB; document.getElementById('subtitle').innerHTML=ADD_QSUB; this.setCap(ADD_QCAP.t,ADD_QCAP.s);
+    } else {
+      panel.classList.add('wsmode');
+      document.getElementById('wsheet').classList.add('show');
+      this.subtitle=ADD_CSUB; document.getElementById('subtitle').innerHTML=ADD_CSUB;
+      this.setStage(this.stage);
+    }
+  },
+  measure(){ if(!this.qmist||this.qcollapse>0)return; this.qmeasured=Math.floor(Math.random()*this.problems().length); this.qcollapse=0.0001; this.setReadout('Measuring&hellip;'); },
+  bitLane(i,v){ return v?(G.adCy[i]-G.adLG/2):(G.adCy[i]+G.adLG/2); },
+  simulate(){
+    const A=this.A,B=this.B,a0=A&1,a1=(A>>1)&1,b0=B&1,b1=(B>>1)&1;
+    const inVals=[a0,b0,0,a1,b1,0], vals=inVals.slice();
+    const events=[[],[],[],[],[],[]],gact=[],gctrl=[],ng=this.stage;
+    this.gates.forEach((g,gi)=>{
+      if(gi>=ng){gact.push(false);gctrl.push(g.c.map(()=>0));return;}
+      const cvals=g.c.map(ci=>vals[ci]);gctrl.push(cvals);
+      const active=cvals.every(v=>v===1);gact.push(active);
+      if(active){const t=g.tg;events[t].push({x:G.adGX[gi],to:1-vals[t]});vals[t]^=1;}
+    });
+    this.sim={inVals,outVals:vals,events,gact,gctrl};
+  },
+  laneY(i,x){
+    const w=2*G.adGW;let v=this.sim.inVals[i];
+    for(const e of this.sim.events[i]){
+      if(x>=e.x+w/2){v=e.to;continue;}
+      if(x>e.x-w/2){const t=(x-(e.x-w/2))/w;return lerp(this.bitLane(i,v),this.bitLane(i,e.to),t);}
+      return this.bitLane(i,v);
+    }
+    return this.bitLane(i,v);
+  },
+  valAt(i,x){let v=this.sim.inVals[i];for(const e of this.sim.events[i]){if(x>=e.x)v=e.to;else break;}return v;},
+  buildControls(el){
+    el.innerHTML='';const self=this;
+    const aB=mkbtn('','up',()=>{self.A=(self.A+1)%6;self._sync();self.afterSet();});
+    const bB=mkbtn('','dn',()=>{self.B=(self.B+1)%5;self._sync();self.afterSet();});
+    const buildB=mkbtn('','',()=>{ if(self.quantum())return; self.setStage((self.stage+1)%7); });
+    el.append(aB,bB,buildB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    this._sync=()=>{
+      aB.textContent='A = '+(self.A<4?self.A:(self.A===4?'{2,3}':'★ all')); aB.className='stepbtn '+(self.A>=4?'mist':'up');
+      bB.textContent='B = '+(self.B<4?self.B:'★ all'); bB.className='stepbtn '+(self.B>=4?'mist':'dn');
+      buildB.textContent='Build ▶ '+self.stage+'/6'; buildB.style.opacity=self.quantum()?0.4:1;
+    };this._sync();
+  },
+  reset(){ if(this.quantum()){ this.qreset(); return; }
+    this.prog=0;this.running=false;this.landed=null;this.simulate();
+    this.setReadout(this.stage===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+this.stage+' gate'+(this.stage>1?'s':'')+' built so far.'); },
+  run(){ if(this.quantum()){ this.qrun=true;this.qprog=0;this.qmist=false;this.qcollapse=0;this.qmeasured=null;this.setReadout('Computing <b class="m">all sums</b> in parallel&hellip;'); return; }
+    this.simulate();this.prog=0;this.running=true;this.landed=null;this.setReadout('Running&hellip;'); },
+  step(dt){
+    if(this.quantum()){
+      if(this.qrun){ this.qprog+=dt*0.4; if(this.qprog>=1){ this.qprog=1;this.qrun=false;this.qmist=true;
+        const P=this.problems(); this.setReadout('<b class="m">'+P.length+' sums at once</b> &mdash; '+P.map(p=>p.a+'+'+p.b+'='+p.s).join(', ')+'. <b class="warn">Measure</b> to collapse.'); } }
+      if(this.qcollapse>0&&this.qcollapse<1){ this.qcollapse=Math.min(1,this.qcollapse+dt*1.6);
+        if(this.qcollapse>=1){ const P=this.problems(), p=P[this.qmeasured]||P[0];
+          this.setReadout('Collapsed to one: <b class="w">'+p.a+'</b> + <b class="c">'+p.b+'</b> = <b class="e">'+p.s+'</b> &mdash; just one random sum survives.'); } }
+      return;
+    }
+    if(!this.running)return;
+    this.prog+=dt*0.38;
+    if(this.prog>=1){this.prog=1;this.running=false;this.landed=this.sim.outVals;
+      const o=this.sim.outVals,s0=o[1],s1=o[4],s2=o[5];
+      if(this.stage===0) this.setReadout('A = <b class="w">'+this.A+'</b>, B = <b class="c">'+this.B+'</b> &mdash; six straight shots, nothing added yet.');
+      else if(this.stage===6) this.setReadout('<b class="w">'+this.A+'</b> + <b class="c">'+this.B+'</b> = <b class="e">'+(this.A+this.B)+'</b> &nbsp; (s&#8322;s&#8321;s&#8320; = '+s2+s1+s0+')');
+      else this.setReadout('Built <b>'+this.stage+'/6</b> gates &mdash; partial result on the output lanes.');}
+  },
+  drawGate(g,gi){
+    const x=G.adGX[gi],tg=g.tg,cy=G.adCy[tg],lg=G.adLG;
+    const top=cy-lg/2,bot=cy+lg/2,gw=G.adGW,pad=Math.max(5,lg*0.32);
+    const x0=x-gw,x1=x+gw,yT=top-pad,yB=bot+pad,active=this.sim.gact[gi];
+    const ctrlYs=g.c.map(ci=>this.bitLane(ci,1)),cyMin=Math.min.apply(null,ctrlYs.concat([yT]));
+    ctx.save();ctx.strokeStyle=active?C.elec:'#7CFFB244';ctx.lineWidth=2;if(active){ctx.shadowColor=C.elec;ctx.shadowBlur=6;}
+    ctx.beginPath();ctx.moveTo(x,cyMin);ctx.lineTo(x,yT);ctx.stroke();ctx.restore();
+    g.c.forEach((ci,k)=>{const cyD=this.bitLane(ci,1),on=this.sim.gctrl[gi][k]===1;
+      ctx.save();ctx.beginPath();ctx.arc(x,cyD,5,0,7);if(on){ctx.shadowColor=C.elec;ctx.shadowBlur=6;}
+      ctx.fillStyle=on?C.elec:'#0c101e';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=on?C.elec:'#7CFFB288';ctx.stroke();ctx.restore();});
+    const r=6,L=Math.max(12,gw*0.95),m=Math.max(6,lg*0.18);
+    const tT=top-m,tB=bot+m,mcy=(tT+tB)/2,mry=(tB-tT)/2,mxL=x0-L,mxR=x1+L;
+    const sc=active?C.elec:'#7CFFB255';
+    ctx.save();ctx.fillStyle='rgba(8,11,20,0.9)';
+    ctx.fillRect(mxL,tT,x0-mxL,tB-tT);ctx.fillRect(x1,tT,mxR-x1,tB-tT);
+    rrect(x0,yT,x1-x0,yB-yT,r);ctx.fill();ctx.restore();
+    ctx.save();ctx.strokeStyle=sc;ctx.lineWidth=1.6;ctx.lineJoin='round';ctx.lineCap='round';
+    if(active){ctx.shadowColor=C.elec;ctx.shadowBlur=5;}
+    ctx.beginPath();ctx.moveTo(x0,tT);ctx.lineTo(x0,yT+r);ctx.arcTo(x0,yT,x0+r,yT,r);
+    ctx.lineTo(x1-r,yT);ctx.arcTo(x1,yT,x1,yT+r,r);ctx.lineTo(x1,tT);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x0,tB);ctx.lineTo(x0,yB-r);ctx.arcTo(x0,yB,x0+r,yB,r);
+    ctx.lineTo(x1-r,yB);ctx.arcTo(x1,yB,x1,yB-r,r);ctx.lineTo(x1,tB);ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x0,tT);ctx.lineTo(mxL,tT);ctx.moveTo(x0,tB);ctx.lineTo(mxL,tB);
+    ctx.moveTo(x1,tT);ctx.lineTo(mxR,tT);ctx.moveTo(x1,tB);ctx.lineTo(mxR,tB);ctx.stroke();
+    ctx.beginPath();ctx.ellipse(mxL,mcy,5,mry,0,0,7);ctx.stroke();
+    ctx.beginPath();ctx.ellipse(mxR,mcy,5,mry,0,0,7);ctx.stroke();
+    ctx.restore();
+    ctx.save();ctx.lineCap='round';
+    if(active){ctx.strokeStyle=C.elec;ctx.lineWidth=2.5;
+      ctx.beginPath();ctx.moveTo(x0,top);ctx.lineTo(x1,bot);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(x0,bot);ctx.lineTo(x1,top);ctx.stroke();}
+    else{ctx.lineWidth=2;ctx.strokeStyle=C.warm+'aa';ctx.beginPath();ctx.moveTo(x0,top);ctx.lineTo(x1,top);ctx.stroke();
+      ctx.strokeStyle=C.cool+'aa';ctx.beginPath();ctx.moveTo(x0,bot);ctx.lineTo(x1,bot);ctx.stroke();}
+    ctx.restore();
+  },
+  drawQuantumAdder(){
+    const cfgs=this.configs(), sims=cfgs.map(c=>this.simAt(c.A,c.B)), exp=this.explicit(), sx0=G.bx+G.bw/2;
+    // merged sim so the gates show as "used by some branch"
+    const gact=this.gates.map((g,gi)=>sims.some(s=>s.gact[gi]));
+    const gctrl=this.gates.map((g,gi)=>g.c.map((ci,k)=>sims.some(s=>s.gctrl[gi][k]===1)?1:0));
+    this.sim={inVals:sims[0].inVals,events:[[],[],[],[],[],[]],gact,gctrl};
+    // machine backdrop (lanes + the six gates + barrier)
+    ctx.save();ctx.globalAlpha=exp?0.7:0.45;ctx.setLineDash([4,7]);ctx.lineWidth=1.3;
+    for(let i=0;i<6;i++){ctx.strokeStyle=C.warm+'22';ctx.beginPath();ctx.moveTo(sx0,this.bitLane(i,1));ctx.lineTo(G.rx,this.bitLane(i,1));ctx.stroke();
+      ctx.strokeStyle=C.cool+'22';ctx.beginPath();ctx.moveTo(sx0,this.bitLane(i,0));ctx.lineTo(G.rx,this.bitLane(i,0));ctx.stroke();}
+    ctx.setLineDash([]);ctx.restore();
+    ctx.save();ctx.globalAlpha=exp?0.92:0.55;
+    this.gates.forEach((g,gi)=>this.drawGate(g,gi));
+    const slits=[];for(let i=0;i<6;i++){slits.push({y:this.bitLane(i,1),color:C.warm});slits.push({y:this.bitLane(i,0),color:C.cool});}
+    drawBarrierMulti(slits,G.adSH);ctx.restore();
+    // cannons: mist where the input wire differs across branches
+    const wireMist=i=> new Set(sims.map(s=>s.inVals[i])).size>1;
+    for(let i=0;i<6;i++) drawCannonAt(G.adCy[i],REG_SHAPES[i], wireMist(i)?C.mist:colOf(sims[0].inVals[i]));
+    ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    for(let i=0;i<6;i++) ctx.fillText(this.labels[i],G.sx,G.adCy[i]-G.adLG/2-7);
+    // input register summary + explicit ket
+    ctx.textAlign='left';ctx.font='600 13px Inter,system-ui';
+    ctx.fillStyle=this.A>=4?C.mist:C.warm; ctx.fillText('A = '+(this.A<4?this.A:(this.A===4?'{2,3}':'{0,1,2,3}')), 16, H*0.40);
+    ctx.fillStyle=this.B>=4?C.mist:C.cool; ctx.fillText('B = '+(this.B<4?this.B:'{0,1,2,3}'), 16, H*0.40+18);
+    if(exp){ ctx.fillStyle=C.mist;ctx.font='600 12px Inter,system-ui';
+      ctx.fillText('ψ = '+cfgs.map(c=>'|'+c.A+','+c.B+'⟩').join(' + '), 16, H*0.40+40); }
+    if(exp){
+      // RUN THE CIRCUIT EXPLICITLY. A wire that differs across branches is in a
+      // superposition: it is SHOT as a mist fan (through both slits), and on the
+      // lanes it shows fuzzy where branches diverge, crisp where they all agree.
+      if(this.qrun){
+        const coreR=Math.max(4,H*0.009), startR=Math.max(4,H*0.011), bigRx=Math.max(7,H*0.016);
+        const crisp=(px,py,col)=>{ctx.save();ctx.shadowColor=col;ctx.shadowBlur=9;ctx.beginPath();ctx.arc(px,py,Math.max(4,H*0.0085),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
+        const fuzz=(px,py,col)=>{ctx.save();ctx.globalAlpha=0.8;blob(px,py,coreR*1.6,coreR*1.6,col);ctx.restore();};
+        if(this.qprog<0.18){
+          const u=this.qprog/0.18, px=lerp(G.sx,G.bx,u);
+          for(let i=0;i<6;i++){
+            if(wireMist(i)){ const spanRy=(this.bitLane(i,0)-this.bitLane(i,1))/2+G.adSH;
+              blob(px,G.adCy[i],lerp(startR,bigRx,u),lerp(startR,spanRy,u),C.mist); }
+            else { const v=sims[0].inVals[i]; crisp(px,lerp(G.adCy[i],this.bitLane(i,v),u),colOf(v)); }
+          }
+        } else {
+          const u=(this.qprog-0.18)/0.82, x=lerp(G.bx,G.rx,u);
+          for(let i=0;i<6;i++){
+            const m=new Map(); sims.forEach(s=>m.set(this.valAtFor(s,i,x), this.laneYFor(s,i,x)));
+            const sup=m.size>1;
+            m.forEach((y,v)=> sup?fuzz(x,y,colOf(v)):crisp(x,y,colOf(v)) );
+          }
+        }
+      }
+      // explicit output state written out: the FULL six-qubit output register
+      const items=sims.map((s,ci)=>({A:cfgs[ci].A,B:cfgs[ci].B,s:cfgs[ci].A+cfgs[ci].B,wires:s.outVals.slice()}));
+      if(this.qmist||this.qcollapse>0){ const inten=this.qcollapse>0?(1-this.qcollapse):1; drawRegStateCloud(items,this.qmeasured,this.qcollapse,inten); }
+      else if(this.qrun && this.qprog>0.55){ const f=Math.min(1,(this.qprog-0.55)/0.45); drawRegStateCloud(items,null,0,f*0.9); }
+    } else {
+      // too many branches to draw individually: abstract parallel sweep + cloud of sums
+      const P=this.problems();
+      if(this.qrun){ const sweepX=lerp(G.bx,G.rx,this.qprog), top=this.bitLane(0,1)-18, bot=this.bitLane(5,0)+18;
+        ctx.save();const grd=ctx.createLinearGradient(sweepX-46,0,sweepX+8,0);
+        grd.addColorStop(0,'rgba(185,168,255,0)');grd.addColorStop(1,'rgba(185,168,255,0.45)');
+        ctx.fillStyle=grd;ctx.fillRect(sweepX-46,top,54,bot-top);ctx.restore(); }
+      if(this.qmist||this.qcollapse>0){ const inten=this.qcollapse>0?(1-this.qcollapse):1; drawSumCloud(P,this.qmeasured,this.qcollapse,inten); }
+      else if(this.qrun && this.qprog>0.45){ const f=Math.min(1,(this.qprog-0.45)/0.45); drawSumCloud(P,null,0,f*0.9); }
+    }
+  },
+  draw(){
+    clearBG();
+    if(this.quantum()){ this.drawQuantumAdder(); return; }
+    const sx0=G.bx+G.bw/2, rr=Math.max(8,G.adLG*0.30);
+    ctx.save();ctx.setLineDash([4,7]);ctx.lineWidth=1.3;
+    for(let i=0;i<6;i++){
+      ctx.strokeStyle=C.warm+'30';ctx.beginPath();ctx.moveTo(sx0,this.bitLane(i,1));ctx.lineTo(G.rx,this.bitLane(i,1));ctx.stroke();
+      ctx.strokeStyle=C.cool+'30';ctx.beginPath();ctx.moveTo(sx0,this.bitLane(i,0));ctx.lineTo(G.rx,this.bitLane(i,0));ctx.stroke();
+    }ctx.restore();
+    for(let i=0;i<6;i++){
+      [[1,C.warm],[0,C.cool]].forEach(p=>{const y=this.bitLane(i,p[0]),on=this.landed&&this.landed[i]===p[0];
+        ctx.beginPath();ctx.arc(G.rx,y,rr,0,7);ctx.fillStyle=on?p[1]:'#0d1226';
+        if(on){ctx.save();ctx.shadowColor=p[1];ctx.shadowBlur=14;ctx.fill();ctx.restore();}else ctx.fill();
+        ctx.lineWidth=1.6;ctx.strokeStyle=p[1]+(on?'':'55');ctx.stroke();});
+    }
+    if(this.stage===6){ctx.font='800 12px Inter,system-ui';ctx.fillStyle=C.elec;ctx.textAlign='left';
+      [[1,'s0'],[4,'s1'],[5,'s2']].forEach(p=>ctx.fillText(p[1],G.rx+rr+7,G.adCy[p[0]]+4));}
+    this.gates.forEach((g,gi)=>{if(gi<this.stage)this.drawGate(g,gi);});
+    const slits=[];for(let i=0;i<6;i++){slits.push({y:this.bitLane(i,1),color:C.warm});slits.push({y:this.bitLane(i,0),color:C.cool});}
+    drawBarrierMulti(slits,G.adSH);
+    for(let i=0;i<6;i++) drawCannonAt(G.adCy[i],REG_SHAPES[i],colOf(this.sim.inVals[i]));
+    ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    for(let i=0;i<6;i++) ctx.fillText(this.labels[i],G.sx,G.adCy[i]-G.adLG/2-7);
+    if(this.running||(this.prog>0&&this.prog<1)){
+      for(let i=0;i<6;i++){
+        let x,y,v;
+        if(this.prog<0.18){const u=this.prog/0.18;x=lerp(G.sx,G.bx,u);y=lerp(G.adCy[i],this.bitLane(i,this.sim.inVals[i]),u);v=this.sim.inVals[i];}
+        else{const u=(this.prog-0.18)/0.82;x=lerp(G.bx,G.rx,u);y=this.laneY(i,x);v=this.valAt(i,x);}
+        const col=colOf(v);
+        ctx.save();ctx.shadowColor=col;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(x,y,Math.max(4,H*0.0095),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();
+      }
+    }
+    this.updateSheet();
+  },
+  updateSheet(){
+    const A=this.A,B=this.B,st=this.stage;
+    const a0=A&1,a1=(A>>1)&1,b0=B&1,b1=(B>>1)&1;
+    const s0=a0^b0,c1=a0&b0,tt=a1+b1+c1,s1=tt&1,c2=tt>>1,s2=c2;
+    // reveal each digit as the ball-front passes the gate that computes it;
+    // idle (just built / after a run) -> front at the readout, so all built digits show.
+    const front=this.running?((this.prog<0.18)?G.bx:lerp(G.bx,G.rx,(this.prog-0.18)/0.82)):G.rx;
+    const shown=gi=>(gi<st)&&(front>=G.adGX[gi]);
+    const $=id=>document.getElementById(id);
+    const badge=$('wshBadge'); if(!badge) return; badge.textContent=st+'/6';
+    const setd=(id,val,cls)=>{const e=$(id);if(e){e.textContent=val;e.className=cls||'';}};
+    setd('wsA2',a1,'wa'); setd('wsA1',a0,'wa');
+    setd('wsB2',b1,b1?'wa':'wz'); setd('wsB1',b0,b0?'wa':'wz');
+    setd('wsC2',shown(0)?c1:''); setd('wsC4',shown(4)?c2:'');
+    setd('wsS1',shown(1)?s0:'·',shown(1)?'':'wz');
+    setd('wsS2',shown(5)?s1:'·',shown(5)?'':'wz');
+    setd('wsS4',shown(5)?s2:'·',shown(5)?'':'wz');
+  },
+  onEnter(){ this.buildControls(document.getElementById('sctrl')); if(!this.quantum()) this.stage=0; this.afterSet(); },
+  onLeave(){ document.getElementById('panel').classList.remove('wsmode');document.getElementById('wsheet').classList.remove('show');this.running=false;this.prog=0;this.qrun=false; },
+};
+
+/* ----------------------------- scene manager ------------------------------ */
+const scenes=[S1,S2,S3,S4,S5];
+const labels=['Qubit','NOT','CNOT','Toffoli','Adder'];
+let cur=0;
+
+const els={
+  subtitle:document.getElementById('subtitle'),
+  tag:document.getElementById('tag'),
+  capTitle:document.getElementById('capTitle'),
+  capSub:document.getElementById('capSub'),
+  prev:document.getElementById('prev'),
+  next:document.getElementById('next'),
+};
+const dotsWrap=document.getElementById('dots');
+const dotEls=labels.map((l,i)=>{
+  const d=document.createElement('div');d.className='dot';
+  d.innerHTML='<span class="pip"></span><span class="dl">'+l+'</span>';
+  d.onclick=()=>go(i);dotsWrap.appendChild(d);return d;
+});
+function applySceneUI(s){
+  els.subtitle.innerHTML=s.subtitle;
+  els.tag.textContent=s.tag;els.tag.style.color=s.tagColor;els.tag.style.borderColor=s.tagColor+'55';
+  els.capTitle.innerHTML=s.capTitle;els.capSub.innerHTML=s.capSub;
+  dotEls.forEach((d,i)=>d.classList.toggle('active',i===cur));
+  els.prev.disabled=cur===0;els.next.disabled=cur===scenes.length-1;
+}
+function go(i){
+  i=Math.max(0,Math.min(scenes.length-1,i));
+  if(i===cur){return;}
+  scenes[cur].onLeave&&scenes[cur].onLeave();
+  cur=i;
+  scenes[cur].onEnter&&scenes[cur].onEnter();
+  applySceneUI(scenes[cur]);
+}
+els.prev.onclick=()=>go(cur-1);
+els.next.onclick=()=>go(cur+1);
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight')go(cur+1);
+  if(e.key==='ArrowLeft')go(cur-1);
+});
+
+/* ------------------------------- main loop -------------------------------- */
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  scenes[cur].step(dt);
+  scenes[cur].draw();
+  requestAnimationFrame(frame);
+}
+resize();
+scenes[0].onEnter();
+applySceneUI(scenes[0]);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
