@@ -1,100 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Qubits as Cannonballs — Superposition</title>
-<style>
-  :root{
-    --bg:#05060d;
-    --ink:#eef2ff;
-    --muted:#8b93b8;
-    --warm:#ffb24a;     /* the "1" / up slit */
-    --cool:#6ad7ff;     /* the "0" / down slit */
-    --elec:#7CFFB2;     /* gates / operations */
-    --warn:#ff5470;     /* carry (later) */
-    --mist:#b9a8ff;     /* superposition / cloud */
-    --line:#1c2238;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    background:radial-gradient(1200px 800px at 50% -10%, #11162b 0%, var(--bg) 60%);
-    color:var(--ink);
-    font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    overflow:hidden;height:100vh;display:flex;flex-direction:column;
-  }
-  header{text-align:center;padding:14px 16px 6px;flex:0 0 auto}
-  header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
-  header h1 .a{color:var(--cool)}
-  header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;transition:opacity .3s}
+### A Pluto.jl notebook ###
+# v0.20.16
 
-  .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
-  .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
-    overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset;}
-  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+using Markdown
+using InteractiveUtils
 
-  .tag{position:absolute;top:14px;left:14px;z-index:5;font-size:12px;letter-spacing:2px;
-    font-weight:700;text-transform:uppercase;padding:6px 11px;border-radius:8px;
-    background:#0008;backdrop-filter:blur(4px);border:1px solid var(--line);transition:color .3s,border-color .3s}
+# ╔═╡ 9c6e2b31-7a88-4d55-9f2a-5e4c1b8d7a01
+begin
+    import Pkg
+    Pkg.develop(path=expanduser("~/Documents/Presentations/MCPresPluto.jl"))
+    using MCPresPluto, PlutoUI, Base64
+end
 
-  .sctrl{position:absolute;top:14px;right:14px;z-index:6;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-  .stepbtn{font-size:13px;color:var(--ink);background:#121734;border:1px solid var(--line);
-    border-radius:9px;padding:7px 14px;cursor:pointer;transition:background .15s;font-weight:600}
-  .stepbtn:hover{background:#1b2350}
-  .stepbtn.up{border-color:#ffb24a55;color:#ffd089}
-  .stepbtn.dn{border-color:#6ad7ff55;color:#bdecff}
-  .stepbtn.mist{border-color:#b9a8ff66;color:#d7ccff}
+# ╔═╡ 9c6e2b31-7a88-4d55-9f2a-5e4c1b8d7a02
+slide_setup(
+    author = "Adrien Florio",
+    place = "MINT Sommer",
+    date = "08.07.26",
+    colour = :bleunuit,
+)
 
-  .caption{position:absolute;left:16px;bottom:16px;right:16px;z-index:5;max-width:min(640px,74%);
-    background:#0009;border:1px solid #ffffff22;border-radius:12px;padding:11px 14px;
-    backdrop-filter:blur(5px);transition:opacity .3s}
-  .caption .ct{font-size:clamp(13px,1.5vw,17px);font-weight:700;line-height:1.25}
-  .caption .cs{font-size:clamp(11px,1.2vw,13.5px);color:#c9d1f5;margin-top:4px;line-height:1.35}
-  .caption b.warm{color:var(--warm)} .caption b.cool{color:var(--cool)}
-  .caption b.elec{color:var(--elec)} .caption b.warn{color:var(--warn)} .caption b.mist{color:var(--mist)}
-
-  .readout{position:absolute;left:16px;bottom:96px;z-index:5;font-size:clamp(13px,1.6vw,18px);
-    color:#c9d1f5;font-variant-numeric:tabular-nums;min-height:1.4em;transition:opacity .3s}
-  .readout b.w{color:var(--warm)} .readout b.c{color:var(--cool)} .readout b.e{color:var(--elec)} .readout b.m{color:var(--mist)}
-  .panel.wsmode .readout{display:none}
-  .panel.wsmode .caption{display:none}
-
-  .controls{flex:0 0 auto;padding:12px 24px 18px;display:flex;flex-direction:column;align-items:center;gap:9px}
-  .dots{display:flex;gap:18px;align-items:center}
-  .dot{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;opacity:.55;transition:opacity .2s}
-  .dot.active{opacity:1}
-  .dot .pip{width:11px;height:11px;border-radius:50%;background:#39406a;transition:background .2s,box-shadow .2s}
-  .dot.active .pip{background:var(--cool);box-shadow:0 0 12px var(--cool)}
-  .dot .dl{font-size:11.5px;color:var(--muted);letter-spacing:.3px}
-  .dot.active .dl{color:var(--ink);font-weight:700}
-  .navrow{display:flex;align-items:center;gap:16px}
-  button.nav{background:#121734;color:var(--ink);border:1px solid var(--line);border-radius:10px;
-    width:46px;height:40px;font-size:18px;cursor:pointer;transition:background .15s,transform .1s}
-  button.nav:hover{background:#1b2350} button.nav:active{transform:scale(.94)}
-  button.nav:disabled{opacity:.3;cursor:default}
-  .hint{color:var(--muted);font-size:12px;text-align:center}
-  .hint b{color:var(--ink)}
-
-  /* base-2 worksheet (adder panel only) — HTML element, can overlap the controls */
-  .wsheet{position:fixed;left:22px;bottom:12px;z-index:30;display:none;
-    background:rgba(11,16,32,0.94);border:1px solid var(--line);border-radius:11px;
-    padding:8px 12px 9px;font-family:'Inter',system-ui,sans-serif}
-  .wsheet.show{display:block}
-  .wsh-head{display:flex;justify-content:space-between;align-items:center;gap:22px;margin-bottom:4px}
-  .wsh-head b{font-size:12px;font-weight:700;color:var(--ink)}
-  .wsh-badge{font-size:11px;font-weight:700;color:var(--elec)}
-  .wsh-grid{border-collapse:collapse;font-variant-numeric:tabular-nums}
-  .wsh-grid td{width:24px;height:22px;text-align:center;font-size:15px;font-weight:800;color:var(--ink)}
-  .wsh-grid td.wsh-lab{width:auto;text-align:right;padding-right:8px;font-size:11px;font-weight:600;color:var(--muted)}
-  .wsh-grid tr.wsh-carry td{height:16px;font-size:12px;color:var(--warn)}
-  .wsh-grid tr.wsh-sum td{color:var(--elec)}
-  .wsh-grid tr.wsh-sum td.wsh-lab{color:var(--elec)}
-  .wsh-grid td.wa{color:var(--warm)!important} .wsh-grid td.wz{color:var(--muted)!important}
-  .wsh-grid hr{border:none;border-top:1.5px solid #3a4160;margin:1px 0}
-</style>
-</head>
-<body>
+# ╔═╡ 9c6e2b31-7a88-4d55-9f2a-5e4c1b8d7a03
+blank_slide() do
+    # Canvas-only scene, self-contained; scoped for the deck like cannon-bits.jl:
+    #   - all CSS prefixed under #cbq-root
+    #   - JS wrapped in an IIFE that queries within `root` (not `document`)
+    #   - the global arrow-key handler is removed (arrows drive deck navigation)
+    #   - the explanatory caption box and the canvas cloud legends are removed
+    #   - font switched to Cabin
+    _scene = raw"""
+<div id="cbq-root">
   <header>
     <h1><span class="a">Qubits</span> as Cannonballs</h1>
     <p id="subtitle"></p>
@@ -106,10 +40,6 @@
       <div class="tag" id="tag"></div>
       <div class="sctrl" id="sctrl"></div>
       <div class="readout" id="readout"></div>
-      <div class="caption">
-        <div class="ct" id="capTitle"></div>
-        <div class="cs" id="capSub"></div>
-      </div>
     </div>
   </div>
 
@@ -119,7 +49,7 @@
       <button class="nav" id="prev" title="Previous (&#8592;)">&#9664;</button>
       <button class="nav" id="next" title="Next (&#8594;)">&#9654;</button>
     </div>
-    <div class="hint">Use <b>&#9664; &#9654;</b> or the <b>arrow keys</b> to move between panels &middot; fire the cannon to send a qubit.</div>
+    <div class="hint">Use <b>&#9664; &#9654;</b> or the dots to move between panels &middot; fire the cannon to send a qubit.</div>
   </div>
 
   <div class="wsheet" id="wsheet">
@@ -131,10 +61,101 @@
       <tr class="wsh-rule"><td></td><td colspan="3"><hr></td></tr>
       <tr class="wsh-sum"><td class="wsh-lab">Sum</td><td id="wsS4"></td><td id="wsS2"></td><td id="wsS1"></td></tr>
     </table>
-  </div>
+  </div></div>
+
+<style>
+  #cbq-root{
+    --bg:#05060d;
+    --ink:#eef2ff;
+    --muted:#8b93b8;
+    --warm:#ffb24a;     /* the "1" / up slit */
+    --cool:#6ad7ff;     /* the "0" / down slit */
+    --elec:#7CFFB2;     /* gates / operations */
+    --warn:#ff5470;     /* carry (later) */
+    --mist:#b9a8ff;     /* superposition / cloud */
+    --line:#1c2238;
+  }
+  #cbq-root *{box-sizing:border-box;margin:0;padding:0}
+  
+  #cbq-root{
+    background:radial-gradient(1200px 800px at 50% -10%, #11162b 0%, var(--bg) 60%);
+    color:var(--ink);
+    font-family:'Cabin','Inter',system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    position:relative;overflow:hidden;display:flex;flex-direction:column;
+    /* Fill the slide box exactly in slide mode (parent has a definite height,
+       so height:100% wins and aspect-ratio is ignored). In the notebook editor
+       the parent height is auto, height:100% collapses, and aspect-ratio then
+       derives a landscape height from the cell width. */
+    width:100%;height:100%;max-height:100%;aspect-ratio:4 / 3;border-radius:10px;
+  }
+  #cbq-root header{text-align:center;padding:14px 16px 6px;flex:0 0 auto}
+  #cbq-root header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
+  #cbq-root header h1 .a{color:var(--cool)}
+  #cbq-root header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;transition:opacity .3s}
+
+  #cbq-root .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
+  #cbq-root .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset;}
+  #cbq-root canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+  #cbq-root .tag{position:absolute;top:14px;left:14px;z-index:5;font-size:12px;letter-spacing:2px;
+    font-weight:700;text-transform:uppercase;padding:6px 11px;border-radius:8px;
+    background:#0008;backdrop-filter:blur(4px);border:1px solid var(--line);transition:color .3s,border-color .3s}
+
+  #cbq-root .sctrl{position:absolute;top:14px;right:14px;z-index:6;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  #cbq-root .stepbtn{font-size:13px;color:var(--ink);background:#121734;border:1px solid var(--line);
+    border-radius:9px;padding:7px 14px;cursor:pointer;transition:background .15s;font-weight:600}
+  #cbq-root .stepbtn:hover{background:#1b2350}
+  #cbq-root .stepbtn.up{border-color:#ffb24a55;color:#ffd089}
+  #cbq-root .stepbtn.dn{border-color:#6ad7ff55;color:#bdecff}
+  #cbq-root .stepbtn.mist{border-color:#b9a8ff66;color:#d7ccff}
+
+  #cbq-root .readout{position:absolute;left:16px;bottom:16px;z-index:5;font-size:clamp(13px,1.6vw,18px);
+    color:#c9d1f5;font-variant-numeric:tabular-nums;min-height:1.4em;transition:opacity .3s}
+  #cbq-root .readout b.w{color:var(--warm)} #cbq-root .readout b.c{color:var(--cool)} #cbq-root .readout b.e{color:var(--elec)} #cbq-root .readout b.m{color:var(--mist)}
+  #cbq-root .panel.wsmode .readout{display:none}
+
+  #cbq-root .controls{flex:0 0 auto;padding:12px 24px 18px;display:flex;flex-direction:column;align-items:center;gap:9px}
+  #cbq-root .dots{display:flex;gap:18px;align-items:center}
+  #cbq-root .dot{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;opacity:.55;transition:opacity .2s}
+  #cbq-root .dot.active{opacity:1}
+  #cbq-root .dot .pip{width:11px;height:11px;border-radius:50%;background:#39406a;transition:background .2s,box-shadow .2s}
+  #cbq-root .dot.active .pip{background:var(--cool);box-shadow:0 0 12px var(--cool)}
+  #cbq-root .dot .dl{font-size:11.5px;color:var(--muted);letter-spacing:.3px}
+  #cbq-root .dot.active .dl{color:var(--ink);font-weight:700}
+  #cbq-root .navrow{display:flex;align-items:center;gap:16px}
+  #cbq-root button.nav{background:#121734;color:var(--ink);border:1px solid var(--line);border-radius:10px;
+    width:46px;height:40px;font-size:18px;cursor:pointer;transition:background .15s,transform .1s}
+  #cbq-root button.nav:hover{background:#1b2350} #cbq-root button.nav:active{transform:scale(.94)}
+  #cbq-root button.nav:disabled{opacity:.3;cursor:default}
+  #cbq-root .hint{color:var(--muted);font-size:12px;text-align:center}
+  #cbq-root .hint b{color:var(--ink)}
+
+  /* base-2 worksheet (adder panel only) — HTML element, can overlap the controls */
+  #cbq-root .wsheet{position:absolute;left:22px;bottom:12px;z-index:30;display:none;
+    background:rgba(11,16,32,0.94);border:1px solid var(--line);border-radius:11px;
+    padding:8px 12px 9px;font-family:'Cabin','Inter',system-ui,sans-serif}
+  #cbq-root .wsheet.show{display:block}
+  #cbq-root .wsh-head{display:flex;justify-content:space-between;align-items:center;gap:22px;margin-bottom:4px}
+  #cbq-root .wsh-head b{font-size:12px;font-weight:700;color:var(--ink)}
+  #cbq-root .wsh-badge{font-size:11px;font-weight:700;color:var(--elec)}
+  #cbq-root .wsh-grid{border-collapse:collapse;font-variant-numeric:tabular-nums}
+  #cbq-root .wsh-grid td{width:24px;height:22px;text-align:center;font-size:15px;font-weight:800;color:var(--ink)}
+  #cbq-root .wsh-grid td.wsh-lab{width:auto;text-align:right;padding-right:8px;font-size:11px;font-weight:600;color:var(--muted)}
+  #cbq-root .wsh-grid tr.wsh-carry td{height:16px;font-size:12px;color:var(--warn)}
+  #cbq-root .wsh-grid tr.wsh-sum td{color:var(--elec)}
+  #cbq-root .wsh-grid tr.wsh-sum td.wsh-lab{color:var(--elec)}
+  #cbq-root .wsh-grid td.wa{color:var(--warm)!important} #cbq-root .wsh-grid td.wz{color:var(--muted)!important}
+  #cbq-root .wsh-grid hr{border:none;border-top:1.5px solid #3a4160;margin:1px 0}
+</style>
 
 <script>
+(function(){
 "use strict";
+const root = document.getElementById('cbq-root');
+if(!root || root._cbqInit) return;
+root._cbqInit = true;
+const $ = sel => root.querySelector(sel);
 /* ============================================================================
    QUBITS AS CANNONBALLS  —  quantum version of the slit-path deck
      1) Qubit    : one shot, up slit = 1 / down slit = 0 — OR BOTH at once
@@ -144,9 +165,9 @@
    Mist/cloud notation after Economou & Barnes, "Hello Quantum World!".
    ========================================================================== */
 
-const cv = document.getElementById('cv');
+const cv = $('#cv');
 const ctx = cv.getContext('2d');
-const panel = document.getElementById('panel');
+const panel = $('#panel');
 
 let W=0,H=0,DPR=1,G={};
 const lerp=(a,b,u)=>a+(b-a)*u;
@@ -232,7 +253,7 @@ function drawBarrier(){
     ctx.beginPath();ctx.moveTo(x,p[0]-G.sH);ctx.lineTo(x,p[0]+G.sH);ctx.stroke();
   });
   ctx.restore();
-  ctx.font='700 13px Inter,system-ui';ctx.textAlign='center';
+  ctx.font='700 13px Cabin,Inter,system-ui';ctx.textAlign='center';
   ctx.fillStyle=C.warm;ctx.fillText('1',x-24,G.sTop+5);
   ctx.fillStyle=C.cool;ctx.fillText('0',x-24,G.sBot+5);
 }
@@ -240,7 +261,7 @@ function drawCannon(){
   ctx.save();ctx.shadowColor=C.warm;ctx.shadowBlur=18;
   ctx.beginPath();ctx.arc(G.sx,G.cy,Math.max(7,H*0.014),0,7);ctx.fillStyle=C.warm;ctx.fill();
   ctx.restore();
-  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  ctx.font='11px Cabin,Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
   ctx.fillText('cannon',G.sx,G.cy+H*0.05);
 }
 function drawReadout(landed){
@@ -251,10 +272,10 @@ function drawReadout(landed){
     ctx.fillStyle=on?z[1]:'#0d1226';
     if(on){ctx.save();ctx.shadowColor=z[1];ctx.shadowBlur=20;ctx.fill();ctx.restore();}else ctx.fill();
     ctx.lineWidth=2;ctx.strokeStyle=z[1]+(on?'':'66');ctx.stroke();
-    ctx.font='800 15px Inter,system-ui';ctx.textAlign='center';
+    ctx.font='800 15px Cabin,Inter,system-ui';ctx.textAlign='center';
     ctx.fillStyle=on?'#10131f':z[1];ctx.fillText(z[2],G.rx,z[0]+5);
   });
-  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+  ctx.font='11px Cabin,Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
   ctx.fillText('readout',G.rx,G.sBot+H*0.05);
 }
 
@@ -353,12 +374,10 @@ function drawMistCloud(intensity, measured, collapse){
     if(chosen||intensity>0.4){ctx.shadowColor=z[1];ctx.shadowBlur=chosen?20:14;}
     ctx.fill();
     ctx.lineWidth=2;ctx.strokeStyle=z[1];ctx.stroke();
-    ctx.font='800 15px Inter,system-ui';ctx.textAlign='center';ctx.fillStyle='#10131f';
+    ctx.font='800 15px Cabin,Inter,system-ui';ctx.textAlign='center';ctx.fillStyle='#10131f';
     ctx.fillText(z[2],xr,z[0]+5);
     ctx.restore();
   });
-  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText(collapse>=1?'readout':'cloud · both at once',xr,cyMid+cry+14);
 }
 
 function drawNOTgate(){
@@ -442,7 +461,7 @@ function drawBarrierMulti(slits,sH){
   slits.forEach(s=>{ ctx.shadowColor=s.color;ctx.strokeStyle=s.color;ctx.globalAlpha=.55;ctx.lineWidth=G.bw;
     ctx.beginPath();ctx.moveTo(x,s.y-sH);ctx.lineTo(x,s.y+sH);ctx.stroke(); });
   ctx.restore();
-  ctx.font='700 12px Inter,system-ui';ctx.textAlign='center';
+  ctx.font='700 12px Cabin,Inter,system-ui';ctx.textAlign='center';
   slits.forEach(s=>{ if(s.lab){ctx.fillStyle=s.color;ctx.fillText(s.lab,x-22,s.y+4);} });
 }
 function drawLanesMulti(){
@@ -462,7 +481,7 @@ function drawReadoutPair(yA,yB,landed,shape){
     shapeAt(G.rx,z[0],rr,shape);ctx.fillStyle=on?z[1]:'#0d1226';
     if(on){ctx.save();ctx.shadowColor=z[1];ctx.shadowBlur=18;ctx.fill();ctx.restore();}else ctx.fill();
     ctx.lineWidth=2;ctx.strokeStyle=z[1]+(on?'':'66');ctx.stroke();
-    ctx.font='800 13px Inter,system-ui';ctx.textAlign='center';ctx.fillStyle=on?'#10131f':z[1];
+    ctx.font='800 13px Cabin,Inter,system-ui';ctx.textAlign='center';ctx.fillStyle=on?'#10131f':z[1];
     ctx.fillText(z[2],G.rx,z[0]+5);
   });
 }
@@ -555,7 +574,7 @@ const S1={
   capTitle:'A qubit can be <b class="warm">1</b>, <b class="cool">0</b>, or a <b class="mist">mist</b> of both.',
   capSub:'A classical bit must pick one slit. A <b class="mist">qubit</b> can go through <b class="warm">both slits at once</b> — a <b class="mist">superposition</b>. We draw that as a <b class="mist">cloud</b> holding both possibilities, <b class="warm">1</b> and <b class="cool">0</b>, until we <b>measure</b> — then it collapses to a single answer.',
   ball:null, ghosts:null, landed:null, mist:false, collapse:0, measured:null,
-  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  setReadout(t){ $('#readout').innerHTML=t; },
   reset(){
     this.ball=null;this.ghosts=null;this.landed=null;this.mist=false;this.collapse=0;this.measured=null;
     this.setReadout('Fire a definite <b class="w">1</b> / <b class="c">0</b>, or <b class="m">both</b> for a superposition.');
@@ -657,7 +676,7 @@ const S1={
       mkbtn('↻','',()=>self.reset())
     );
   },
-  onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+  onEnter(){ this.buildControls($('#sctrl')); this.reset(); },
   onLeave(){ this.ball=null; this.ghosts=null; },
 };
 
@@ -672,10 +691,10 @@ function makeScene(cfg){
     fire(v){
       this.landed=null; this.vin=v;
       this.ball={vin:v, vout:this.hasNOT?(1-v):v, x:G.sx, y:G.cy, phase:'toSlit'};
-      document.getElementById('readout').innerHTML='Firing&hellip;';
+      $('#readout').innerHTML='Firing&hellip;';
     },
     reset(){ this.ball=null; this.landed=null; this.vin=null;
-      document.getElementById('readout').innerHTML=cfg.idle; },
+      $('#readout').innerHTML=cfg.idle; },
     step(dt){
       const b=this.ball; if(!b) return;
       const vx=W*0.42*dt;
@@ -688,7 +707,7 @@ function makeScene(cfg){
         b.x+=vx; b.y=laneY(b.x,b.vin,b.vout,this.hasNOT);
         if(b.x>=G.rx){
           this.landed=b.vout; this.ball=null;
-          document.getElementById('readout').innerHTML=cfg.result(b.vin,b.vout);
+          $('#readout').innerHTML=cfg.result(b.vin,b.vout);
         }
       }
     },
@@ -714,7 +733,7 @@ function makeScene(cfg){
         mkbtn('↻','',()=>self.reset())
       );
     },
-    onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+    onEnter(){ this.buildControls($('#sctrl')); this.reset(); },
     onLeave(){ this.ball=null; },
   };
 }
@@ -728,7 +747,7 @@ const S2={
   capTitle:'<b class="elec">NOT</b> flips <b class="mist">every branch</b> of the superposition at once.',
   capSub:'A definite bit just swaps lanes, as before. But fire <b class="mist">both</b> and the gate flips <b class="warm">1</b>&rarr;<b class="cool">0</b> <i>and</i> <b class="cool">0</b>&rarr;<b class="warm">1</b> in a single pass — the whole <b class="mist">cloud</b> is transformed together. The balanced cloud maps back to itself, yet each branch really did flip: a first taste of <b class="mist">quantum parallelism</b>.',
   ball:null, landed:null, mist:false, collapse:0, measured:null,
-  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  setReadout(t){ $('#readout').innerHTML=t; },
   reset(){
     this.ball=null;this.landed=null;this.mist=false;this.collapse=0;this.measured=null;
     this.setReadout('Fire a definite <b class="w">1</b>/<b class="c">0</b>, or <b class="m">both</b>, through the <b class="e">NOT</b>.');
@@ -835,7 +854,7 @@ const S2={
       mkbtn('↻','',()=>self.reset())
     );
   },
-  onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+  onEnter(){ this.buildControls($('#sctrl')); this.reset(); },
   onLeave(){ this.ball=null; },
 };
 
@@ -849,7 +868,7 @@ function drawCell(shape,x,y,rr,val,glow,intensity){
   if(glow||intensity>0.4){ctx.shadowColor=col;ctx.shadowBlur=glow?18:12;}
   shapeAt(x,y,rr,shape);ctx.fillStyle=col;ctx.fill();
   ctx.lineWidth=2;ctx.strokeStyle=col;ctx.stroke();
-  ctx.shadowBlur=0;ctx.fillStyle='#10131f';const fz=Math.max(8,Math.round(rr*1.0));ctx.font='800 '+fz+'px Inter,system-ui';ctx.textAlign='center';
+  ctx.shadowBlur=0;ctx.fillStyle='#10131f';const fz=Math.max(8,Math.round(rr*1.0));ctx.font='800 '+fz+'px Cabin,Inter,system-ui';ctx.textAlign='center';
   ctx.fillText(String(val),x,y+fz*0.35);
   ctx.restore();
 }
@@ -888,9 +907,6 @@ function drawJointCloud(configs, measured, collapse, intensity, entangled){
     drawCell('circle',xr+dx,row.y,r*sc,row.tv,chosen,intensity);
     ctx.restore();
   });
-  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  const lab=collapse>=1?'measured · ▪ control  ● target':((entangled?'entangled':'superposed')+' cloud · ▪ control  ● target');
-  ctx.fillText(lab,xr,cyMid+cry+15);
 }
 /* control link in superposition (mist) style: both control values tap the gate */
 function drawQControlLink(){
@@ -909,7 +925,7 @@ const S3={
   capSub:'With a definite control it is the old story: control <b class="warm">1</b> flips the <b>target</b>, control <b class="cool">0</b> leaves it. Put the <b class="mist">control</b> in a cloud of both and the gate acts on each branch at once — the result is one cloud of two <i>linked</i> pairs, so measuring either qubit decides the other: <b class="mist">entanglement</b>. Superpose the <b class="mist">target</b> too and you get a bigger cloud — but if the control is definite, the qubits stay independent (a plain superposition, not entangled).',
   cin:1, tin:0, cball:null, tball:null, cLanded:null, tLanded:null, _sync:null,
   sup:null, mist:false, collapse:0, measured:null,
-  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  setReadout(t){ $('#readout').innerHTML=t; },
   configList(){
     const cv=this.cin===2?[1,0]:[this.cin];
     const tv=this.tin===2?[1,0]:[this.tin];
@@ -982,7 +998,7 @@ const S3={
                       {y:G.tTop,color:C.warm,lab:'1'},{y:G.tBot,color:C.cool,lab:'0'}],G.sH2);
     drawCannonAt(G.cyC,'square',this.cin===2?C.mist:colOf(this.cin));
     drawCannonAt(G.cyT,'circle',this.tin===2?C.mist:colOf(this.tin));
-    ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.font='11px Cabin,Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
     ctx.fillText('control',G.sx,G.cTop-12);ctx.fillText('target',G.sx,G.tBot+18);
     if(this.sup){
       const t=this.sup.t, coreR=Math.max(4,H*0.011), startR=Math.max(4,H*0.012), spanRyC=G.gap2/2+G.sH2;
@@ -1033,7 +1049,7 @@ const S3={
     drawBarrierMulti([{y:G.cTop,color:C.warm,lab:'1'},{y:G.cBot,color:C.cool,lab:'0'},
                       {y:G.tTop,color:C.warm,lab:'1'},{y:G.tBot,color:C.cool,lab:'0'}],G.sH2);
     drawCannonAt(G.cyC,'square',colOf(this.cin));drawCannonAt(G.cyT,'circle',colOf(this.tin));
-    ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.font='11px Cabin,Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
     ctx.fillText('control',G.sx,G.cTop-12);
     ctx.fillText('target',G.sx,G.tBot+18);
     const drawB=(b,vbefore,vafter)=>{const v=b.x<G.gateX?vbefore:vafter,col=colOf(v);
@@ -1042,7 +1058,7 @@ const S3={
     if(this.cball)drawB(this.cball,this.cin,this.cin);
     if(this.tball)drawB(this.tball,this.tin,this.tball.vout);
   },
-  onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+  onEnter(){ this.buildControls($('#sctrl')); this.reset(); },
   onLeave(){ this.cball=this.tball=null;this.sup=null; },
 };
 
@@ -1084,9 +1100,6 @@ function drawConfigCloud(configs, shapes, measured, collapse, intensity, entangl
     for(let m=0;m<M;m++) drawCell(shapes[m], x0+m*cdx, row.y, r*sc, row.vals[m], chosen, intensity);
     ctx.restore();
   });
-  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  const lab=collapse>=1?('measured · '+legend):((entangled?'entangled':'superposed')+' cloud · '+legend);
-  ctx.fillText(lab,xr,cyMid+cry+14);
 }
 
 const TOF_SHAPES=['triangle','square','circle'], TOF_LEGEND='▲■ controls  ● target';
@@ -1097,7 +1110,7 @@ const S4={
   capSub:'It is an <b class="elec">AND</b>-controlled flip: the <b>target ●</b> crosses only when the <b>triangle ▲</b> and <b>square ■</b> are both <b class="warm">1</b>. Put the controls in a <b class="mist">cloud</b> and the gate writes that AND into the target, entangling all three. Superpose only the target and nothing links up — just a bigger superposition.',
   c1:1, c2:1, tin:0, b1:null, b2:null, b3:null, l1:null, l2:null, l3:null, _sync:null,
   sup:null, mist:false, collapse:0, measured:null,
-  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  setReadout(t){ $('#readout').innerHTML=t; },
   active(){ return this.c1===1 && this.c2===1; },
   quantum(){ return this.c1===2||this.c2===2||this.tin===2; },
   configList(){
@@ -1191,7 +1204,7 @@ const S4={
     drawCannonAt(G.t3a,'triangle',this.c1===2?C.mist:colOf(this.c1));
     drawCannonAt(G.t3b,'square',this.c2===2?C.mist:colOf(this.c2));
     drawCannonAt(G.t3c,'circle',this.tin===2?C.mist:colOf(this.tin));
-    ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.font='11px Cabin,Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
     ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);ctx.fillText('target',G.sx,G.a3B+18);
     if(this.sup){
       const t=this.sup.t, coreR=Math.max(4,H*0.010), startR=Math.max(4,H*0.011), spanRy=G.gap3/2+G.sH3;
@@ -1233,7 +1246,7 @@ const S4={
                       {y:G.a2T,color:C.warm,lab:'1'},{y:G.a2B,color:C.cool,lab:'0'},
                       {y:G.a3T,color:C.warm,lab:'1'},{y:G.a3B,color:C.cool,lab:'0'}],G.sH3);
     drawCannonAt(G.t3a,'triangle',colOf(this.c1));drawCannonAt(G.t3b,'square',colOf(this.c2));drawCannonAt(G.t3c,'circle',colOf(this.tin));
-    ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.font='11px Cabin,Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
     ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);
     ctx.fillText('target',G.sx,G.a3B+18);
     const drawB=(b,vb,va)=>{const v=b.x<G.gateX?vb:va,col=colOf(v);
@@ -1243,7 +1256,7 @@ const S4={
     if(this.b2)drawB(this.b2,this.c2,this.c2);
     if(this.b3)drawB(this.b3,this.tin,this.b3.vout);
   },
-  onEnter(){ this.buildControls(document.getElementById('sctrl')); this.reset(); },
+  onEnter(){ this.buildControls($('#sctrl')); this.reset(); },
   onLeave(){ this.b1=this.b2=this.b3=null;this.sup=null; },
 };
 
@@ -1272,7 +1285,7 @@ function drawSumCloud(probs, measured, collapse, intensity){
     if(N>1){ctx.save();ctx.globalAlpha=intensity*0.6;ctx.strokeStyle='rgba(205,194,255,0.5)';ctx.lineWidth=1;
       for(let i=1;i<N;i++){const by=(rows[i-1].y+rows[i].y)/2;ctx.beginPath();ctx.moveTo(xr-crx*0.6,by);ctx.lineTo(xr+crx*0.6,by);ctx.stroke();}ctx.restore();}
   }
-  ctx.font='700 '+fs+'px Inter,system-ui';ctx.textBaseline='middle';
+  ctx.font='700 '+fs+'px Cabin,Inter,system-ui';ctx.textBaseline='middle';
   rows.forEach((row,idx)=>{
     const chosen=measured===idx; let a=intensity*0.95;
     if(collapse>0) a=chosen?1:intensity*0.95;
@@ -1284,8 +1297,6 @@ function drawSumCloud(probs, measured, collapse, intensity){
     ctx.globalAlpha=Math.max(a,chosen?1:a); ctx.fillStyle=chosen?'#bff0d0':C.elec; ctx.fillText(rhs,sx+wl,row.y);
   });
   ctx.globalAlpha=1; ctx.textBaseline='alphabetic';
-  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText(collapse>=1?'measured — one sum':'cloud of sums · every A+B at once', xr, cyMid+cry+14);
 }
 /* explicit output state (few branches): the FULL six-qubit output register.
    The adder is reversible — six wires in, six out. Shape marks each wire's
@@ -1316,7 +1327,7 @@ function drawRegStateCloud(items, measured, collapse, intensity){
     ctx.restore();
     if(N>1){ctx.save();ctx.globalAlpha=intensity*0.75;ctx.strokeStyle='rgba(205,194,255,0.6)';ctx.lineWidth=1.3;
       for(let i=1;i<N;i++){const by=(rows[i-1].y+rows[i].y)/2;ctx.beginPath();ctx.moveTo(xr-crx*0.62,by);ctx.lineTo(xr+crx*0.62,by);ctx.stroke();}ctx.restore();}
-    ctx.save();ctx.globalAlpha=intensity*0.9;ctx.textAlign='center';ctx.font='600 9px Inter,system-ui';
+    ctx.save();ctx.globalAlpha=intensity*0.9;ctx.textAlign='center';ctx.font='600 9px Cabin,Inter,system-ui';
     for(let m=0;m<M;m++){ ctx.fillStyle=(m===1||m===4||m===5)?C.elec:C.muted; ctx.fillText(REG_LABELS[m], c0x+m*cdx, rows[0].y-r-7); }
     ctx.restore();
   }
@@ -1325,18 +1336,16 @@ function drawRegStateCloud(items, measured, collapse, intensity){
     const it=row.it, chosen=measured===idx; let a=intensity*0.95, sc=1;
     if(collapse>0){a=chosen?1:intensity*0.95;sc=chosen?1+0.08*collapse:1-0.3*collapse;}
     a=Math.max(0,a);
-    ctx.save();ctx.globalAlpha=a;ctx.textAlign='right';ctx.font='600 11px Inter,system-ui';ctx.fillStyle='#c9d1f5';
+    ctx.save();ctx.globalAlpha=a;ctx.textAlign='right';ctx.font='600 11px Cabin,Inter,system-ui';ctx.fillStyle='#c9d1f5';
     ctx.fillText(it.A+'+'+it.B, labRX, row.y);ctx.restore();
     ctx.save();ctx.globalAlpha=chosen?1:a;
     for(let m=0;m<M;m++){ const isSum=REG_SUM.indexOf(m)>=0, cr=(r*sc)*(isSum?1:0.5);
       drawCell(REG_SHAPES[m], c0x+m*cdx, row.y, cr, it.wires[m], chosen, intensity); }
     ctx.restore();
-    ctx.save();ctx.globalAlpha=chosen?1:a;ctx.textAlign='left';ctx.font='800 13px Inter,system-ui';
+    ctx.save();ctx.globalAlpha=chosen?1:a;ctx.textAlign='left';ctx.font='800 13px Cabin,Inter,system-ui';
     ctx.fillStyle=chosen?'#bff0d0':C.elec;ctx.fillText('= '+it.s, decX, row.y);ctx.restore();
   });
   ctx.textBaseline='alphabetic';
-  ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText(collapse>=1?'measured — one 6-qubit state':'output register · big = sum s₂s₁s₀,  small = garbage', xr, cyMid+cry+14);
 }
 const ADD_CSUB='Chain the gates into a machine that adds two 2-bit numbers.';
 const ADD_QSUB='Feed the adder a superposition of inputs and it computes every sum at once.';
@@ -1369,14 +1378,12 @@ const S5={
      s:'The last <b class="elec">CNOT</b> folds c1 into b1 = <b class="elec">s1</b>. Output lanes now spell <b class="elec">A + B</b>. Six balls in, six out.'}
   ],
   setStage(s){
-    this.stage=s;const c=this.STAGE[s];this.capTitle=c.t;this.capSub=c.s;
-    const ct=document.getElementById('capTitle'),cs=document.getElementById('capSub');
-    if(ct)ct.innerHTML=c.t;if(cs)cs.innerHTML=c.s;
+    this.stage=s;
     this.prog=0;this.running=false;this.landed=null;this.simulate();
     this.setReadout(s===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+s+' gate'+(s>1?'s':'')+' built so far.');
     if(this._sync)this._sync();
   },
-  setReadout(t){ document.getElementById('readout').innerHTML=t; },
+  setReadout(t){ $('#readout').innerHTML=t; },
   qrun:false, qprog:0, qmist:false, qcollapse:0, qmeasured:null,
   quantum(){ return this.A>=4 || this.B>=4; },
   Aset(){ return this.A<4?[this.A]:(this.A===4?[2,3]:[0,1,2,3]); },
@@ -1392,20 +1399,20 @@ const S5={
   laneYFor(sim,i,x){ const w=2*G.adGW;let v=sim.inVals[i];
     for(const e of sim.events[i]){ if(x>=e.x+w/2){v=e.to;continue;} if(x>e.x-w/2){const t=(x-(e.x-w/2))/w;return lerp(this.bitLane(i,v),this.bitLane(i,e.to),t);} return this.bitLane(i,v);} return this.bitLane(i,v); },
   valAtFor(sim,i,x){ let v=sim.inVals[i];for(const e of sim.events[i]){if(x>=e.x)v=e.to;else break;}return v; },
-  setCap(t,s){ this.capTitle=t;this.capSub=s;const ct=document.getElementById('capTitle'),cs=document.getElementById('capSub');if(ct)ct.innerHTML=t;if(cs)cs.innerHTML=s; },
+  setCap(t,s){ this.capTitle=t;this.capSub=s; },
   qreset(){ this.qrun=false;this.qprog=0;this.qmist=false;this.qcollapse=0;this.qmeasured=null;
     this.setReadout('Inputs are a <b class="m">cloud</b>. Press <b>Run</b> to add them all at once, then <b>Measure</b>.'); },
   afterSet(){
-    const panel=document.getElementById('panel');
+    const panel=$('#panel');
     if(this.quantum()){
       panel.classList.remove('wsmode');
-      document.getElementById('wsheet').classList.remove('show');
+      $('#wsheet').classList.remove('show');
       this.stage=6; this.qreset();
-      this.subtitle=ADD_QSUB; document.getElementById('subtitle').innerHTML=ADD_QSUB; this.setCap(ADD_QCAP.t,ADD_QCAP.s);
+      this.subtitle=ADD_QSUB; $('#subtitle').innerHTML=ADD_QSUB; this.setCap(ADD_QCAP.t,ADD_QCAP.s);
     } else {
       panel.classList.add('wsmode');
-      document.getElementById('wsheet').classList.add('show');
-      this.subtitle=ADD_CSUB; document.getElementById('subtitle').innerHTML=ADD_CSUB;
+      $('#wsheet').classList.add('show');
+      this.subtitle=ADD_CSUB; $('#subtitle').innerHTML=ADD_CSUB;
       this.setStage(this.stage);
     }
   },
@@ -1521,13 +1528,13 @@ const S5={
     // cannons: mist where the input wire differs across branches
     const wireMist=i=> new Set(sims.map(s=>s.inVals[i])).size>1;
     for(let i=0;i<6;i++) drawCannonAt(G.adCy[i],REG_SHAPES[i], wireMist(i)?C.mist:colOf(sims[0].inVals[i]));
-    ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.font='10px Cabin,Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
     for(let i=0;i<6;i++) ctx.fillText(this.labels[i],G.sx,G.adCy[i]-G.adLG/2-7);
     // input register summary + explicit ket
-    ctx.textAlign='left';ctx.font='600 13px Inter,system-ui';
+    ctx.textAlign='left';ctx.font='600 13px Cabin,Inter,system-ui';
     ctx.fillStyle=this.A>=4?C.mist:C.warm; ctx.fillText('A = '+(this.A<4?this.A:(this.A===4?'{2,3}':'{0,1,2,3}')), 16, H*0.40);
     ctx.fillStyle=this.B>=4?C.mist:C.cool; ctx.fillText('B = '+(this.B<4?this.B:'{0,1,2,3}'), 16, H*0.40+18);
-    if(exp){ ctx.fillStyle=C.mist;ctx.font='600 12px Inter,system-ui';
+    if(exp){ ctx.fillStyle=C.mist;ctx.font='600 12px Cabin,Inter,system-ui';
       ctx.fillText('ψ = '+cfgs.map(c=>'|'+c.A+','+c.B+'⟩').join(' + '), 16, H*0.40+40); }
     if(exp){
       // RUN THE CIRCUIT EXPLICITLY. A wire that differs across branches is in a
@@ -1583,13 +1590,13 @@ const S5={
         if(on){ctx.save();ctx.shadowColor=p[1];ctx.shadowBlur=14;ctx.fill();ctx.restore();}else ctx.fill();
         ctx.lineWidth=1.6;ctx.strokeStyle=p[1]+(on?'':'55');ctx.stroke();});
     }
-    if(this.stage===6){ctx.font='800 12px Inter,system-ui';ctx.fillStyle=C.elec;ctx.textAlign='left';
+    if(this.stage===6){ctx.font='800 12px Cabin,Inter,system-ui';ctx.fillStyle=C.elec;ctx.textAlign='left';
       [[1,'s0'],[4,'s1'],[5,'s2']].forEach(p=>ctx.fillText(p[1],G.rx+rr+7,G.adCy[p[0]]+4));}
     this.gates.forEach((g,gi)=>{if(gi<this.stage)this.drawGate(g,gi);});
     const slits=[];for(let i=0;i<6;i++){slits.push({y:this.bitLane(i,1),color:C.warm});slits.push({y:this.bitLane(i,0),color:C.cool});}
     drawBarrierMulti(slits,G.adSH);
     for(let i=0;i<6;i++) drawCannonAt(G.adCy[i],REG_SHAPES[i],colOf(this.sim.inVals[i]));
-    ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.font='10px Cabin,Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
     for(let i=0;i<6;i++) ctx.fillText(this.labels[i],G.sx,G.adCy[i]-G.adLG/2-7);
     if(this.running||(this.prog>0&&this.prog<1)){
       for(let i=0;i<6;i++){
@@ -1610,7 +1617,7 @@ const S5={
     // idle (just built / after a run) -> front at the readout, so all built digits show.
     const front=this.running?((this.prog<0.18)?G.bx:lerp(G.bx,G.rx,(this.prog-0.18)/0.82)):G.rx;
     const shown=gi=>(gi<st)&&(front>=G.adGX[gi]);
-    const $=id=>document.getElementById(id);
+    const $=id=>root.querySelector('#'+id);
     const badge=$('wshBadge'); if(!badge) return; badge.textContent=st+'/6';
     const setd=(id,val,cls)=>{const e=$(id);if(e){e.textContent=val;e.className=cls||'';}};
     setd('wsA2',a1,'wa'); setd('wsA1',a0,'wa');
@@ -1620,8 +1627,8 @@ const S5={
     setd('wsS2',shown(5)?s1:'·',shown(5)?'':'wz');
     setd('wsS4',shown(5)?s2:'·',shown(5)?'':'wz');
   },
-  onEnter(){ this.buildControls(document.getElementById('sctrl')); if(!this.quantum()) this.stage=0; this.afterSet(); },
-  onLeave(){ document.getElementById('panel').classList.remove('wsmode');document.getElementById('wsheet').classList.remove('show');this.running=false;this.prog=0;this.qrun=false; },
+  onEnter(){ this.buildControls($('#sctrl')); if(!this.quantum()) this.stage=0; this.afterSet(); },
+  onLeave(){ $('#panel').classList.remove('wsmode');$('#wsheet').classList.remove('show');this.running=false;this.prog=0;this.qrun=false; },
 };
 
 /* ----------------------------- scene manager ------------------------------ */
@@ -1630,14 +1637,12 @@ const labels=['Qubit','NOT','CNOT','Toffoli','Adder'];
 let cur=0;
 
 const els={
-  subtitle:document.getElementById('subtitle'),
-  tag:document.getElementById('tag'),
-  capTitle:document.getElementById('capTitle'),
-  capSub:document.getElementById('capSub'),
-  prev:document.getElementById('prev'),
-  next:document.getElementById('next'),
+  subtitle:$('#subtitle'),
+  tag:$('#tag'),
+  prev:$('#prev'),
+  next:$('#next'),
 };
-const dotsWrap=document.getElementById('dots');
+const dotsWrap=$('#dots');
 const dotEls=labels.map((l,i)=>{
   const d=document.createElement('div');d.className='dot';
   d.innerHTML='<span class="pip"></span><span class="dl">'+l+'</span>';
@@ -1646,7 +1651,6 @@ const dotEls=labels.map((l,i)=>{
 function applySceneUI(s){
   els.subtitle.innerHTML=s.subtitle;
   els.tag.textContent=s.tag;els.tag.style.color=s.tagColor;els.tag.style.borderColor=s.tagColor+'55';
-  els.capTitle.innerHTML=s.capTitle;els.capSub.innerHTML=s.capSub;
   dotEls.forEach((d,i)=>d.classList.toggle('active',i===cur));
   els.prev.disabled=cur===0;els.next.disabled=cur===scenes.length-1;
 }
@@ -1660,10 +1664,6 @@ function go(i){
 }
 els.prev.onclick=()=>go(cur-1);
 els.next.onclick=()=>go(cur+1);
-window.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight')go(cur+1);
-  if(e.key==='ArrowLeft')go(cur-1);
-});
 
 /* ------------------------------- main loop -------------------------------- */
 let last=performance.now();
@@ -1677,6 +1677,18 @@ resize();
 scenes[0].onEnter();
 applySceneUI(scenes[0]);
 requestAnimationFrame(frame);
+})();
 </script>
-</body>
-</html>
+"""
+
+    HTML(_scene)
+end
+
+# ╔═╡ 9c6e2b31-7a88-4d55-9f2a-5e4c1b8d7a04
+slide_button()
+
+# ╔═╡ Cell order:
+# ╟─9c6e2b31-7a88-4d55-9f2a-5e4c1b8d7a01
+# ╟─9c6e2b31-7a88-4d55-9f2a-5e4c1b8d7a02
+# ╠═9c6e2b31-7a88-4d55-9f2a-5e4c1b8d7a03
+# ╟─9c6e2b31-7a88-4d55-9f2a-5e4c1b8d7a04

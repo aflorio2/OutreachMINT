@@ -26,3 +26,15 @@
 # ========================================
 &binary-base2
 
+# ========================================
+# Bits as Cannonballs — reversible logic, 5-scene interactive canvas
+# (live HTML scene; inlined from cannon-bits.jl)
+# ========================================
+&cannon-bits
+
+# ========================================
+# Quantum Cannonballs — superposition/entanglement, 5-scene interactive canvas
+# (live HTML scene; inlined from cannon-bits-quantum.jl)
+# ========================================
+&cannon-bits-quantum
+
