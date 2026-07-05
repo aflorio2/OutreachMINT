@@ -1568,6 +1568,48 @@ const S5={
       else if(this.qrun && this.qprog>0.45){ const f=Math.min(1,(this.qprog-0.45)/0.45); drawSumCloud(P,null,0,f*0.9); }
     }
   },
+  /* output register row (bottom right, classical mode) — the one-branch twin of
+     the quantum output-register cloud: six landed bits, sum wires big, '= A+B'. */
+  drawOutRegister(){
+    if(!this.landed) return;
+    const o=this.landed, full=this.stage===6;
+    const labs=full?REG_LABELS:this.labels;
+    const r=Math.max(8,H*0.016), cdx=r*2.3, y=H*0.925;
+    const labW=Math.max(34,W*0.034), gap=10, decW=full?Math.max(38,W*0.032):0;
+    const cellsW=5*cdx, blockW=labW+gap+cellsW+gap+decW;
+    const xc=W*0.78, x0=xc-blockW/2, c0x=x0+labW+gap;
+    ctx.save();
+    // backdrop card
+    ctx.fillStyle='rgba(11,16,32,0.88)';ctx.strokeStyle='#2a3152';ctx.lineWidth=1;
+    rrect(x0-14,y-r-24,blockW+28,2*r+48,10);ctx.fill();ctx.stroke();
+    // wire labels above cells
+    ctx.textAlign='center';ctx.font='600 9px Inter,system-ui';
+    for(let m=0;m<6;m++){
+      ctx.fillStyle=(full&&REG_SUM.indexOf(m)>=0)?C.elec:C.muted;
+      ctx.fillText(labs[m],c0x+m*cdx,y-r-10);
+    }
+    // left label: the inputs
+    ctx.textAlign='right';ctx.font='600 12px Inter,system-ui';ctx.fillStyle='#c9d1f5';
+    ctx.fillText(this.A+'+'+this.B,x0+labW,y+4);
+    // the six landed bits: sum wires big, the rest small (to be discarded)
+    for(let m=0;m<6;m++){
+      const isSum=REG_SUM.indexOf(m)>=0, cr=r*(isSum?1:0.55);
+      ctx.save();ctx.globalAlpha=isSum?1:0.55;
+      drawCell(REG_SHAPES[m],c0x+m*cdx,y,cr,o[m],isSum,1);
+      ctx.restore();
+    }
+    // decimal answer (only once all six gates are built)
+    if(full){
+      const s=o[5]*4+o[4]*2+o[1];
+      ctx.font='800 15px Inter,system-ui';ctx.textAlign='left';ctx.fillStyle=C.elec;
+      ctx.fillText('= '+s,c0x+cellsW+gap+8,y+4);
+    }
+    ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.fillText(this.stage===0?'output register — nothing added yet'
+      :full?'output register · big = sum s₂s₁s₀ · small = discarded'
+      :'output register — partial (build more gates)',xc,y+r+18);
+    ctx.restore();
+  },
   draw(){
     clearBG();
     if(this.quantum()){ this.drawQuantumAdder(); return; }

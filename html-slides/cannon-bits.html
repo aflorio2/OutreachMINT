@@ -779,6 +779,54 @@ const S5={
       ctx.strokeStyle=C.cool+'aa';ctx.beginPath();ctx.moveTo(x0,bot);ctx.lineTo(x1,bot);ctx.stroke();}
     ctx.restore();
   },
+  /* output register row (bottom right) — classical twin of the quantum
+     output-register cloud: six landed bits, sum wires big, plus '= A+B'. */
+  drawOutRegister(){
+    if(!this.landed) return;
+    const o=this.landed, full=this.stage===6, SUMW=[1,4,5];
+    const labs=full?['a0','s0','c1','a1','s1','s2']:this.labels;
+    const r=Math.max(8,H*0.016), cdx=r*2.3, y=H*0.925;
+    const labW=Math.max(34,W*0.034), gap=10, decW=full?Math.max(38,W*0.032):0;
+    const cellsW=5*cdx, blockW=labW+gap+cellsW+gap+decW;
+    const xc=W*0.78, x0=xc-blockW/2, c0x=x0+labW+gap;
+    ctx.save();
+    // backdrop card
+    ctx.fillStyle='rgba(11,16,32,0.88)';ctx.strokeStyle='#2a3152';ctx.lineWidth=1;
+    rrect(x0-14,y-r-24,blockW+28,2*r+48,10);ctx.fill();ctx.stroke();
+    // wire labels above cells
+    ctx.textAlign='center';ctx.font='600 9px Inter,system-ui';
+    for(let m=0;m<6;m++){
+      ctx.fillStyle=(full&&SUMW.indexOf(m)>=0)?C.elec:C.muted;
+      ctx.fillText(labs[m],c0x+m*cdx,y-r-10);
+    }
+    // left label: the inputs
+    ctx.textAlign='right';ctx.font='600 12px Inter,system-ui';ctx.fillStyle='#c9d1f5';
+    ctx.fillText(this.A+'+'+this.B,x0+labW,y+4);
+    // the six landed bits: sum wires big, the rest small ("garbage")
+    ctx.textBaseline='middle';
+    for(let m=0;m<6;m++){
+      const isSum=SUMW.indexOf(m)>=0, cr=r*(isSum?1:0.55), v=o[m], col=colOf(v);
+      ctx.save();ctx.globalAlpha=isSum?1:0.55;
+      ctx.beginPath();ctx.arc(c0x+m*cdx,y,cr,0,7);
+      if(isSum){ctx.shadowColor=col;ctx.shadowBlur=10;}
+      ctx.fillStyle=col;ctx.fill();ctx.shadowBlur=0;
+      ctx.font='800 '+(isSum?13:9)+'px Inter,system-ui';ctx.textAlign='center';
+      ctx.fillStyle='#10131f';ctx.fillText(v,c0x+m*cdx,y+0.5);
+      ctx.restore();
+    }
+    // decimal answer (only once all six gates are built)
+    if(full){
+      const s=o[5]*4+o[4]*2+o[1];
+      ctx.font='800 15px Inter,system-ui';ctx.textAlign='left';ctx.fillStyle=C.elec;
+      ctx.fillText('= '+s,c0x+cellsW+gap+8,y+0.5);
+    }
+    ctx.textBaseline='alphabetic';
+    ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.fillText(this.stage===0?'output register — nothing added yet'
+      :full?'output register · big = sum s₂s₁s₀ · small = discarded'
+      :'output register — partial (build more gates)',xc,y+r+18);
+    ctx.restore();
+  },
   draw(){
     clearBG();
     const sx0=G.bx+G.bw/2, rr=Math.max(8,G.adLG*0.30);
@@ -787,14 +835,22 @@ const S5={
       ctx.strokeStyle=C.warm+'30';ctx.beginPath();ctx.moveTo(sx0,this.bitLane(i,1));ctx.lineTo(G.rx,this.bitLane(i,1));ctx.stroke();
       ctx.strokeStyle=C.cool+'30';ctx.beginPath();ctx.moveTo(sx0,this.bitLane(i,0));ctx.lineTo(G.rx,this.bitLane(i,0));ctx.stroke();
     }ctx.restore();
+    const SUMW=[1,4,5];
     for(let i=0;i<6;i++){
+      const dim=this.stage===6&&SUMW.indexOf(i)<0;   // result vs to-be-discarded lanes
+      ctx.save();if(dim)ctx.globalAlpha=0.4;
       [[1,C.warm],[0,C.cool]].forEach(p=>{const y=this.bitLane(i,p[0]),on=this.landed&&this.landed[i]===p[0];
         ctx.beginPath();ctx.arc(G.rx,y,rr,0,7);ctx.fillStyle=on?p[1]:'#0d1226';
         if(on){ctx.save();ctx.shadowColor=p[1];ctx.shadowBlur=14;ctx.fill();ctx.restore();}else ctx.fill();
         ctx.lineWidth=1.6;ctx.strokeStyle=p[1]+(on?'':'55');ctx.stroke();});
+      ctx.restore();
     }
-    if(this.stage===6){ctx.font='800 12px Inter,system-ui';ctx.fillStyle=C.elec;ctx.textAlign='left';
-      [[1,'s0'],[4,'s1'],[5,'s2']].forEach(p=>ctx.fillText(p[1],G.rx+rr+7,G.adCy[p[0]]+4));}
+    if(this.stage===6){
+      ctx.font='800 12px Inter,system-ui';ctx.fillStyle=C.elec;ctx.textAlign='left';
+      [[1,'s0'],[4,'s1'],[5,'s2']].forEach(p=>ctx.fillText(p[1],G.rx+rr+7,G.adCy[p[0]]+4));
+      ctx.font='italic 10px Inter,system-ui';ctx.fillStyle=C.muted;
+      [0,2,3].forEach(i=>ctx.fillText('discard',G.rx+rr+7,G.adCy[i]+4));
+    }
     this.gates.forEach((g,gi)=>{if(gi<this.stage)this.drawGate(g,gi);});
     const slits=[];for(let i=0;i<6;i++){slits.push({y:this.bitLane(i,1),color:C.warm});slits.push({y:this.bitLane(i,0),color:C.cool});}
     drawBarrierMulti(slits,G.adSH);
@@ -810,6 +866,7 @@ const S5={
         ctx.save();ctx.shadowColor=col;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(x,y,Math.max(4,H*0.0095),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();
       }
     }
+    this.drawOutRegister();
     this.updateSheet();
   },
   updateSheet(){

@@ -67,6 +67,21 @@
     border-radius:8px;padding:5px 12px;cursor:pointer;transition:background .15s}
   .qbtn:hover{background:#1b2350}
 
+  /* embedded video (scene 3) */
+  .videowrap{position:absolute;inset:0;z-index:4;display:none;background:#000}
+  .videowrap iframe{width:100%;height:100%;border:0;display:none}
+  .videowrap a.vlink{position:absolute;inset:0;display:none}
+  .videowrap .vthumb{width:100%;height:100%;object-fit:cover;opacity:.8}
+  .videowrap .playbtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:92px;height:64px;border-radius:16px;background:#e62117;
+    box-shadow:0 0 40px #000c;transition:transform .15s,background .15s}
+  .videowrap .playbtn::after{content:"";position:absolute;top:50%;left:53%;transform:translate(-50%,-50%);
+    border-style:solid;border-width:14px 0 14px 24px;border-color:transparent transparent transparent #fff}
+  .videowrap a.vlink:hover .playbtn{transform:translate(-50%,-50%) scale(1.08);background:#ff2a1e}
+  .videowrap .playhint{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);
+    font-size:13px;color:#eef2ff;background:#000a;border:1px solid #ffffff22;border-radius:20px;
+    padding:6px 14px;backdrop-filter:blur(4px);white-space:nowrap}
+
   /* speed control (scene 1 & 3) */
   .speedctrl{position:absolute;bottom:16px;right:16px;z-index:6;display:none;align-items:center;gap:8px;
     background:#0009;border:1px solid #ffffff22;border-radius:10px;padding:6px 12px;backdrop-filter:blur(5px)}
@@ -100,6 +115,17 @@
   <div class="stage">
     <div class="panel" id="panel">
       <canvas id="cv"></canvas>
+      <div class="videowrap" id="videowrap">
+        <iframe id="ytframe" title="The Double Slit Experiment Performed With Electrons"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        <a class="vlink" id="ytlink" href="https://www.youtube.com/watch?v=ZqS8Jjkk1HI" target="_blank" rel="noopener">
+          <img class="vthumb" src="https://img.youtube.com/vi/ZqS8Jjkk1HI/hqdefault.jpg"
+            alt="The Double Slit Experiment Performed With Electrons">
+          <span class="playbtn"></span>
+          <span class="playhint">▶ Watch on YouTube (opens in a new tab)</span>
+        </a>
+      </div>
       <div class="tag" id="tag"></div>
 
       <div class="qctrl" id="qctrl">
@@ -430,10 +456,40 @@ const sceneWaves = {
 };
 
 /* =========================================================================
-   SCENE 3 — ELECTRONS (dot-by-dot build-up + observe toggle)
+   SCENE 3 — VIDEO (the real experiment, performed with electrons)
+   ========================================================================= */
+const sceneVideo = {
+  tag:'3 · The real thing',
+  tagColor:'var(--cool)',
+  subtitle:'Not a simulation: the double-slit experiment actually performed with electrons.',
+  capTitle:'', capSub:'',
+  onEnter(){
+    const frame=document.getElementById('ytframe');
+    const link=document.getElementById('ytlink');
+    // YouTube blocks embeds that send no Referer (error 153), which is the case
+    // for file:// and data: pages — fall back to a click-out thumbnail there.
+    if(/^https?:$/.test(location.protocol)){
+      frame.src='https://www.youtube-nocookie.com/embed/ZqS8Jjkk1HI';
+      frame.style.display='block'; link.style.display='none';
+    } else {
+      frame.style.display='none'; link.style.display='block';
+    }
+    document.getElementById('videowrap').style.display='block';
+    els.caption.style.display='none';   // don't cover the player controls
+  },
+  onLeave(){
+    document.getElementById('ytframe').src='';   // stop playback
+    document.getElementById('videowrap').style.display='none';
+    els.caption.style.display='';
+  },
+  step(){}, draw(){ clearBG(); }
+};
+
+/* =========================================================================
+   SCENE 4 — ELECTRONS (dot-by-dot build-up + observe toggle)
    ========================================================================= */
 const sceneElectrons = {
-  tag:'3 · Electrons',
+  tag:'4 · Electrons',
   tagColor:'var(--elec)',
   subtitle:'Electrons are tiny lumps of matter. Fire them one at a time — and watch what the screen remembers.',
   capTitle:'Matter builds the <b class="cool">wave pattern</b> — one dot at a time.',
@@ -548,7 +604,7 @@ const sceneElectrons = {
 };
 
 /* ----------------------------- scene manager ------------------------------ */
-const scenes=[sceneBalls, sceneWaves, sceneElectrons];
+const scenes=[sceneBalls, sceneWaves, sceneVideo, sceneElectrons];
 let cur=0, last=performance.now();
 
 const els = {
@@ -567,7 +623,7 @@ let SPEED = 0.075;
 document.getElementById('speed').addEventListener('input',e=> SPEED=parseFloat(e.target.value));
 
 const dotsWrap=document.getElementById('dots');
-const labels=['Balls','Waves','Electrons'];
+const labels=['Balls','Waves','The real thing','Electrons'];
 const dotEls=labels.map((l,i)=>{
   const d=document.createElement('div'); d.className='dot';
   d.innerHTML=`<span class="pip"></span><span class="dl">${l}</span>`;
