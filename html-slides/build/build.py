@@ -168,13 +168,13 @@ els_new = '''const els = {
 script = must_replace(script, els_old, els_new, 'slit els object')
 
 dots_old = '''const dotsWrap=document.getElementById('dots');
-const labels=['Balls','Waves','Electrons'];
+const labels=['Balls','Waves','The real thing','Electrons'];
 const dotEls=labels.map((l,i)=>{
   const d=document.createElement('div'); d.className='dot';
   d.innerHTML=`<span class="pip"></span><span class="dl">${l}</span>`;
   d.onclick=()=>go(i); dotsWrap.appendChild(d); return d;
 });'''
-script = must_replace(script, dots_old, "const labels=['Balls','Waves','Electrons'];", 'slit dots block')
+script = must_replace(script, dots_old, "const labels=['Balls','Waves','The real thing','Electrons'];", 'slit dots block')
 
 apply_old = '''function applySceneUI(s){
   els.subtitle.textContent=s.subtitle;
@@ -593,7 +593,7 @@ print("getElementById refs with no matching id= :", missing if missing else "NON
 kd_count = final_html.count("addEventListener('keydown'")
 print("keydown listeners:", kd_count, "(expect 1)")
 
-expected = {'scales':7,'slit':3,'b2':2,'cannon':5,'cannonq':5}
+expected = {'scales':7,'slit':4,'b2':2,'cannon':5,'cannonq':5}
 print("Expected bullet counts:", expected, "total:", sum(expected.values()))
 
 # sanity: each deck's script should still contain its own 'labels' array declaration

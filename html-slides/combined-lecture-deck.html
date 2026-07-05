@@ -173,6 +173,20 @@ button.gnav:disabled{opacity:.3;cursor:default}
 #deck-slit .qbtn{font-size:12px;color:var(--ink);background:#121734;border:1px solid var(--line);
     border-radius:8px;padding:5px 12px;cursor:pointer;transition:background .15s}
 #deck-slit .qbtn:hover{background:#1b2350}
+#deck-slit /* embedded video (scene 3) */
+  .videowrap{position:absolute;inset:0;z-index:4;display:none;background:#000}
+#deck-slit .videowrap iframe{width:100%;height:100%;border:0;display:none}
+#deck-slit .videowrap a.vlink{position:absolute;inset:0;display:none}
+#deck-slit .videowrap .vthumb{width:100%;height:100%;object-fit:cover;opacity:.8}
+#deck-slit .videowrap .playbtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:92px;height:64px;border-radius:16px;background:#e62117;
+    box-shadow:0 0 40px #000c;transition:transform .15s,background .15s}
+#deck-slit .videowrap .playbtn::after{content:"";position:absolute;top:50%;left:53%;transform:translate(-50%,-50%);
+    border-style:solid;border-width:14px 0 14px 24px;border-color:transparent transparent transparent #fff}
+#deck-slit .videowrap a.vlink:hover .playbtn{transform:translate(-50%,-50%) scale(1.08);background:#ff2a1e}
+#deck-slit .videowrap .playhint{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);
+    font-size:13px;color:#eef2ff;background:#000a;border:1px solid #ffffff22;border-radius:20px;
+    padding:6px 14px;backdrop-filter:blur(4px);white-space:nowrap}
 #deck-slit /* speed control (scene 1 & 3) */
   .speedctrl{position:absolute;bottom:16px;right:16px;z-index:6;display:none;align-items:center;gap:8px;
     background:#0009;border:1px solid #ffffff22;border-radius:10px;padding:6px 12px;backdrop-filter:blur(5px)}
@@ -487,6 +501,17 @@ button.gnav:disabled{opacity:.3;cursor:default}
   <div class="stage">
     <div class="panel" id="panel-slit">
       <canvas id="cv-slit"></canvas>
+      <div class="videowrap" id="videowrap">
+        <iframe id="ytframe" title="The Double Slit Experiment Performed With Electrons"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        <a class="vlink" id="ytlink" href="https://www.youtube.com/watch?v=ZqS8Jjkk1HI" target="_blank" rel="noopener">
+          <img class="vthumb" src="https://img.youtube.com/vi/ZqS8Jjkk1HI/hqdefault.jpg"
+            alt="The Double Slit Experiment Performed With Electrons">
+          <span class="playbtn"></span>
+          <span class="playhint">▶ Watch on YouTube (opens in a new tab)</span>
+        </a>
+      </div>
       <div class="tag" id="tag-slit"></div>
 
       <div class="qctrl" id="qctrl-slit">
@@ -1125,10 +1150,40 @@ const sceneWaves = {
 };
 
 /* =========================================================================
-   SCENE 3 — ELECTRONS (dot-by-dot build-up + observe toggle)
+   SCENE 3 — VIDEO (the real experiment, performed with electrons)
+   ========================================================================= */
+const sceneVideo = {
+  tag:'3 · The real thing',
+  tagColor:'var(--cool)',
+  subtitle:'Not a simulation: the double-slit experiment actually performed with electrons.',
+  capTitle:'', capSub:'',
+  onEnter(){
+    const frame=document.getElementById('ytframe');
+    const link=document.getElementById('ytlink');
+    // YouTube blocks embeds that send no Referer (error 153), which is the case
+    // for file:// and data: pages — fall back to a click-out thumbnail there.
+    if(/^https?:$/.test(location.protocol)){
+      frame.src='https://www.youtube-nocookie.com/embed/ZqS8Jjkk1HI';
+      frame.style.display='block'; link.style.display='none';
+    } else {
+      frame.style.display='none'; link.style.display='block';
+    }
+    document.getElementById('videowrap').style.display='block';
+    els.caption.style.display='none';   // don't cover the player controls
+  },
+  onLeave(){
+    document.getElementById('ytframe').src='';   // stop playback
+    document.getElementById('videowrap').style.display='none';
+    els.caption.style.display='';
+  },
+  step(){}, draw(){ clearBG(); }
+};
+
+/* =========================================================================
+   SCENE 4 — ELECTRONS (dot-by-dot build-up + observe toggle)
    ========================================================================= */
 const sceneElectrons = {
-  tag:'3 · Electrons',
+  tag:'4 · Electrons',
   tagColor:'var(--elec)',
   subtitle:'Electrons are tiny lumps of matter. Fire them one at a time — and watch what the screen remembers.',
   capTitle:'Matter builds the <b class="cool">wave pattern</b> — one dot at a time.',
@@ -1243,7 +1298,7 @@ const sceneElectrons = {
 };
 
 /* ----------------------------- scene manager ------------------------------ */
-const scenes=[sceneBalls, sceneWaves, sceneElectrons];
+const scenes=[sceneBalls, sceneWaves, sceneVideo, sceneElectrons];
 let cur=0, last=performance.now();
 
 const els = {
@@ -1259,7 +1314,7 @@ function qctrl(show){ document.getElementById('qctrl-slit').style.display = show
 let SPEED = 0.075;
 document.getElementById('speed-slit').addEventListener('input',e=> SPEED=parseFloat(e.target.value));
 
-const labels=['Balls','Waves','Electrons'];
+const labels=['Balls','Waves','The real thing','Electrons'];
 
 function applySceneUI(s){
   els.subtitle.textContent=s.subtitle;
@@ -2232,6 +2287,54 @@ const S5={
       ctx.strokeStyle=C.cool+'aa';ctx.beginPath();ctx.moveTo(x0,bot);ctx.lineTo(x1,bot);ctx.stroke();}
     ctx.restore();
   },
+  /* output register row (bottom right) — classical twin of the quantum
+     output-register cloud: six landed bits, sum wires big, plus '= A+B'. */
+  drawOutRegister(){
+    if(!this.landed) return;
+    const o=this.landed, full=this.stage===6, SUMW=[1,4,5];
+    const labs=full?['a0','s0','c1','a1','s1','s2']:this.labels;
+    const r=Math.max(8,H*0.016), cdx=r*2.3, y=H*0.925;
+    const labW=Math.max(34,W*0.034), gap=10, decW=full?Math.max(38,W*0.032):0;
+    const cellsW=5*cdx, blockW=labW+gap+cellsW+gap+decW;
+    const xc=W*0.78, x0=xc-blockW/2, c0x=x0+labW+gap;
+    ctx.save();
+    // backdrop card
+    ctx.fillStyle='rgba(11,16,32,0.88)';ctx.strokeStyle='#2a3152';ctx.lineWidth=1;
+    rrect(x0-14,y-r-24,blockW+28,2*r+48,10);ctx.fill();ctx.stroke();
+    // wire labels above cells
+    ctx.textAlign='center';ctx.font='600 9px Inter,system-ui';
+    for(let m=0;m<6;m++){
+      ctx.fillStyle=(full&&SUMW.indexOf(m)>=0)?C.elec:C.muted;
+      ctx.fillText(labs[m],c0x+m*cdx,y-r-10);
+    }
+    // left label: the inputs
+    ctx.textAlign='right';ctx.font='600 12px Inter,system-ui';ctx.fillStyle='#c9d1f5';
+    ctx.fillText(this.A+'+'+this.B,x0+labW,y+4);
+    // the six landed bits: sum wires big, the rest small ("garbage")
+    ctx.textBaseline='middle';
+    for(let m=0;m<6;m++){
+      const isSum=SUMW.indexOf(m)>=0, cr=r*(isSum?1:0.55), v=o[m], col=colOf(v);
+      ctx.save();ctx.globalAlpha=isSum?1:0.55;
+      ctx.beginPath();ctx.arc(c0x+m*cdx,y,cr,0,7);
+      if(isSum){ctx.shadowColor=col;ctx.shadowBlur=10;}
+      ctx.fillStyle=col;ctx.fill();ctx.shadowBlur=0;
+      ctx.font='800 '+(isSum?13:9)+'px Inter,system-ui';ctx.textAlign='center';
+      ctx.fillStyle='#10131f';ctx.fillText(v,c0x+m*cdx,y+0.5);
+      ctx.restore();
+    }
+    // decimal answer (only once all six gates are built)
+    if(full){
+      const s=o[5]*4+o[4]*2+o[1];
+      ctx.font='800 15px Inter,system-ui';ctx.textAlign='left';ctx.fillStyle=C.elec;
+      ctx.fillText('= '+s,c0x+cellsW+gap+8,y+0.5);
+    }
+    ctx.textBaseline='alphabetic';
+    ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.fillText(this.stage===0?'output register — nothing added yet'
+      :full?'output register · big = sum s₂s₁s₀ · small = discarded'
+      :'output register — partial (build more gates)',xc,y+r+18);
+    ctx.restore();
+  },
   draw(){
     clearBG();
     const sx0=G.bx+G.bw/2, rr=Math.max(8,G.adLG*0.30);
@@ -2240,14 +2343,22 @@ const S5={
       ctx.strokeStyle=C.warm+'30';ctx.beginPath();ctx.moveTo(sx0,this.bitLane(i,1));ctx.lineTo(G.rx,this.bitLane(i,1));ctx.stroke();
       ctx.strokeStyle=C.cool+'30';ctx.beginPath();ctx.moveTo(sx0,this.bitLane(i,0));ctx.lineTo(G.rx,this.bitLane(i,0));ctx.stroke();
     }ctx.restore();
+    const SUMW=[1,4,5];
     for(let i=0;i<6;i++){
+      const dim=this.stage===6&&SUMW.indexOf(i)<0;   // result vs to-be-discarded lanes
+      ctx.save();if(dim)ctx.globalAlpha=0.4;
       [[1,C.warm],[0,C.cool]].forEach(p=>{const y=this.bitLane(i,p[0]),on=this.landed&&this.landed[i]===p[0];
         ctx.beginPath();ctx.arc(G.rx,y,rr,0,7);ctx.fillStyle=on?p[1]:'#0d1226';
         if(on){ctx.save();ctx.shadowColor=p[1];ctx.shadowBlur=14;ctx.fill();ctx.restore();}else ctx.fill();
         ctx.lineWidth=1.6;ctx.strokeStyle=p[1]+(on?'':'55');ctx.stroke();});
+      ctx.restore();
     }
-    if(this.stage===6){ctx.font='800 12px Inter,system-ui';ctx.fillStyle=C.elec;ctx.textAlign='left';
-      [[1,'s0'],[4,'s1'],[5,'s2']].forEach(p=>ctx.fillText(p[1],G.rx+rr+7,G.adCy[p[0]]+4));}
+    if(this.stage===6){
+      ctx.font='800 12px Inter,system-ui';ctx.fillStyle=C.elec;ctx.textAlign='left';
+      [[1,'s0'],[4,'s1'],[5,'s2']].forEach(p=>ctx.fillText(p[1],G.rx+rr+7,G.adCy[p[0]]+4));
+      ctx.font='italic 10px Inter,system-ui';ctx.fillStyle=C.muted;
+      [0,2,3].forEach(i=>ctx.fillText('discard',G.rx+rr+7,G.adCy[i]+4));
+    }
     this.gates.forEach((g,gi)=>{if(gi<this.stage)this.drawGate(g,gi);});
     const slits=[];for(let i=0;i<6;i++){slits.push({y:this.bitLane(i,1),color:C.warm});slits.push({y:this.bitLane(i,0),color:C.cool});}
     drawBarrierMulti(slits,G.adSH);
@@ -2263,6 +2374,7 @@ const S5={
         ctx.save();ctx.shadowColor=col;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(x,y,Math.max(4,H*0.0095),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();
       }
     }
+    this.drawOutRegister();
     this.updateSheet();
   },
   updateSheet(){
@@ -3776,6 +3888,48 @@ const S5={
       else if(this.qrun && this.qprog>0.45){ const f=Math.min(1,(this.qprog-0.45)/0.45); drawSumCloud(P,null,0,f*0.9); }
     }
   },
+  /* output register row (bottom right, classical mode) — the one-branch twin of
+     the quantum output-register cloud: six landed bits, sum wires big, '= A+B'. */
+  drawOutRegister(){
+    if(!this.landed) return;
+    const o=this.landed, full=this.stage===6;
+    const labs=full?REG_LABELS:this.labels;
+    const r=Math.max(8,H*0.016), cdx=r*2.3, y=H*0.925;
+    const labW=Math.max(34,W*0.034), gap=10, decW=full?Math.max(38,W*0.032):0;
+    const cellsW=5*cdx, blockW=labW+gap+cellsW+gap+decW;
+    const xc=W*0.78, x0=xc-blockW/2, c0x=x0+labW+gap;
+    ctx.save();
+    // backdrop card
+    ctx.fillStyle='rgba(11,16,32,0.88)';ctx.strokeStyle='#2a3152';ctx.lineWidth=1;
+    rrect(x0-14,y-r-24,blockW+28,2*r+48,10);ctx.fill();ctx.stroke();
+    // wire labels above cells
+    ctx.textAlign='center';ctx.font='600 9px Inter,system-ui';
+    for(let m=0;m<6;m++){
+      ctx.fillStyle=(full&&REG_SUM.indexOf(m)>=0)?C.elec:C.muted;
+      ctx.fillText(labs[m],c0x+m*cdx,y-r-10);
+    }
+    // left label: the inputs
+    ctx.textAlign='right';ctx.font='600 12px Inter,system-ui';ctx.fillStyle='#c9d1f5';
+    ctx.fillText(this.A+'+'+this.B,x0+labW,y+4);
+    // the six landed bits: sum wires big, the rest small (to be discarded)
+    for(let m=0;m<6;m++){
+      const isSum=REG_SUM.indexOf(m)>=0, cr=r*(isSum?1:0.55);
+      ctx.save();ctx.globalAlpha=isSum?1:0.55;
+      drawCell(REG_SHAPES[m],c0x+m*cdx,y,cr,o[m],isSum,1);
+      ctx.restore();
+    }
+    // decimal answer (only once all six gates are built)
+    if(full){
+      const s=o[5]*4+o[4]*2+o[1];
+      ctx.font='800 15px Inter,system-ui';ctx.textAlign='left';ctx.fillStyle=C.elec;
+      ctx.fillText('= '+s,c0x+cellsW+gap+8,y+4);
+    }
+    ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
+    ctx.fillText(this.stage===0?'output register — nothing added yet'
+      :full?'output register · big = sum s₂s₁s₀ · small = discarded'
+      :'output register — partial (build more gates)',xc,y+r+18);
+    ctx.restore();
+  },
   draw(){
     clearBG();
     if(this.quantum()){ this.drawQuantumAdder(); return; }
@@ -3832,9 +3986,223 @@ const S5={
   onLeave(){ document.getElementById('panel-cannonq').classList.remove('wsmode');document.getElementById('wsheet-cannonq').classList.remove('show');this.running=false;this.prog=0;this.qrun=false; },
 };
 
+/* =========================================================================
+   SCENE 6/7 — HADAMARD: every wire really starts at 0; a gate decides what
+   it becomes. Same six-gate adder, same fully-interactive A/B controls as
+   Scene 5 — reused wholesale via Object.assign — but the cannons no longer
+   "magically" fire the right ball. Instead: a wire that needs to be 1 gets
+   a NOT gate right after its cannon; a wire that varies across the chosen
+   superposition gets a Hadamard (H) instead, fanning 0 into a mist of 1
+   and 0. Carries c1, c2 always want 0, so they never need a gate.
+   Scene 7 is the identical scene with the double-slit graphics removed.
+   ========================================================================= */
+/* the new gate box inserted right after a cannon: an 'H' box or a NOT crossover */
+function drawHadGateBox(x,yTop,yBot,kind){
+  const pad=Math.max(10,(yBot-yTop)*0.5), m=Math.max(6,(yBot-yTop)*0.22), r=8;
+  const gw=Math.max(12,(yBot-yTop)*0.30);
+  const x0=x-gw,x1=x+gw,yT=yTop-pad,yB=yBot+pad;
+  const tT=yTop-m,tB=yBot+m,mcy=(tT+tB)/2,mry=(tB-tT)/2;
+  const L=Math.max(14,gw*0.9), mxL=x0-L, mxR=x1+L;
+  const col = kind==='H'?C.mist:C.elec;
+  ctx.save();ctx.fillStyle='rgba(10,13,26,0.55)';
+  ctx.fillRect(mxL,tT,x0-mxL,tB-tT);ctx.fillRect(x1,tT,mxR-x1,tB-tT);
+  rrect(x0,yT,x1-x0,yB-yT,r);ctx.fill();ctx.restore();
+  ctx.save();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.shadowColor=col;ctx.shadowBlur=6;ctx.lineJoin='round';ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x0,tT);ctx.lineTo(x0,yT+r);ctx.arcTo(x0,yT,x0+r,yT,r);
+  ctx.lineTo(x1-r,yT);ctx.arcTo(x1,yT,x1,yT+r,r);ctx.lineTo(x1,tT);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x0,tB);ctx.lineTo(x0,yB-r);ctx.arcTo(x0,yB,x0+r,yB,r);
+  ctx.lineTo(x1-r,yB);ctx.arcTo(x1,yB,x1,yB-r,r);ctx.lineTo(x1,tB);ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x0,tT);ctx.lineTo(mxL,tT);ctx.moveTo(x0,tB);ctx.lineTo(mxL,tB);
+  ctx.moveTo(x1,tT);ctx.lineTo(mxR,tT);ctx.moveTo(x1,tB);ctx.lineTo(mxR,tB);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(mxL,mcy,5,mry,0,0,7);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(mxR,mcy,5,mry,0,0,7);ctx.stroke();
+  ctx.restore();
+  if(kind==='NOT'){
+    ctx.save();ctx.strokeStyle=C.elec;ctx.lineWidth=2.4;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x0,yTop);ctx.lineTo(x1,yBot);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x0,yBot);ctx.lineTo(x1,yTop);ctx.stroke();ctx.restore();
+  } else {
+    ctx.save();ctx.fillStyle=C.mist;ctx.font='800 '+Math.max(11,gw*0.95)+'px Inter,system-ui';
+    ctx.textAlign='center';ctx.fillText('H',x,mcy+4);ctx.restore();
+  }
+}
+
+/* clone the fully-built adder (Scene 5) wholesale, then override just the
+   parts that change: fixed stage 6 (no Build step), no "magic" cannon
+   colors, and a prep-gate layer drawn right after the cannons. */
+function makeHadamardAdderScene(){
+  const s=Object.assign({}, S5);
+  s.showSlit=true;
+  s.tag='6 · Hadamard gate';
+  s.tagColor='var(--mist)';
+  s.A=2; s.B=1; s.stage=6;
+  s.captionsFor=function(){
+    return this.showSlit ? {
+      sub:'Same adder, same A/B controls — but every wire truly fires a 0, and a gate prepares it.',
+      capt:'Every qubit starts at <b class="cool">0</b> — a gate decides what it becomes.',
+      caps:'The cannons no longer fire the "right" ball by magic — every wire really fires a plain <b class="cool">0</b>. Need a <b class="warm">1</b>? A <b class="elec">NOT</b> goes right after the cannon. Need a <b class="mist">superposition</b>? A <b class="mist">Hadamard (H)</b> goes there instead, fanning the <b class="cool">0</b> into a <b class="mist">mist</b> of <b class="warm">1</b> and <b class="cool">0</b>. Change <b class="w">A</b> or <b class="c">B</b> (try &#9733; all) and watch the gates rearrange themselves.'
+    } : {
+      sub:'Same idea, no double slit — just the circuit.',
+      capt:'No more slits — just <b class="mist">wires and gates</b>.',
+      caps:'Drop the double slit and this is exactly a real circuit diagram: wires left&rarr;right, boxes for gates. The rail a ball rides already encodes its value — the slit was only ever a teaching wheel.'
+    };
+  };
+  s.buildControlsPrep=function(el){
+    el.innerHTML='';const self=this;
+    const aB=mkbtn('','up',()=>{self.A=(self.A+1)%6;self._sync();self.afterSet();});
+    const bB=mkbtn('','dn',()=>{self.B=(self.B+1)%5;self._sync();self.afterSet();});
+    const cB=mkbtn('','',()=>{self.showSlit=!self.showSlit;self._sync();self.afterSet();});
+    el.append(aB,bB,cB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    this._sync=()=>{
+      aB.textContent='A = '+(self.A<4?self.A:(self.A===4?'{2,3}':'★ all')); aB.className='stepbtn '+(self.A>=4?'mist':'up');
+      bB.textContent='B = '+(self.B<4?self.B:'★ all'); bB.className='stepbtn '+(self.B>=4?'mist':'dn');
+      cB.textContent = self.showSlit ? 'Circuit' : '← Slit';
+      cB.className='stepbtn'+(self.showSlit?'':' mist');
+    };this._sync();
+  };
+  s.afterSet=function(){
+    const panel=document.getElementById('panel-cannonq');
+    if(this.quantum()){
+      panel.classList.remove('wsmode');
+      document.getElementById('wsheet-cannonq').classList.remove('show');
+      this.qreset();
+    } else {
+      panel.classList.add('wsmode');
+      document.getElementById('wsheet-cannonq').classList.add('show');
+      this.simulate();
+      this.reset();
+    }
+    const c=this.captionsFor();
+    this.subtitle=c.sub; document.getElementById('subtitle-cannonq').innerHTML=c.sub;
+    this.setCap(c.capt,c.caps);
+  };
+  /* which of the 6 wires need a NOT (always 1) or an H (varies across the
+     chosen A/B superposition)? c1, c2 (indices 2, 5) always want 0. */
+  s.prepFor=function(){
+    const cfgs=this.configs();
+    const sets=[new Set(),new Set(),new Set([0]),new Set(),new Set(),new Set([0])];
+    cfgs.forEach(c=>{ const a0=c.A&1,a1=(c.A>>1)&1,b0=c.B&1,b1=(c.B>>1)&1;
+      sets[0].add(a0);sets[1].add(b0);sets[3].add(a1);sets[4].add(b1); });
+    return sets.map(set=> set.size>1 ? 'H' : (set.has(1) ? 'NOT' : null));
+  };
+  // slow the balls down — extra slow for the cannon->gate->slit stretch,
+  // where there is now something new to actually look at.
+  s.step=function(dt){
+    let mul=0.5;
+    if(this.quantum()){ if(this.qrun && this.qprog<0.18) mul=0.18; }
+    else if(this.running && this.prog<0.18) mul=0.18;
+    S5.step.call(this, dt*mul);
+  };
+  s.draw=function(){
+    const prep=this.prepFor();
+    // the prep gate sits BEFORE the slit — between the cannon and the barrier —
+    // since it is what decides which slit (or both, in a mist) the ball takes.
+    const gx=G.sx+(G.bx-G.sx)*0.5;
+    // where is the traveling ball right now, if it's still in the approach
+    // stretch (cannon -> barrier)? Same formula the borrowed Scene-5 code
+    // uses internally, so this lines up with it exactly.
+    let u=null;
+    if(this.quantum()){ if(this.qrun && this.qprog<0.18) u=this.qprog/0.18; }
+    else if(this.running && this.prog<0.18) u=this.prog/0.18;
+    const px = u===null ? null : lerp(G.sx,G.bx,u);
+
+    const origCannon=drawCannonAt, origBarrier=drawBarrierMulti, origBlob=blob;
+    const origArc=ctx.arc, origFill=ctx.fill;
+    let lastArc=null;
+    try{
+      drawCannonAt=function(y,shape,col){
+        const i=G.adCy.indexOf(y);
+        origCannon(y,shape,(i>=0&&prep[i])?C.cool:col);
+      };
+      if(!this.showSlit) drawBarrierMulti=function(){};
+      // Scene 5's own ball-flight code draws every prepped wire's ball as
+      // if it already knew its final value — a mist fan for H, a crisp dot
+      // already at the "1" rail for NOT — smeared across the whole cannon
+      // ->barrier stretch. Suppress exactly those draws (mist blobs via the
+      // blob() hook; the crisp NOT dot via a precise arc+fill match) and
+      // repaint the honest version below: a plain blue ball that travels
+      // straight in and only crosses/splits right at the gate, the same way
+      // every other NOT gate in this deck behaves.
+      blob=function(bx,by,rx,ry,color){
+        if(px!==null && color===C.mist){
+          const i=G.adCy.indexOf(by);
+          if(i>=0 && prep[i]) return;
+        }
+        origBlob(bx,by,rx,ry,color);
+      };
+      ctx.arc=function(x,y,r,a0,a1,ccw){ lastArc={x,y}; return origArc.call(ctx,x,y,r,a0,a1,ccw); };
+      ctx.fill=function(...args){
+        if(px!==null && lastArc && Math.abs(lastArc.x-px)<0.5){
+          for(let k=0;k<6;k++){
+            if(prep[k]!=='NOT') continue;
+            const yWrong=lerp(G.adCy[k], S5.bitLane(k,1), u);
+            if(Math.abs(lastArc.y-yWrong)<0.5) return;
+          }
+        }
+        return origFill.apply(ctx,args);
+      };
+      S5.draw.call(this);
+    } finally {
+      drawCannonAt=origCannon; drawBarrierMulti=origBarrier; blob=origBlob;
+      ctx.arc=origArc; ctx.fill=origFill;
+    }
+    for(let i=0;i<6;i++){
+      if(!prep[i]) continue;
+      const y0=S5.bitLane(i,0), y1=S5.bitLane(i,1);
+      ctx.save();ctx.setLineDash([4,6]);ctx.lineWidth=1.3;
+      // cannon -> gate: always the plain 0 rail (every wire really fires a 0)
+      ctx.strokeStyle=C.cool+'70';
+      ctx.beginPath();ctx.moveTo(G.sx,y0);ctx.lineTo(gx,y0);ctx.stroke();
+      // gate -> slit: NOT lands on the 1 rail; H fans toward both slits
+      if(prep[i]==='NOT'){
+        ctx.strokeStyle=C.warm+'70';
+        ctx.beginPath();ctx.moveTo(gx,y1);ctx.lineTo(G.bx,y1);ctx.stroke();
+      } else {
+        ctx.strokeStyle=C.warm+'55';
+        ctx.beginPath();ctx.moveTo(gx,y1);ctx.lineTo(G.bx,y1);ctx.stroke();
+        ctx.strokeStyle=C.cool+'55';
+        ctx.beginPath();ctx.moveTo(gx,y0);ctx.lineTo(G.bx,y0);ctx.stroke();
+      }
+      ctx.restore();
+      drawHadGateBox(gx, y1, y0, prep[i]);
+    }
+    // the honest ball: straight in at 0 (blue), crosses (NOT) or splits in
+    // two (H) strictly inside the gate box, then straight on to the slit.
+    if(px!==null){
+      for(let i=0;i<6;i++){
+        const kind=prep[i]; if(!kind) continue;
+        const y0=S5.bitLane(i,0), y1=S5.bitLane(i,1);
+        const gw=Math.max(12,(y0-y1)*0.30), xL=gx-gw, xR=gx+gw;
+        const crisp=(x,y,col)=>{ ctx.save();ctx.shadowColor=col;ctx.shadowBlur=10;
+          ctx.beginPath();ctx.arc(x,y,Math.max(4,H*0.010),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore(); };
+        const soft=(x,y,col)=>{ ctx.save();ctx.globalAlpha=0.85;
+          origBlob(x,y,Math.max(4,H*0.011)*1.6,Math.max(4,H*0.011)*1.6,col);ctx.restore(); };
+        if(px<=xL){
+          const t=(xL-G.sx)>0 ? Math.min(1,Math.max(0,(px-G.sx)/(xL-G.sx))) : 1;
+          crisp(px, lerp(G.adCy[i], y0, t), C.cool);
+        } else if(kind==='NOT'){
+          if(px<xR){ const t=(px-xL)/(xR-xL); crisp(px, lerp(y0,y1,t), px<gx?C.cool:C.warm); }
+          else { crisp(px, y1, C.warm); }
+        } else { // 'H': one branch peels off toward 1 while the other stays at 0
+          if(px<xR){ const t=(px-xL)/(xR-xL); crisp(px,y0,C.cool); crisp(px, lerp(y0,y1,t), C.warm); }
+          else { soft(px,y0,C.cool); soft(px,y1,C.warm); }
+        }
+      }
+    }
+  };
+  s.onEnter=function(){
+    this.stage=6;
+    this.buildControlsPrep(document.getElementById('sctrl-cannonq'));
+    this.afterSet();
+  };
+  return s;
+}
+const S6 = makeHadamardAdderScene();
+
 /* ----------------------------- scene manager ------------------------------ */
-const scenes=[S1,S2,S3,S4,S5];
-const labels=['Qubit','NOT','CNOT','Toffoli','Adder'];
+const scenes=[S1,S2,S3,S4,S5,S6];
+const labels=['Qubit','NOT','CNOT','Toffoli','Adder','Hadamard'];
 let cur=0;
 
 const els={
@@ -3929,5 +4297,3 @@ window.__DECKS.push({
 </script>
 </body>
 </html>
-
-</script>
