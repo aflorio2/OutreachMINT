@@ -73,7 +73,18 @@ controls_block = '''  <div class="controls">
   </div>
 
 '''
-body = must_replace(body, controls_block, '', 'scales controls block')
+# In the merged deck this whole animation counts as ONE bullet in the global nav.
+# Keep a tiny local prev/next pair so you can still step through the 7 internal
+# scenes; drop the ticks/slider/hint (those implied per-scene bullets).
+controls_block_min = '''  <div class="controls">
+    <div class="sliderrow">
+      <button class="nav" id="prev" title="Zoom toward human scale">◀</button>
+      <button class="nav" id="next" title="Zoom outward">▶</button>
+    </div>
+  </div>
+
+'''
+body = must_replace(body, controls_block, controls_block_min, 'scales controls block')
 
 blk1 = '''const ticks = document.getElementById('ticks');
 const tickEls = LEFT.map((d,i)=>{
@@ -106,17 +117,24 @@ window.addEventListener('keydown',e=>{
 });
 
 '''
-script = must_replace(script, blk5, '', 'scales nav wiring block')
+# Keep the button wiring (that's the "change scenes" control) but drop the local
+# keydown listener -- arrow keys are owned by the single global nav listener,
+# which now only sees ONE flat entry for this whole deck.
+blk5_min = '''document.getElementById('next').onclick=()=>animateTo(Math.round(current)+1);
+document.getElementById('prev').onclick=()=>animateTo(Math.round(current)-1);
 
-ids_scales = ['panelL','wrapL','nameL','subL','refL','sizeL','panelR','wrapR','nameR','subR','refR','sizeR']
+'''
+script = must_replace(script, blk5, blk5_min, 'scales nav wiring block')
+
+ids_scales = ['panelL','wrapL','nameL','subL','refL','sizeL','panelR','wrapR','nameR','subR','refR','sizeR','prev','next']
 body = suffix_html(body, ids_scales, 'scales')
 script = suffix_js(script, ids_scales, 'scales', blanket=['wrapL','wrapR'])
 
 reg_scales = '''
 window.__DECKS.push({
   sectionId: 'deck-scales',
-  labels: LEFT.map((d,i)=> i===0 ? 'Human' : (LEFT[i].name+' ⟷ '+RIGHT[i].name)),
-  goto(i){ animateTo(i); },
+  labels: ['The Very Small ⟷ The Very Large'],
+  goto(i){ animateTo(0); },
   activate(){},
   deactivate(){},
 });
@@ -477,7 +495,7 @@ body{
 .deck{display:none;flex:1 1 auto;flex-direction:column;min-height:0;}
 .deck.active{display:flex;}
 .gcontrols{flex:0 0 auto;padding:10px 24px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;width:100%}
-.gdots{display:flex;gap:10px;flex-wrap:nowrap;align-items:center;justify-content:flex-start;
+.gdots{display:flex;gap:10px;flex-wrap:nowrap;align-items:center;justify-content:center;
   max-width:min(1400px,96vw);width:100%;overflow-x:auto;overflow-y:hidden;padding:2px 4px 6px;scrollbar-width:thin}
 .gdot{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;opacity:.55;transition:opacity .2s;flex:0 0 auto}
 .gdot.active{opacity:1}
@@ -490,8 +508,6 @@ button.gnav{background:#121734;color:var(--ink);border:1px solid var(--line);bor
   width:46px;height:40px;font-size:18px;cursor:pointer;transition:background .15s,transform .1s}
 button.gnav:hover{background:#1b2350} button.gnav:active{transform:scale(.94)}
 button.gnav:disabled{opacity:.3;cursor:default}
-.ghint{color:var(--muted);font-size:12px;text-align:center}
-.ghint b{color:var(--ink)}
 '''
 
 css_all = GLOBAL_ROOT + '\n' + '\n'.join(d['css'] for d in decks)
@@ -507,7 +523,6 @@ nav_html = '''<div class="gcontrols">
     <button class="gnav" id="gprev" title="Previous (&#8592;)">&#9664;</button>
     <button class="gnav" id="gnext" title="Next (&#8594;)">&#9654;</button>
   </div>
-  <div class="ghint">Use <b>&#9664; &#9654;</b> or the <b>arrow keys</b> to move through the whole talk &middot; click a dot to jump.</div>
 </div>'''
 
 master_script = '''(function(){
@@ -593,7 +608,7 @@ print("getElementById refs with no matching id= :", missing if missing else "NON
 kd_count = final_html.count("addEventListener('keydown'")
 print("keydown listeners:", kd_count, "(expect 1)")
 
-expected = {'scales':7,'slit':4,'b2':2,'cannon':5,'cannonq':5}
+expected = {'scales':1,'slit':4,'b2':2,'cannon':5,'cannonq':5}
 print("Expected bullet counts:", expected, "total:", sum(expected.values()))
 
 # sanity: each deck's script should still contain its own 'labels' array declaration

@@ -25,6 +25,9 @@
   header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
   header h1 .q{color:var(--accentL)} header h1 .c{color:var(--accentR)}
   header p{color:var(--muted);font-size:clamp(12px,1.2vw,15px);margin-top:4px}
+  header .lede{list-style:none;margin-top:6px;display:flex;justify-content:center}
+  header .lede li{position:relative;padding-left:18px;color:var(--muted);font-size:clamp(12px,1.2vw,15px)}
+  header .lede li::before{content:"•";position:absolute;left:2px;color:var(--ink);opacity:.6}
 
   .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
   .panel{position:relative;flex:1 1 50%;border:1px solid var(--line);border-radius:16px;
@@ -123,7 +126,7 @@
 <body>
   <header>
     <h1><span class="q">The Very Small</span> &nbsp;⟷&nbsp; <span class="c">The Very Large</span></h1>
-    <p>Each step <b>inward</b> (left) mirrors a step <b>outward</b> (right) — the same factor in opposite directions.</p>
+    <ul class="lede"><li>Each step <b>inward</b> (left) mirrors a step <b>outward</b> (right) — the same factor in opposite directions.</li></ul>
   </header>
 
   <div class="stage">
