@@ -161,7 +161,7 @@
 const FP = "https://commons.wikimedia.org/wiki/Special:FilePath/";
 function fpath(name){return FP + encodeURIComponent(name);}
 const CB = "?v=" + Date.now();                 // cache-buster for local files
-const IMG_BASE = "../imgs/";                    // images live in OutreachMINT/imgs/
+const IMG_BASE = "../imgs-web/";                // web-optimized images live in OutreachMINT/imgs-web/
 function lsrc(name){return encodeURI(IMG_BASE + name) + CB;}
 
 // Inline SVG for the atomic nucleus (cannot be photographed) — a packed cluster of nucleons.
