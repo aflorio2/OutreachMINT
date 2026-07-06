@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Going Further — References &amp; Resources</title>
+<style>
+  :root{
+    --bg:#05060d;
+    --ink:#eef2ff;
+    --muted:#8b93b8;
+    --warm:#ffb24a;
+    --cool:#6ad7ff;
+    --elec:#7CFFB2;
+    --warn:#ff5470;
+    --mist:#b9a8ff;
+    --line:#1c2238;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(1200px 800px at 50% -10%, #11162b 0%, var(--bg) 60%);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden;height:100vh;display:flex;flex-direction:column;
+  }
+  header{text-align:center;padding:clamp(16px,3vh,30px) 16px 6px;flex:0 0 auto}
+  header h1{font-size:clamp(21px,3vw,36px);font-weight:700;letter-spacing:.4px;
+    opacity:0;animation:rise .6s ease-out forwards}
+  header h1 .a{color:var(--mist)}
+  header p{color:var(--muted);font-size:clamp(12.5px,1.3vw,16px);margin-top:8px;
+    opacity:0;animation:rise .6s ease-out .1s forwards}
+
+  .stage{flex:1 1 auto;display:flex;padding:14px 18px 0;min-height:0}
+  .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
+    overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset;
+    display:flex;align-items:center;justify-content:center;padding:clamp(14px,2.6vh,28px) clamp(18px,3vw,40px)}
+
+  .content{width:100%;max-width:1180px;display:flex;flex-direction:column;gap:clamp(12px,1.8vh,20px)}
+
+  .grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:clamp(12px,1.6vw,20px)}
+
+  .card{border-radius:14px;padding:clamp(14px,2.1vh,24px) clamp(16px,2.2vw,26px);background:#0d1226b0;
+    border:1px solid var(--line);opacity:0;animation:rise .6s ease-out forwards;display:flex;flex-direction:column}
+  .card.notation{animation-delay:.18s;border-color:#7CFFB244}
+  .card.explore{animation-delay:.3s;border-color:#b9a8ff55;justify-content:center;
+    background:linear-gradient(135deg, rgba(185,168,255,.14), rgba(106,215,255,.08));position:relative;overflow:hidden}
+  .card.explore::after{content:"";position:absolute;inset:0;background:radial-gradient(420px 200px at 85% -10%, rgba(185,168,255,.22), transparent 70%);pointer-events:none}
+  .card.advanced{animation-delay:.42s;border-color:#ffb24a44}
+  .card-head{display:flex;align-items:center;gap:9px;font-size:clamp(13px,1.4vw,16px);font-weight:700;margin-bottom:10px}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+  .dot.elec{background:var(--elec);box-shadow:0 0 9px var(--elec)}
+  .dot.mist{background:var(--mist);box-shadow:0 0 9px var(--mist)}
+  .dot.warm{background:var(--warm);box-shadow:0 0 9px var(--warm)}
+  .card p{color:var(--muted);font-size:clamp(11.5px,1.2vw,13.5px);line-height:1.4;margin-bottom:8px}
+
+  /* individual paper citations -- given real visual weight, not tucked into a bullet list */
+  .paper{padding:9px 0;border-top:1px solid #ffffff14}
+  .paper:first-of-type{border-top:none;padding-top:0}
+  .paper-title{color:#eef2ff;font-size:clamp(12.5px,1.35vw,15px);font-weight:700;font-style:italic;line-height:1.35}
+  .paper-authors{color:#c9d1f5;font-size:clamp(11px,1.15vw,13px);margin-top:4px}
+  .paper-link{display:inline-block;margin-top:6px;color:var(--elec);text-decoration:none;
+    border-bottom:1px solid #7CFFB255;font-weight:700;font-size:clamp(11px,1.15vw,13px)}
+  .paper-link:hover{border-bottom-color:currentColor}
+  .thanks{margin-top:10px;padding-top:10px;border-top:1px solid #ffffff14;color:var(--muted);
+    font-size:clamp(10.5px,1.1vw,12.5px);font-style:italic;line-height:1.4}
+
+  .explore-title{font-size:clamp(18px,2.2vw,25px);font-weight:800;margin-bottom:8px}
+  .explore-title a{color:var(--ink);text-decoration:none;border-bottom:2px solid #b9a8ff88;transition:border-color .2s,color .2s}
+  .explore-title a:hover{color:var(--mist);border-bottom-color:var(--mist)}
+  .card.explore p{color:#c9d1f5;font-size:clamp(12px,1.3vw,14.5px);line-height:1.45;margin-bottom:0}
+
+  .reflist{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:10px}
+  .reflist li{color:#c9d1f5;font-size:clamp(11.5px,1.2vw,13.5px);line-height:1.42;padding-left:14px;position:relative}
+  .reflist li::before{content:"—";position:absolute;left:0;color:var(--muted)}
+  .reflist a{color:var(--elec);text-decoration:none;border-bottom:1px solid #7CFFB255;font-weight:600}
+  .reflist a:hover{border-bottom-color:currentColor}
+  .reflist i{color:#dfe4ff;font-style:italic}
+  .card.advanced .reflist a{color:var(--warm);border-bottom-color:#ffb24a55}
+
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+  @media (max-width:760px){
+    .grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1><span class="a">Going</span> Further</h1>
+    <p>Where this lecture's notation comes from — and where to keep exploring.</p>
+  </header>
+
+  <div class="stage">
+    <div class="panel">
+      <div class="content">
+        <div class="grid">
+          <div class="card notation">
+            <div class="card-head"><span class="dot elec"></span>Notation used in this lecture</div>
+            <p>The circuit diagrams and "cloud" superposition pictures used throughout this lecture are adapted from:</p>
+            <div class="paper">
+              <div class="paper-title">"Q is for Quantum"</div>
+              <div class="paper-authors">Terry Rudolph</div>
+              <a class="paper-link" href="https://www.qisforquantum.org" target="_blank" rel="noopener">qisforquantum.org &#8599;</a>
+            </div>
+            <div class="paper">
+              <div class="paper-title">"Teaching quantum information science to high-school and early undergraduate students"</div>
+              <div class="paper-authors">S. E. Economou, T. Rudolph &amp; E. Barnes</div>
+              <a class="paper-link" href="https://arxiv.org/abs/2005.07874" target="_blank" rel="noopener">arXiv:2005.07874 &#8599;</a>
+            </div>
+            <div class="paper">
+              <div class="paper-title">"Hello Quantum World!"</div>
+              <div class="paper-authors">S. E. Economou &amp; E. Barnes</div>
+              <a class="paper-link" href="https://arxiv.org/pdf/2210.02868" target="_blank" rel="noopener">arXiv:2210.02868 &#8599;</a>
+            </div>
+            <div class="thanks">With thanks to Sophia Economou and Ed Barnes for sharing their enthusiasm for quantum outreach.</div>
+          </div>
+
+          <div class="card explore">
+            <div class="card-head"><span class="dot mist"></span>Keep exploring</div>
+            <div class="explore-title"><a href="https://www.qisforquantum.org" target="_blank" rel="noopener">Q is for Quantum &#8599;</a></div>
+            <p>A free, rigorous introduction to quantum computing by Terry Rudolph, starting from nothing more than
+              basic arithmetic — the natural next step after this lecture.</p>
+          </div>
+        </div>
+
+        <div class="card advanced">
+          <div class="card-head"><span class="dot warm"></span>Advanced reading</div>
+          <p>For a full, graduate-level mathematical treatment once you're ready to go deeper:</p>
+          <ul class="reflist">
+            <li>M. A. Nielsen &amp; I. L. Chuang, <i>Quantum Computation and Quantum Information</i> — the standard textbook in the field</li>
+            <li>John Preskill, <a href="http://theory.caltech.edu/~preskill/ph219/" target="_blank" rel="noopener">Caltech Ph219/CS219 lecture notes</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -478,6 +478,31 @@ print("PART 3 OK: cannon transformed")
 decks.append(build_cannon_deck("cannon-bits-quantum.html", "cannonq", "fire the cannon to send a qubit."))
 print("PART 4 OK: cannonq transformed")
 
+# ============================================================ RESOURCES ============================================================
+# Static closing slide -- no canvas/JS scenes, so there's no <script> tag to
+# extract from the source file; just lift style+body and register one bullet.
+src = load("further-resources.html")
+style = extract(src, "style")
+body = extract(src, "body")
+
+reg_resources = '''
+window.__DECKS.push({
+  sectionId: 'deck-resources',
+  labels: ['Going Further'],
+  goto(i){},
+  activate(){},
+  deactivate(){},
+});
+'''
+
+decks.append({
+    'id': 'resources', 'active': False,
+    'css': scope_css(style, 'resources'),
+    'body': body,
+    'script': f'(function(){{\n{reg_resources}\n}})();'
+})
+print("PART 5 OK: resources transformed")
+
 # ============================================================ ASSEMBLE ============================================================
 GLOBAL_ROOT = ''':root{
   --bg:#05060d; --ink:#eef2ff; --muted:#8b93b8; --line:#1c2238;
@@ -608,11 +633,11 @@ print("getElementById refs with no matching id= :", missing if missing else "NON
 kd_count = final_html.count("addEventListener('keydown'")
 print("keydown listeners:", kd_count, "(expect 1)")
 
-expected = {'scales':1,'slit':4,'b2':2,'cannon':5,'cannonq':5}
+expected = {'scales':1,'slit':4,'b2':2,'cannon':5,'cannonq':5,'resources':1}
 print("Expected bullet counts:", expected, "total:", sum(expected.values()))
 
 # sanity: each deck's script should still contain its own 'labels' array declaration
 for d in decks:
-    if "labels" not in d['script'] and d['id'] != 'scales':
+    if "labels" not in d['script'] and d['id'] not in ('scales', 'resources'):
         print("WARNING: no labels array found in", d['id'])
 print("Done.")
