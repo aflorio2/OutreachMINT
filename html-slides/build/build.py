@@ -53,6 +53,23 @@ def must_replace(text, old, new, label):
         raise SystemExit(f"MISSING BLOCK [{label}]:\n{old[:200]}")
     return text.replace(old, new, 1)
 
+# Every deck's header gets the same "back to the main site" link -- added here
+# at build time so it doesn't need to be hand-copied into all 6 source files.
+HOME_LINK_CSS = '''
+header{position:relative}
+.home-link{position:absolute;left:16px;top:50%;transform:translateY(-50%);
+  font-size:12px;color:var(--muted);text-decoration:none;white-space:nowrap;
+  background:#0009;border:1px solid var(--line);border-radius:8px;padding:6px 12px;
+  backdrop-filter:blur(4px);transition:background .15s,color .15s}
+.home-link:hover{background:#1b2350;color:var(--ink)}
+'''
+HOME_LINK_HTML = '<a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener">← Back to aflorio.science</a>'
+
+def add_home_link(style, body, deck_id):
+    style = style + '\n' + HOME_LINK_CSS
+    body = must_replace(body, '<header>', f'<header>\n    {HOME_LINK_HTML}', f'{deck_id} header open tag (home link)')
+    return style, body
+
 decks = []
 
 # ============================================================ SCALES ============================================================
@@ -61,6 +78,7 @@ style = extract(src, "style")
 body = extract(src, "body")
 body = body[:body.index("<script")]
 script = extract(src, "script")
+style, body = add_home_link(style, body, 'scales')
 
 controls_block = '''  <div class="controls">
     <div class="ticks" id="ticks"></div>
@@ -154,6 +172,7 @@ style = extract(src, "style")
 body = extract(src, "body")
 body = body[:body.index("<script")]
 script = extract(src, "script")
+style, body = add_home_link(style, body, 'slit')
 
 controls_block = '''  <div class="controls">
     <div class="dots" id="dots"></div>
@@ -266,6 +285,7 @@ style = extract(src, "style")
 body = extract(src, "body")
 body = body[:body.index("<script")]
 script = extract(src, "script")
+style, body = add_home_link(style, body, 'b2')
 
 controls_block = '''  <div class="controls">
     <div class="dots" id="dots"></div>
@@ -364,6 +384,7 @@ def build_cannon_deck(srcfile, deck_id, hint_text):
     body = extract(src, "body")
     body = body[:body.index("<script")]
     script = extract(src, "script")
+    style, body = add_home_link(style, body, deck_id)
 
     controls_block = f'''  <div class="controls">
     <div class="dots" id="dots"></div>
@@ -484,6 +505,7 @@ print("PART 4 OK: cannonq transformed")
 src = load("further-resources.html")
 style = extract(src, "style")
 body = extract(src, "body")
+style, body = add_home_link(style, body, 'resources')
 
 reg_resources = '''
 window.__DECKS.push({
