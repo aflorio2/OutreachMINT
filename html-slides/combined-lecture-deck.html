@@ -2159,7 +2159,7 @@ const S1=makeScene({
 
 const S2=makeScene({
   tag:'2 · NOT gate', tagColor:'var(--elec)',
-  subtitle:'A gate is a switch on the lanes. The simplest one just crosses them over.',
+  subtitle:'A gate is a switch on the lanes. &ldquo;NOT&rdquo; is the simplest one: it just crosses them over.',
   capTitle:'<b class="elec">NOT</b> swaps the lanes &mdash; same ball, flipped bit.',
   capSub:'The crossover sends an <b class="warm">up</b> ball out on the <b class="cool">down</b> lane and vice-versa. Nothing is created or destroyed: one ball in, one ball out. That &ldquo;count stays the same&rdquo; rule is what makes it <b class="elec">reversible</b>.',
   hasNOT:true,
@@ -3370,7 +3370,7 @@ function drawQControlLink(){
 
 const S3={
   tag:'3 · CNOT gate', tagColor:'var(--elec)',
-  subtitle:'Two qubits. Each can be 0, 1, or a cloud of both — and the gate can tie them together.',
+  subtitle:'Two qubits. Each can be 0, 1, or a cloud of both. To apply all possibilities are taken into account.',
   capTitle:'<b class="elec">CNOT</b> on a superposed control makes an <b class="mist">entangled</b> cloud.',
   capSub:'With a definite control it is the old story: control <b class="warm">1</b> flips the <b>target</b>, control <b class="cool">0</b> leaves it. Put the <b class="mist">control</b> in a cloud of both and the gate acts on each branch at once — the result is one cloud of two <i>linked</i> pairs, so measuring either qubit decides the other: <b class="mist">entanglement</b>. Superpose the <b class="mist">target</b> too and you get a bigger cloud — but if the control is definite, the qubits stay independent (a plain superposition, not entangled).',
   cin:1, tin:0, cball:null, tball:null, cLanded:null, tLanded:null, _sync:null,
@@ -3804,15 +3804,14 @@ function drawRegStateCloud(items, measured, collapse, intensity){
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
   ctx.fillText(collapse>=1?'measured — one 6-qubit state':'output register · big = sum s₂s₁s₀,  small = garbage', xr, cyMid+cry+14);
 }
-const ADD_CSUB='Chain the gates into a machine that adds two 2-bit numbers.';
-const ADD_QSUB='Feed the adder a superposition of inputs and it computes every sum at once.';
+const ADD_CSUB='Now all additions can be performed at the same time!';
 const ADD_QCAP={
   t:'One run, <b class="mist">every sum at once</b>.',
   s:'Put the inputs in a <b class="mist">cloud</b> of all values and the same six-gate adder computes <b class="warm">A</b>+<b class="cool">B</b> for <b>every</b> pair simultaneously &mdash; the output is a <b class="mist">cloud of sums</b>. That parallel power is the heart of quantum computing. The catch: <b class="warn">measuring</b> collapses the cloud to just <b>one</b> random sum, so a real quantum algorithm must first steer the useful answer to the top.'
 };
 const S5={
   tag:'5 · 2-bit adder', tagColor:'var(--elec)',
-  subtitle:'Chain the gates into a machine that adds two 2-bit numbers.',
+  subtitle:'Now all additions can be performed at the same time!',
   capTitle:'The whole <b class="elec">adder</b>: gates chained into a switchyard.',
   capSub:'Six bits flow left&rarr;right &mdash; the numbers <b class="warm">A</b> and <b class="cool">B</b> plus two blank <b>carry</b> bits. Three Toffolis and three CNOTs route the balls so the output lanes spell <b class="e">A + B</b>. Count them: six balls in, six out &mdash; still reversible.',
   A:2, B:1, stage:0, prog:0, running:false, landed:null, sim:null, _sync:null,
@@ -3863,15 +3862,15 @@ const S5={
     this.setReadout('Inputs are a <b class="m">cloud</b>. Press <b>Run</b> to add them all at once, then <b>Measure</b>.'); },
   afterSet(){
     const panel=document.getElementById('panel-cannonq');
+    this.subtitle=ADD_CSUB; document.getElementById('subtitle-cannonq').innerHTML=ADD_CSUB;
     if(this.quantum()){
       panel.classList.remove('wsmode');
       document.getElementById('wsheet-cannonq').classList.remove('show');
       this.stage=6; this.qreset();
-      this.subtitle=ADD_QSUB; document.getElementById('subtitle-cannonq').innerHTML=ADD_QSUB; this.setCap(ADD_QCAP.t,ADD_QCAP.s);
+      this.setCap(ADD_QCAP.t,ADD_QCAP.s);
     } else {
       panel.classList.add('wsmode');
       document.getElementById('wsheet-cannonq').classList.add('show');
-      this.subtitle=ADD_CSUB; document.getElementById('subtitle-cannonq').innerHTML=ADD_CSUB;
       this.setStage(this.stage);
     }
   },
@@ -4185,7 +4184,7 @@ function makeHadamardAdderScene(){
   s.A=2; s.B=1; s.stage=6;
   s.captionsFor=function(){
     return this.showSlit ? {
-      sub:'Same adder, same A/B controls — but every wire truly fires a 0, and a gate prepares it.',
+      sub:'Same adder but now every wire fires a 0 and a gate prepares it.',
       capt:'Every qubit starts at <b class="cool">0</b> — a gate decides what it becomes.',
       caps:'The cannons no longer fire the "right" ball by magic — every wire really fires a plain <b class="cool">0</b>. Need a <b class="warm">1</b>? A <b class="elec">NOT</b> goes right after the cannon. Need a <b class="mist">superposition</b>? A <b class="mist">Hadamard (H)</b> goes there instead, fanning the <b class="cool">0</b> into a <b class="mist">mist</b> of <b class="warm">1</b> and <b class="cool">0</b>. Change <b class="w">A</b> or <b class="c">B</b> (try &#9733; all) and watch the gates rearrange themselves.'
     } : {
