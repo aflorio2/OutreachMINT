@@ -133,7 +133,7 @@ script = suffix_js(script, ids_scales, 'scales', blanket=['wrapL','wrapR'])
 reg_scales = '''
 window.__DECKS.push({
   sectionId: 'deck-scales',
-  labels: ['The Very Small ⟷ The Very Large'],
+  labels: ['Scales'],
   goto(i){ animateTo(0); },
   activate(){},
   deactivate(){},

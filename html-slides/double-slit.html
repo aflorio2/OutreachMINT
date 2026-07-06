@@ -196,7 +196,11 @@ function computeGeom(){
   G.scFx       = G.screenX + (W - G.screenX)*0.93;   // far edge x
   G.scCy       = (G.yTop + G.yBot)/2;
   G.scNearHalf = (G.yBot - G.yTop)/2;
-  G.scFarHalf  = G.scNearHalf*0.58;                  // foreshortened far edge
+  // The front edge is where straight-line trajectories (balls, collapsed
+  // electrons) actually land, so it must be wide enough to hold their full
+  // spread (a ray through the outer edge of a slit lands ratio*(gap/2+half)
+  // from centre) -- otherwise hits get drawn past the visible edge of the panel.
+  G.scFarHalf  = Math.min(G.scNearHalf, G.ratio*(G.slitGap/2+G.slitHalf)*1.15);
   G.scFarTop   = G.scCy - G.scFarHalf;
 }
 
@@ -294,7 +298,7 @@ function drawBands(build){
 const sceneBalls = {
   tag:'1 · Classical balls',
   tagColor:'var(--warm)',
-  subtitle:'Fire little balls (or paint pellets) at a wall with two slits. What lands on the screen behind it?',
+  subtitle:'Fire paint balls at a wall with two slits. What lands on the screen behind it?',
   capTitle:'Particles make <b class="warm">two stripes</b>.',
   capSub:'Each ball goes through <b class="warm">one</b> slit or the other, then flies straight on. The pile-up on the screen is just two bumps — one behind each opening.',
   accent:'#ffb24a',
@@ -326,7 +330,7 @@ const sceneBalls = {
         b.y = G.cy + (b.x-G.sourceX)*b.tan;
         if(b.x >= G.screenX){
           if(b.y>=G.yTop && b.y<=G.yBot)
-            this.dots.push({u:clamp((b.y-G.yTop)/(G.yBot-G.yTop),0,1), d:Math.sqrt(Math.random())});
+            this.dots.push({u:clamp((b.y-G.scFarTop)/(2*G.scFarHalf),0,1), d:Math.sqrt(Math.random())});
           b.state='dead';
         }
       } else if(b.state==='absorb'){
@@ -361,7 +365,7 @@ const sceneBalls = {
 const sceneWaves = {
   tag:'2 · Waves',
   tagColor:'var(--cool)',
-  subtitle:'Now send a wave at the same wall — water ripples, sound, light. Each slit becomes a new source of ripples.',
+  subtitle:'Now send a wave at the same wall — water ripples, sound, light. ',
   capTitle:'Waves make <b class="cool">many stripes</b> — interference.',
   capSub:'A wave passes through <b class="cool">both</b> slits at once. Where two crests meet they add up (bright); where a crest meets a trough they cancel (dark). The result is a pattern of <b class="cool">many</b> bands.',
   accent:'#6ad7ff',
@@ -491,7 +495,7 @@ const sceneVideo = {
 const sceneElectrons = {
   tag:'4 · Electrons',
   tagColor:'var(--elec)',
-  subtitle:'Electrons are tiny lumps of matter. Fire them one at a time — and watch what the screen remembers.',
+  subtitle:'Quantum particles behaves both like particles and waves at the same time.',
   capTitle:'Matter builds the <b class="cool">wave pattern</b> — one dot at a time.',
   capSub:'Each electron lands as a single dot, yet thousands of dots form interference fringes. Unobserved, every electron travels <b class="elec">both paths at once</b>. Ask <b class="warn">"which slit?"</b> and the fringes vanish — back to two stripes.',
   accent:'#7CFFB2',
@@ -529,7 +533,14 @@ const sceneElectrons = {
       if(f.t>=1){
         // bias depth toward the wide (right) edge so physical dot density is even
         const d=Math.sqrt(Math.random());
-        this.dots.push({u:clamp((f.y-G.yTop)/(G.yBot-G.yTop),0,1), d});
+        // Observed (collapsed) hits fly a straight line like a classical ball, so
+        // they must be calibrated to the front edge the same way -- otherwise they
+        // land past the panel's visible edge. Unobserved fringes genuinely cover
+        // the full active range, so they keep the uncompressed mapping.
+        const u = f.observed
+          ? clamp((f.y-G.scFarTop)/(2*G.scFarHalf),0,1)
+          : clamp((f.y-G.yTop)/(G.yBot-G.yTop),0,1);
+        this.dots.push({u, d});
         this.count++;
         f.dead=true;
       }
