@@ -28,6 +28,14 @@
   header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
   header h1 .a{color:var(--cool)}
   header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;transition:opacity .3s}
+  header{position:relative}
+  .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+  .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+  .lang-switch button.active{background:#1b2350;color:var(--ink)}
+  .lang-switch button:not(.active):hover{color:var(--ink)}
 
   .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
   .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
@@ -96,7 +104,8 @@
 </head>
 <body>
   <header>
-    <h1><span class="a">Qubits</span> as Cannonballs</h1>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="Qubits als <span class='a'>Kanonenkugeln</span>"><span class="a">Qubits</span> as Cannonballs</h1>
     <p id="subtitle"></p>
   </header>
 
@@ -119,22 +128,58 @@
       <button class="nav" id="prev" title="Previous (&#8592;)">&#9664;</button>
       <button class="nav" id="next" title="Next (&#8594;)">&#9654;</button>
     </div>
-    <div class="hint">Use <b>&#9664; &#9654;</b> or the <b>arrow keys</b> to move between panels &middot; fire the cannon to send a qubit.</div>
+    <div class="hint" data-de="Nutze <b>&#9664; &#9654;</b> oder die <b>Pfeiltasten</b>, um zwischen den Ansichten zu wechseln &middot; feuere die Kanone, um ein Qubit zu senden.">Use <b>&#9664; &#9654;</b> or the <b>arrow keys</b> to move between panels &middot; fire the cannon to send a qubit.</div>
   </div>
 
   <div class="wsheet" id="wsheet">
-    <div class="wsh-head"><b>binary addition</b><span class="wsh-badge" id="wshBadge">0/6</span></div>
+    <div class="wsh-head"><b data-de="bin&auml;re Addition">binary addition</b><span class="wsh-badge" id="wshBadge">0/6</span></div>
     <table class="wsh-grid">
-      <tr class="wsh-carry"><td class="wsh-lab">carry</td><td id="wsC4"></td><td id="wsC2"></td><td></td></tr>
+      <tr class="wsh-carry"><td class="wsh-lab" data-de="&Uuml;bertrag">carry</td><td id="wsC4"></td><td id="wsC2"></td><td></td></tr>
       <tr><td class="wsh-lab">A</td><td></td><td id="wsA2"></td><td id="wsA1"></td></tr>
       <tr><td class="wsh-lab">+B</td><td></td><td id="wsB2"></td><td id="wsB1"></td></tr>
       <tr class="wsh-rule"><td></td><td colspan="3"><hr></td></tr>
-      <tr class="wsh-sum"><td class="wsh-lab">Sum</td><td id="wsS4"></td><td id="wsS2"></td><td id="wsS1"></td></tr>
+      <tr class="wsh-sum"><td class="wsh-lab" data-de="Summe">Sum</td><td id="wsS4"></td><td id="wsS2"></td><td id="wsS1"></td></tr>
     </table>
   </div>
 
 <script>
 "use strict";
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+const __L=(en,de)=>window.__omLang==='de'?de:en;
+const __SWAPS=[];
+function __regDE(obj,de){ for(const k in de){ __SWAPS.push([obj,k,obj[k],de[k]]); } }
+function __applyLang(){
+  const de=window.__omLang==='de';
+  __SWAPS.forEach(s=>{ s[0][s[1]]=de?s[3]:s[2]; });
+  __refreshLang();
+}
 /* ============================================================================
    QUBITS AS CANNONBALLS  —  quantum version of the slit-path deck
      1) Qubit    : one shot, up slit = 1 / down slit = 0 — OR BOTH at once
@@ -241,7 +286,7 @@ function drawCannon(){
   ctx.beginPath();ctx.arc(G.sx,G.cy,Math.max(7,H*0.014),0,7);ctx.fillStyle=C.warm;ctx.fill();
   ctx.restore();
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText('cannon',G.sx,G.cy+H*0.05);
+  ctx.fillText(__L('cannon','Kanone'),G.sx,G.cy+H*0.05);
 }
 function drawReadout(landed){
   [[G.sTop,C.warm,'1',1],[G.sBot,C.cool,'0',0]].forEach(z=>{
@@ -255,7 +300,7 @@ function drawReadout(landed){
     ctx.fillStyle=on?'#10131f':z[1];ctx.fillText(z[2],G.rx,z[0]+5);
   });
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText('readout',G.rx,G.sBot+H*0.05);
+  ctx.fillText(__L('readout','Anzeige'),G.rx,G.sBot+H*0.05);
 }
 
 /* fuzzy probability blob (double-slit slide style): radial-gradient ellipse */
@@ -358,7 +403,7 @@ function drawMistCloud(intensity, measured, collapse){
     ctx.restore();
   });
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText(collapse>=1?'readout':'cloud · both at once',xr,cyMid+cry+14);
+  ctx.fillText(collapse>=1?__L('readout','Anzeige'):__L('cloud · both at once','Wolke · beides zugleich'),xr,cyMid+cry+14);
 }
 
 function drawNOTgate(){
@@ -558,23 +603,23 @@ const S1={
   setReadout(t){ document.getElementById('readout').innerHTML=t; },
   reset(){
     this.ball=null;this.ghosts=null;this.landed=null;this.mist=false;this.collapse=0;this.measured=null;
-    this.setReadout('Fire a definite <b class="w">1</b> / <b class="c">0</b>, or <b class="m">both</b> for a superposition.');
+    this.setReadout(__L('Fire a definite <b class="w">1</b> / <b class="c">0</b>, or <b class="m">both</b> for a superposition.','Feuere eine eindeutige <b class="w">1</b> / <b class="c">0</b> — oder <b class="m">beide</b> für eine Überlagerung.'));
   },
   fire(v){
     this.reset();
     this.ball={vin:v,x:G.sx,y:G.cy,phase:'toSlit'};
-    this.setReadout('Firing&hellip;');
+    this.setReadout(__L('Firing&hellip;','Feuern&hellip;'));
   },
   fireSuper(){
     this.reset();
     this.ball={sup:true,t:0};
-    this.setReadout('Firing through <b class="m">both</b> slits at once&hellip;');
+    this.setReadout(__L('Firing through <b class="m">both</b> slits at once&hellip;','Feuern durch <b class="m">beide</b> Spalte gleichzeitig&hellip;'));
   },
   measure(){
     if(!this.mist||this.collapse>0) return;
     this.measured = Math.random()<0.5 ? 0 : 1;
     this.collapse = 0.0001;
-    this.setReadout('Measuring&hellip;');
+    this.setReadout(__L('Measuring&hellip;','Messung&hellip;'));
   },
   step(dt){
     const vx=W*0.42*dt;
@@ -584,7 +629,7 @@ const S1={
         b.t += dt*0.6;
         if(b.t>=1){
           this.ball=null; this.mist=true;
-          this.setReadout('Superposition: <b class="w">1</b> and <b class="c">0</b> at once — a <b class="m">cloud</b>. Press <b>Measure</b> to look.');
+          this.setReadout(__L('Superposition: <b class="w">1</b> and <b class="c">0</b> at once — a <b class="m">cloud</b>. Press <b>Measure</b> to look.','Überlagerung: <b class="w">1</b> und <b class="c">0</b> zugleich — eine <b class="m">Wolke</b>. Drücke <b>Messen</b>, um nachzusehen.'));
         }
       } else {
         if(b.phase==='toSlit'){
@@ -596,8 +641,8 @@ const S1={
           if(b.x>=G.rx){
             this.landed=b.vin; this.ball=null;
             this.setReadout(b.vin
-              ? 'The ball took the <b class="w">up</b> slit &rarr; qubit = <b class="w">1</b> (definite).'
-              : 'The ball took the <b class="c">down</b> slit &rarr; qubit = <b class="c">0</b> (definite).');
+              ? __L('The ball took the <b class="w">up</b> slit &rarr; qubit = <b class="w">1</b> (definite).','Die Kugel nahm den <b class="w">oberen</b> Spalt &rarr; Qubit = <b class="w">1</b> (eindeutig).')
+              : __L('The ball took the <b class="c">down</b> slit &rarr; qubit = <b class="c">0</b> (definite).','Die Kugel nahm den <b class="c">unteren</b> Spalt &rarr; Qubit = <b class="c">0</b> (eindeutig).'));
           }
         }
       }
@@ -606,7 +651,7 @@ const S1={
       this.collapse=Math.min(1,this.collapse+dt*1.6);
       if(this.collapse>=1){
         this.mist=false; this.landed=this.measured;
-        this.setReadout('Measured <b class="'+(this.measured?'w':'c')+'">'+this.measured+'</b> — the <b class="m">cloud</b> collapsed to one answer. Fire <b class="m">both</b> again to retry.');
+        this.setReadout(__L('Measured ','Gemessen: ')+'<b class="'+(this.measured?'w':'c')+'">'+this.measured+'</b>'+__L(' — the <b class="m">cloud</b> collapsed to one answer. Fire <b class="m">both</b> again to retry.',' — die <b class="m">Wolke</b> ist zu einer Antwort kollabiert. Feuere wieder <b class="m">beide</b>, um es noch einmal zu versuchen.'));
       }
     }
   },
@@ -650,10 +695,10 @@ const S1={
   buildControls(el){
     el.innerHTML='';const self=this;
     el.append(
-      mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
-      mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
-      mkbtn('Fire ◐ both','mist',()=>self.fireSuper()),
-      mkbtn('Measure','',()=>self.measure()),
+      mkbtn(__L('Fire ▲ (1)','Feuer ▲ (1)'),'up',()=>self.fire(1)),
+      mkbtn(__L('Fire ▼ (0)','Feuer ▼ (0)'),'dn',()=>self.fire(0)),
+      mkbtn(__L('Fire ◐ both','Feuer ◐ beide'),'mist',()=>self.fireSuper()),
+      mkbtn(__L('Measure','Messen'),'',()=>self.measure()),
       mkbtn('↻','',()=>self.reset())
     );
   },
@@ -672,7 +717,7 @@ function makeScene(cfg){
     fire(v){
       this.landed=null; this.vin=v;
       this.ball={vin:v, vout:this.hasNOT?(1-v):v, x:G.sx, y:G.cy, phase:'toSlit'};
-      document.getElementById('readout').innerHTML='Firing&hellip;';
+      document.getElementById('readout').innerHTML=__L('Firing&hellip;','Feuern&hellip;');
     },
     reset(){ this.ball=null; this.landed=null; this.vin=null;
       document.getElementById('readout').innerHTML=cfg.idle; },
@@ -709,8 +754,8 @@ function makeScene(cfg){
     buildControls(el){
       el.innerHTML='';const self=this;
       el.append(
-        mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
-        mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
+        mkbtn(__L('Fire ▲ (1)','Feuer ▲ (1)'),'up',()=>self.fire(1)),
+        mkbtn(__L('Fire ▼ (0)','Feuer ▼ (0)'),'dn',()=>self.fire(0)),
         mkbtn('↻','',()=>self.reset())
       );
     },
@@ -731,23 +776,23 @@ const S2={
   setReadout(t){ document.getElementById('readout').innerHTML=t; },
   reset(){
     this.ball=null;this.landed=null;this.mist=false;this.collapse=0;this.measured=null;
-    this.setReadout('Fire a definite <b class="w">1</b>/<b class="c">0</b>, or <b class="m">both</b>, through the <b class="e">NOT</b>.');
+    this.setReadout(__L('Fire a definite <b class="w">1</b>/<b class="c">0</b>, or <b class="m">both</b>, through the <b class="e">NOT</b>.','Feuere eine eindeutige <b class="w">1</b>/<b class="c">0</b> — oder <b class="m">beide</b> — durch das <b class="e">NOT</b>.'));
   },
   fire(v){
     this.reset();
     this.ball={vin:v,vout:1-v,x:G.sx,y:G.cy,phase:'toSlit'};
-    this.setReadout('Firing&hellip;');
+    this.setReadout(__L('Firing&hellip;','Feuern&hellip;'));
   },
   fireSuper(){
     this.reset();
     this.ball={sup:true,t:0};
-    this.setReadout('Sending <b class="m">both</b> branches through the <b class="e">NOT</b>&hellip;');
+    this.setReadout(__L('Sending <b class="m">both</b> branches through the <b class="e">NOT</b>&hellip;','Schicke <b class="m">beide</b> Zweige durch das <b class="e">NOT</b>&hellip;'));
   },
   measure(){
     if(!this.mist||this.collapse>0) return;
     this.measured = Math.random()<0.5 ? 0 : 1;
     this.collapse = 0.0001;
-    this.setReadout('Measuring&hellip;');
+    this.setReadout(__L('Measuring&hellip;','Messung&hellip;'));
   },
   step(dt){
     const vx=W*0.42*dt;
@@ -757,7 +802,7 @@ const S2={
         b.t += dt*0.5;
         if(b.t>=1){
           this.ball=null; this.mist=true;
-          this.setReadout('<b class="e">NOT</b> flipped <b>both</b> branches at once (<b class="w">1</b>&harr;<b class="c">0</b>). Still a <b class="m">cloud</b> — <b>Measure</b> to look.');
+          this.setReadout(__L('<b class="e">NOT</b> flipped <b>both</b> branches at once (<b class="w">1</b>&harr;<b class="c">0</b>). Still a <b class="m">cloud</b> — <b>Measure</b> to look.','<b class="e">NOT</b> hat <b>beide</b> Zweige gleichzeitig gekippt (<b class="w">1</b>&harr;<b class="c">0</b>). Immer noch eine <b class="m">Wolke</b> — <b>Messen</b>, um nachzusehen.'));
         }
       } else {
         if(b.phase==='toSlit'){
@@ -768,7 +813,7 @@ const S2={
           b.x+=vx; b.y=laneY(b.x,b.vin,b.vout,true);
           if(b.x>=G.rx){
             this.landed=b.vout; this.ball=null;
-            this.setReadout('In <b class="'+(b.vin?'w':'c')+'">'+b.vin+'</b> &rarr; <b class="e">NOT</b> &rarr; out <b class="'+(b.vout?'w':'c')+'">'+b.vout+'</b> (definite).');
+            this.setReadout(__L('In ','Rein: ')+'<b class="'+(b.vin?'w':'c')+'">'+b.vin+'</b>'+__L(' &rarr; <b class="e">NOT</b> &rarr; out ',' &rarr; <b class="e">NOT</b> &rarr; raus: ')+'<b class="'+(b.vout?'w':'c')+'">'+b.vout+'</b>'+__L(' (definite).',' (eindeutig).'));
           }
         }
       }
@@ -777,7 +822,7 @@ const S2={
       this.collapse=Math.min(1,this.collapse+dt*1.6);
       if(this.collapse>=1){
         this.mist=false; this.landed=this.measured;
-        this.setReadout('Measured <b class="'+(this.measured?'w':'c')+'">'+this.measured+'</b> — the cloud collapsed. Fire <b class="m">both</b> again to retry.');
+        this.setReadout(__L('Measured ','Gemessen: ')+'<b class="'+(this.measured?'w':'c')+'">'+this.measured+'</b>'+__L(' — the cloud collapsed. Fire <b class="m">both</b> again to retry.',' — die Wolke ist kollabiert. Feuere wieder <b class="m">beide</b>, um es noch einmal zu versuchen.'));
       }
     }
   },
@@ -828,10 +873,10 @@ const S2={
   buildControls(el){
     el.innerHTML='';const self=this;
     el.append(
-      mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
-      mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
-      mkbtn('Fire ◐ both','mist',()=>self.fireSuper()),
-      mkbtn('Measure','',()=>self.measure()),
+      mkbtn(__L('Fire ▲ (1)','Feuer ▲ (1)'),'up',()=>self.fire(1)),
+      mkbtn(__L('Fire ▼ (0)','Feuer ▼ (0)'),'dn',()=>self.fire(0)),
+      mkbtn(__L('Fire ◐ both','Feuer ◐ beide'),'mist',()=>self.fireSuper()),
+      mkbtn(__L('Measure','Messen'),'',()=>self.measure()),
       mkbtn('↻','',()=>self.reset())
     );
   },
@@ -889,7 +934,7 @@ function drawJointCloud(configs, measured, collapse, intensity, entangled){
     ctx.restore();
   });
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  const lab=collapse>=1?'measured · ▪ control  ● target':((entangled?'entangled':'superposed')+' cloud · ▪ control  ● target');
+  const lab=collapse>=1?__L('measured · ▪ control  ● target','gemessen · ▪ Kontrolle  ● Ziel'):((entangled?__L('entangled','verschränkte'):__L('superposed','überlagerte'))+__L(' cloud · ▪ control  ● target',' Wolke · ▪ Kontrolle  ● Ziel'));
   ctx.fillText(lab,xr,cyMid+cry+15);
 }
 /* control link in superposition (mist) style: both control values tap the gate */
@@ -924,42 +969,42 @@ const S3={
     el.innerHTML='';const self=this;
     const cB=mkbtn('','',()=>{self.cin=(self.cin+1)%3;self._sync();self.reset();});
     const tB=mkbtn('','',()=>{self.tin=(self.tin+1)%3;self._sync();self.reset();});
-    el.append(cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    el.append(cB,tB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn(__L('Measure','Messen'),'',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
     this._sync=function(){
-      cB.textContent='control '+(self.cin===2?'◐ both':(self.cin?'▲ 1':'▼ 0'));
+      cB.textContent=__L('control ','Kontrolle ')+(self.cin===2?__L('◐ both','◐ beide'):(self.cin?'▲ 1':'▼ 0'));
       cB.className='stepbtn '+(self.cin===2?'mist':(self.cin?'up':'dn'));
-      tB.textContent='target '+(self.tin===2?'◐ both':(self.tin?'▲ 1':'▼ 0'));
+      tB.textContent=__L('target ','Ziel ')+(self.tin===2?__L('◐ both','◐ beide'):(self.tin?'▲ 1':'▼ 0'));
       tB.className='stepbtn '+(self.tin===2?'mist':(self.tin?'up':'dn'));
     };this._sync();
   },
   reset(){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;this.sup=null;this.mist=false;this.collapse=0;this.measured=null;
     this.setReadout(this.quantum()
-      ? 'At least one qubit is a <b class="m">cloud</b>. Press <b>Run</b>, then <b>Measure</b>.'
-      : 'Set the <b class="e">control</b> and <b class="w">target</b>, then press <b>Run</b>.'); },
+      ? __L('At least one qubit is a <b class="m">cloud</b>. Press <b>Run</b>, then <b>Measure</b>.','Mindestens ein Qubit ist eine <b class="m">Wolke</b>. Drücke <b>Start</b>, dann <b>Messen</b>.')
+      : __L('Set the <b class="e">control</b> and <b class="w">target</b>, then press <b>Run</b>.','Stelle <b class="e">Kontrolle</b> und <b class="w">Ziel</b> ein, dann drücke <b>Start</b>.')); },
   run(){
     this.measured=null;this.collapse=0;this.mist=false;
-    if(this.quantum()){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;this.sup={t:0};this.setReadout('Running all branches&hellip;');return; }
+    if(this.quantum()){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;this.sup={t:0};this.setReadout(__L('Running all branches&hellip;','Alle Zweige laufen&hellip;'));return; }
     this.cLanded=this.tLanded=null;
     const active=this.cin===1, tout=active?(1-this.tin):this.tin;
     this.cball={x:G.sx,y:G.cyC,sy:(this.cin?G.cTop:G.cBot),vin:this.cin,phase:'toSlit'};
     this.tball={x:G.sx,y:G.cyT,syIn:(this.tin?G.tTop:G.tBot),syOut:(tout?G.tTop:G.tBot),vin:this.tin,vout:tout,phase:'toSlit'};
-    this.setReadout('Running&hellip;');
+    this.setReadout(__L('Running&hellip;','Läuft&hellip;'));
   },
-  measure(){ if(!this.mist||this.collapse>0)return; this.measured=Math.floor(Math.random()*this.configList().length); this.collapse=0.0001; this.setReadout('Measuring&hellip;'); },
+  measure(){ if(!this.mist||this.collapse>0)return; this.measured=Math.floor(Math.random()*this.configList().length); this.collapse=0.0001; this.setReadout(__L('Measuring&hellip;','Messung&hellip;')); },
   _result(){
     if(this.cball||this.tball)return;
     if(this.cLanded==null&&this.tLanded==null)return;
     const cin=this.cLanded,tout=this.tLanded;
-    this.setReadout('control <b class="'+(cin?'w':'c')+'">'+cin+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">CNOT</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+    this.setReadout(__L('control ','Kontrolle ')+'<b class="'+(cin?'w':'c')+'">'+cin+'</b>'+__L(' (unchanged) &nbsp;·&nbsp; target ',' (unverändert) &nbsp;·&nbsp; Ziel ')+'<b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">CNOT</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
   },
   step(dt){
     if(this.sup){ this.sup.t+=dt*0.5; if(this.sup.t>=1){ this.sup=null; this.mist=true;
       const cfgs=this.configList(), ent=this.entangled();
       const list=cfgs.map(c=>'▪'+c.c+'●'+c.t).join(' &nbsp;|&nbsp; ');
-      this.setReadout((ent?'<b class="m">Entangled!</b> ':'<b class="m">Superposition.</b> ')+'The cloud holds '+list+'. <b>Measure</b> to collapse'+(ent?' — the two always agree.':'.')); } }
+      this.setReadout((ent?__L('<b class="m">Entangled!</b> ','<b class="m">Verschränkt!</b> '):__L('<b class="m">Superposition.</b> ','<b class="m">Überlagerung.</b> '))+__L('The cloud holds ','Die Wolke enthält ')+list+__L('. <b>Measure</b> to collapse','. <b>Messen</b> zum Kollabieren')+(ent?__L(' — the two always agree.',' — die beiden stimmen immer überein.'):'.')); } }
     if(this.collapse>0 && this.collapse<1){ this.collapse=Math.min(1,this.collapse+dt*1.6);
       if(this.collapse>=1){ const cfgs=this.configList(), c=cfgs[this.measured]||cfgs[0], ent=this.entangled();
-        this.setReadout('Measured ▪<b class="'+(c.c?'w':'c')+'">'+c.c+'</b> ●<b class="'+(c.t?'w':'c')+'">'+c.t+'</b>'+(ent?' — measuring one fixed the other. <b class="m">Entanglement</b>.':'.')); } }
+        this.setReadout(__L('Measured ','Gemessen: ')+'▪<b class="'+(c.c?'w':'c')+'">'+c.c+'</b> ●<b class="'+(c.t?'w':'c')+'">'+c.t+'</b>'+(ent?__L(' — measuring one fixed the other. <b class="m">Entanglement</b>.',' — die Messung des einen hat das andere festgelegt. <b class="m">Verschränkung</b>.'):'.')); } }
     const vx=W*0.42*dt;
     let b=this.cball;
     if(b){
@@ -983,7 +1028,7 @@ const S3={
     drawCannonAt(G.cyC,'square',this.cin===2?C.mist:colOf(this.cin));
     drawCannonAt(G.cyT,'circle',this.tin===2?C.mist:colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.cTop-12);ctx.fillText('target',G.sx,G.tBot+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.cTop-12);ctx.fillText(__L('target','Ziel'),G.sx,G.tBot+18);
     if(this.sup){
       const t=this.sup.t, coreR=Math.max(4,H*0.011), startR=Math.max(4,H*0.012), spanRyC=G.gap2/2+G.sH2;
       const cS=this.cin===2, tS=this.tin===2, gateL=G.gateX-G.cw;
@@ -1034,8 +1079,8 @@ const S3={
                       {y:G.tTop,color:C.warm,lab:'1'},{y:G.tBot,color:C.cool,lab:'0'}],G.sH2);
     drawCannonAt(G.cyC,'square',colOf(this.cin));drawCannonAt(G.cyT,'circle',colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.cTop-12);
-    ctx.fillText('target',G.sx,G.tBot+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.cTop-12);
+    ctx.fillText(__L('target','Ziel'),G.sx,G.tBot+18);
     const drawB=(b,vbefore,vafter)=>{const v=b.x<G.gateX?vbefore:vafter,col=colOf(v);
       ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
       ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
@@ -1085,11 +1130,11 @@ function drawConfigCloud(configs, shapes, measured, collapse, intensity, entangl
     ctx.restore();
   });
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  const lab=collapse>=1?('measured · '+legend):((entangled?'entangled':'superposed')+' cloud · '+legend);
+  const lab=collapse>=1?(__L('measured · ','gemessen · ')+legend):((entangled?__L('entangled','verschränkte'):__L('superposed','überlagerte'))+__L(' cloud · ',' Wolke · ')+legend);
   ctx.fillText(lab,xr,cyMid+cry+14);
 }
 
-const TOF_SHAPES=['triangle','square','circle'], TOF_LEGEND='▲■ controls  ● target';
+const TOF_SHAPES=['triangle','square','circle'], TOF_LEGEND='▲■ controls  ● target', TOF_LEGEND_DE='▲■ Kontrollen  ● Ziel';
 const S4={
   tag:'4 · Toffoli gate', tagColor:'var(--elec)',
   subtitle:'Three qubits. The target flips only when BOTH controls are 1 — and each can be a cloud.',
@@ -1115,7 +1160,7 @@ const S4={
     el.innerHTML='';const self=this;
     const cyc=p=>()=>{self[p]=(self[p]+1)%3;self._sync();self.reset();};
     const cA=mkbtn('','',cyc('c1')), cB=mkbtn('','',cyc('c2')), tB=mkbtn('','',cyc('tin'));
-    el.append(cA,cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    el.append(cA,cB,tB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn(__L('Measure','Messen'),'',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
     const lab=(sym,s)=>sym+' '+(s===2?'◐':(s?'1':'0')), cls=s=>'stepbtn '+(s===2?'mist':(s?'up':'dn'));
     this._sync=function(){
       cA.textContent=lab('▲',self.c1);cA.className=cls(self.c1);
@@ -1125,32 +1170,32 @@ const S4={
   },
   reset(){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;this.sup=null;this.mist=false;this.collapse=0;this.measured=null;
     this.setReadout(this.quantum()
-      ? 'At least one qubit is a <b class="m">cloud</b>. Press <b>Run</b>, then <b>Measure</b>.'
-      : 'Set the two <b class="e">controls</b> (▲ ■) and the <b class="w">target</b> (●), then press <b>Run</b>.'); },
-  measure(){ if(!this.mist||this.collapse>0)return; this.measured=Math.floor(Math.random()*this.configList().length); this.collapse=0.0001; this.setReadout('Measuring&hellip;'); },
+      ? __L('At least one qubit is a <b class="m">cloud</b>. Press <b>Run</b>, then <b>Measure</b>.','Mindestens ein Qubit ist eine <b class="m">Wolke</b>. Drücke <b>Start</b>, dann <b>Messen</b>.')
+      : __L('Set the two <b class="e">controls</b> (▲ ■) and the <b class="w">target</b> (●), then press <b>Run</b>.','Stelle die beiden <b class="e">Kontrollen</b> (▲ ■) und das <b class="w">Ziel</b> (●) ein, dann drücke <b>Start</b>.')); },
+  measure(){ if(!this.mist||this.collapse>0)return; this.measured=Math.floor(Math.random()*this.configList().length); this.collapse=0.0001; this.setReadout(__L('Measuring&hellip;','Messung&hellip;')); },
   run(){
     this.measured=null;this.collapse=0;this.mist=false;
-    if(this.quantum()){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;this.sup={t:0};this.setReadout('Running all branches&hellip;');return; }
+    if(this.quantum()){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;this.sup={t:0};this.setReadout(__L('Running all branches&hellip;','Alle Zweige laufen&hellip;'));return; }
     this.l1=this.l2=this.l3=null;const act=this.active(),tout=act?(1-this.tin):this.tin;
     this.b1={x:G.sx,y:G.t3a,sy:(this.c1?G.a1T:G.a1B),vin:this.c1,cy:G.t3a,phase:'toSlit'};
     this.b2={x:G.sx,y:G.t3b,sy:(this.c2?G.a2T:G.a2B),vin:this.c2,cy:G.t3b,phase:'toSlit'};
     this.b3={x:G.sx,y:G.t3c,syIn:(this.tin?G.a3T:G.a3B),syOut:(tout?G.a3T:G.a3B),vin:this.tin,vout:tout,cy:G.t3c,phase:'toSlit'};
-    this.setReadout('Running&hellip;');
+    this.setReadout(__L('Running&hellip;','Läuft&hellip;'));
   },
   _result(){
     if(this.b1||this.b2||this.b3)return;
     if(this.l1==null&&this.l2==null&&this.l3==null)return;
     const tout=this.l3;
-    this.setReadout('controls <b class="'+(this.l1?'w':'c')+'">'+this.l1+'</b> <b class="'+(this.l2?'w':'c')+'">'+this.l2+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">Toffoli</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+    this.setReadout(__L('controls ','Kontrollen ')+'<b class="'+(this.l1?'w':'c')+'">'+this.l1+'</b> <b class="'+(this.l2?'w':'c')+'">'+this.l2+'</b>'+__L(' (unchanged) &nbsp;·&nbsp; target ',' (unverändert) &nbsp;·&nbsp; Ziel ')+'<b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">Toffoli</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
   },
   step(dt){
     if(this.sup){ this.sup.t+=dt*0.5; if(this.sup.t>=1){ this.sup=null; this.mist=true;
       const cfgs=this.configList(), ent=this.entangled();
       const list=cfgs.map(c=>'▲'+c[0]+'■'+c[1]+'●'+c[2]).join(' &nbsp;|&nbsp; ');
-      this.setReadout((ent?'<b class="m">Entangled!</b> ':'<b class="m">Superposition.</b> ')+'Cloud of '+cfgs.length+': '+list+'. <b>Measure</b> to collapse.'); } }
+      this.setReadout((ent?__L('<b class="m">Entangled!</b> ','<b class="m">Verschränkt!</b> '):__L('<b class="m">Superposition.</b> ','<b class="m">Überlagerung.</b> '))+__L('Cloud of ','Wolke aus ')+cfgs.length+': '+list+__L('. <b>Measure</b> to collapse.','. <b>Messen</b> zum Kollabieren.')); } }
     if(this.collapse>0 && this.collapse<1){ this.collapse=Math.min(1,this.collapse+dt*1.6);
       if(this.collapse>=1){ const cfgs=this.configList(), c=cfgs[this.measured]||cfgs[0], ent=this.entangled();
-        this.setReadout('Measured ▲<b class="'+(c[0]?'w':'c')+'">'+c[0]+'</b> ■<b class="'+(c[1]?'w':'c')+'">'+c[1]+'</b> ●<b class="'+(c[2]?'w':'c')+'">'+c[2]+'</b>'+(ent?' — one measurement fixed all three. <b class="m">Entanglement</b>.':'.')); } }
+        this.setReadout(__L('Measured ','Gemessen: ')+'▲<b class="'+(c[0]?'w':'c')+'">'+c[0]+'</b> ■<b class="'+(c[1]?'w':'c')+'">'+c[1]+'</b> ●<b class="'+(c[2]?'w':'c')+'">'+c[2]+'</b>'+(ent?__L(' — one measurement fixed all three. <b class="m">Entanglement</b>.',' — eine Messung hat alle drei festgelegt. <b class="m">Verschränkung</b>.'):'.')); } }
     const vx=W*0.42*dt;
     const moveStraight=(b,set)=>{
       if(b.phase==='toSlit'){const dx=G.bx-G.sx,dy=b.sy-b.cy,L=Math.hypot(dx,dy)||1;b.x+=dx/L*vx;b.y+=dy/L*vx;if(b.x>=G.bx){b.x=G.bx;b.y=b.sy;b.phase='lane';}return false;}
@@ -1181,7 +1226,7 @@ const S4={
     drawChannelLanes([{yT:G.a1T,yB:G.a1B,gated:false},{yT:G.a2T,yB:G.a2B,gated:false},{yT:G.a3T,yB:G.a3B,gated:true}]);
     const cfgs=this.configList(), ent=this.entangled();
     if(this.mist||this.collapse>0){ const inten=this.collapse>0?(1-this.collapse):1;
-      drawConfigCloud(cfgs,TOF_SHAPES,this.measured,this.collapse,inten,ent,TOF_LEGEND); }
+      drawConfigCloud(cfgs,TOF_SHAPES,this.measured,this.collapse,inten,ent,__L(TOF_LEGEND,TOF_LEGEND_DE)); }
     const canFlip=(this.c1!==0)&&(this.c2!==0);
     drawGateBox(G.a3T,G.a3B,canFlip,'NOT');
     this.drawLinks();
@@ -1192,7 +1237,7 @@ const S4={
     drawCannonAt(G.t3b,'square',this.c2===2?C.mist:colOf(this.c2));
     drawCannonAt(G.t3c,'circle',this.tin===2?C.mist:colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);ctx.fillText('target',G.sx,G.a3B+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.a1T-12);ctx.fillText(__L('control','Kontrolle'),G.sx,G.a2T-12);ctx.fillText(__L('target','Ziel'),G.sx,G.a3B+18);
     if(this.sup){
       const t=this.sup.t, coreR=Math.max(4,H*0.010), startR=Math.max(4,H*0.011), spanRy=G.gap3/2+G.sH3;
       const c1S=this.c1===2,c2S=this.c2===2,tS=this.tin===2,gateL=G.gateX-G.cw;
@@ -1215,7 +1260,7 @@ const S4={
         else if(canFlip2){ tv.forEach(v=>{const sy=v?G.a3T:G.a3B; fuzz(x,sy,colOf(v),a*0.92);
           const ly=(1-v)?G.a3T:G.a3B, yc=crossYabs(x,sy,ly), val=x<G.gateX?v:1-v; fuzz(x,yc,colOf(val),a*0.92);}); }
         else { tv.forEach(v=>{const y=v?G.a3T:G.a3B; tS?fuzz(x,y,colOf(v),a):crisp(x,y,colOf(v),a);}); }
-        if(k>0) drawConfigCloud(cfgs,TOF_SHAPES,null,0,k,ent,TOF_LEGEND);
+        if(k>0) drawConfigCloud(cfgs,TOF_SHAPES,null,0,k,ent,__L(TOF_LEGEND,TOF_LEGEND_DE));
       }
     }
   },
@@ -1234,8 +1279,8 @@ const S4={
                       {y:G.a3T,color:C.warm,lab:'1'},{y:G.a3B,color:C.cool,lab:'0'}],G.sH3);
     drawCannonAt(G.t3a,'triangle',colOf(this.c1));drawCannonAt(G.t3b,'square',colOf(this.c2));drawCannonAt(G.t3c,'circle',colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);
-    ctx.fillText('target',G.sx,G.a3B+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.a1T-12);ctx.fillText(__L('control','Kontrolle'),G.sx,G.a2T-12);
+    ctx.fillText(__L('target','Ziel'),G.sx,G.a3B+18);
     const drawB=(b,vb,va)=>{const v=b.x<G.gateX?vb:va,col=colOf(v);
       ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
       ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
@@ -1285,7 +1330,7 @@ function drawSumCloud(probs, measured, collapse, intensity){
   });
   ctx.globalAlpha=1; ctx.textBaseline='alphabetic';
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText(collapse>=1?'measured — one sum':'cloud of sums · every A+B at once', xr, cyMid+cry+14);
+  ctx.fillText(collapse>=1?__L('measured — one sum','gemessen — eine Summe'):__L('cloud of sums · every A+B at once','Wolke von Summen · jedes A+B auf einmal'), xr, cyMid+cry+14);
 }
 /* explicit output state (few branches): the FULL six-qubit output register.
    The adder is reversible — six wires in, six out. Shape marks each wire's
@@ -1336,9 +1381,10 @@ function drawRegStateCloud(items, measured, collapse, intensity){
   });
   ctx.textBaseline='alphabetic';
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText(collapse>=1?'measured — one 6-qubit state':'output register · big = sum s₂s₁s₀,  small = garbage', xr, cyMid+cry+14);
+  ctx.fillText(collapse>=1?__L('measured — one 6-qubit state','gemessen — ein 6-Qubit-Zustand'):__L('output register · big = sum s₂s₁s₀,  small = garbage','Ausgaberegister · groß = Summe s₂s₁s₀,  klein = Müll'), xr, cyMid+cry+14);
 }
 const ADD_CSUB='Now all additions can be performed at the same time!';
+const ADD_CSUB_DE='Jetzt lassen sich alle Additionen gleichzeitig ausführen!';
 const ADD_QCAP={
   t:'One run, <b class="mist">every sum at once</b>.',
   s:'Put the inputs in a <b class="mist">cloud</b> of all values and the same six-gate adder computes <b class="warm">A</b>+<b class="cool">B</b> for <b>every</b> pair simultaneously &mdash; the output is a <b class="mist">cloud of sums</b>. That parallel power is the heart of quantum computing. The catch: <b class="warn">measuring</b> collapses the cloud to just <b>one</b> random sum, so a real quantum algorithm must first steer the useful answer to the top.'
@@ -1372,7 +1418,7 @@ const S5={
     const ct=document.getElementById('capTitle'),cs=document.getElementById('capSub');
     if(ct)ct.innerHTML=c.t;if(cs)cs.innerHTML=c.s;
     this.prog=0;this.running=false;this.landed=null;this.simulate();
-    this.setReadout(s===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+s+' gate'+(s>1?'s':'')+' built so far.');
+    this.setReadout(s===0?__L('Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.','Stelle <b class="w">A</b> und <b class="c">B</b> ein, dann <b>Start</b> für die sechs geraden Schüsse.'):__L('Press <b>Run</b> to fire through the '+s+' gate'+(s>1?'s':'')+' built so far.','Drücke <b>Start</b> und feuere durch '+(s>1?'die '+s+' bisher gebauten Gatter':'das bisher gebaute Gatter')+'.'));
     if(this._sync)this._sync();
   },
   setReadout(t){ document.getElementById('readout').innerHTML=t; },
@@ -1393,10 +1439,11 @@ const S5={
   valAtFor(sim,i,x){ let v=sim.inVals[i];for(const e of sim.events[i]){if(x>=e.x)v=e.to;else break;}return v; },
   setCap(t,s){ this.capTitle=t;this.capSub=s;const ct=document.getElementById('capTitle'),cs=document.getElementById('capSub');if(ct)ct.innerHTML=t;if(cs)cs.innerHTML=s; },
   qreset(){ this.qrun=false;this.qprog=0;this.qmist=false;this.qcollapse=0;this.qmeasured=null;
-    this.setReadout('Inputs are a <b class="m">cloud</b>. Press <b>Run</b> to add them all at once, then <b>Measure</b>.'); },
+    this.setReadout(__L('Inputs are a <b class="m">cloud</b>. Press <b>Run</b> to add them all at once, then <b>Measure</b>.','Die Eingaben sind eine <b class="m">Wolke</b>. Drücke <b>Start</b>, um alle auf einmal zu addieren, dann <b>Messen</b>.')); },
   afterSet(){
     const panel=document.getElementById('panel');
-    this.subtitle=ADD_CSUB; document.getElementById('subtitle').innerHTML=ADD_CSUB;
+    const __sub=__L(ADD_CSUB,ADD_CSUB_DE);
+    this.subtitle=__sub; document.getElementById('subtitle').innerHTML=__sub;
     if(this.quantum()){
       panel.classList.remove('wsmode');
       document.getElementById('wsheet').classList.remove('show');
@@ -1408,7 +1455,7 @@ const S5={
       this.setStage(this.stage);
     }
   },
-  measure(){ if(!this.qmist||this.qcollapse>0)return; this.qmeasured=Math.floor(Math.random()*this.problems().length); this.qcollapse=0.0001; this.setReadout('Measuring&hellip;'); },
+  measure(){ if(!this.qmist||this.qcollapse>0)return; this.qmeasured=Math.floor(Math.random()*this.problems().length); this.qcollapse=0.0001; this.setReadout(__L('Measuring&hellip;','Messung&hellip;')); },
   bitLane(i,v){ return v?(G.adCy[i]-G.adLG/2):(G.adCy[i]+G.adLG/2); },
   simulate(){
     const A=this.A,B=this.B,a0=A&1,a1=(A>>1)&1,b0=B&1,b1=(B>>1)&1;
@@ -1437,34 +1484,34 @@ const S5={
     const aB=mkbtn('','up',()=>{self.A=(self.A+1)%6;self._sync();self.afterSet();});
     const bB=mkbtn('','dn',()=>{self.B=(self.B+1)%5;self._sync();self.afterSet();});
     const buildB=mkbtn('','',()=>{ if(self.quantum())return; self.setStage((self.stage+1)%7); });
-    el.append(aB,bB,buildB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    el.append(aB,bB,buildB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn(__L('Measure','Messen'),'',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
     this._sync=()=>{
-      aB.textContent='A = '+(self.A<4?self.A:(self.A===4?'{2,3}':'★ all')); aB.className='stepbtn '+(self.A>=4?'mist':'up');
-      bB.textContent='B = '+(self.B<4?self.B:'★ all'); bB.className='stepbtn '+(self.B>=4?'mist':'dn');
-      buildB.textContent='Build ▶ '+self.stage+'/6'; buildB.style.opacity=self.quantum()?0.4:1;
+      aB.textContent='A = '+(self.A<4?self.A:(self.A===4?'{2,3}':__L('★ all','★ alle'))); aB.className='stepbtn '+(self.A>=4?'mist':'up');
+      bB.textContent='B = '+(self.B<4?self.B:__L('★ all','★ alle')); bB.className='stepbtn '+(self.B>=4?'mist':'dn');
+      buildB.textContent=__L('Build ▶ ','Aufbau ▶ ')+self.stage+'/6'; buildB.style.opacity=self.quantum()?0.4:1;
     };this._sync();
   },
   reset(){ if(this.quantum()){ this.qreset(); return; }
     this.prog=0;this.running=false;this.landed=null;this.simulate();
-    this.setReadout(this.stage===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+this.stage+' gate'+(this.stage>1?'s':'')+' built so far.'); },
-  run(){ if(this.quantum()){ this.qrun=true;this.qprog=0;this.qmist=false;this.qcollapse=0;this.qmeasured=null;this.setReadout('Computing <b class="m">all sums</b> in parallel&hellip;'); return; }
-    this.simulate();this.prog=0;this.running=true;this.landed=null;this.setReadout('Running&hellip;'); },
+    this.setReadout(this.stage===0?__L('Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.','Stelle <b class="w">A</b> und <b class="c">B</b> ein, dann <b>Start</b> für die sechs geraden Schüsse.'):__L('Press <b>Run</b> to fire through the '+this.stage+' gate'+(this.stage>1?'s':'')+' built so far.','Drücke <b>Start</b> und feuere durch '+(this.stage>1?'die '+this.stage+' bisher gebauten Gatter':'das bisher gebaute Gatter')+'.')); },
+  run(){ if(this.quantum()){ this.qrun=true;this.qprog=0;this.qmist=false;this.qcollapse=0;this.qmeasured=null;this.setReadout(__L('Computing <b class="m">all sums</b> in parallel&hellip;','Berechne <b class="m">alle Summen</b> parallel&hellip;')); return; }
+    this.simulate();this.prog=0;this.running=true;this.landed=null;this.setReadout(__L('Running&hellip;','Läuft&hellip;')); },
   step(dt){
     if(this.quantum()){
       if(this.qrun){ this.qprog+=dt*0.4; if(this.qprog>=1){ this.qprog=1;this.qrun=false;this.qmist=true;
-        const P=this.problems(); this.setReadout('<b class="m">'+P.length+' sums at once</b> &mdash; '+P.map(p=>p.a+'+'+p.b+'='+p.s).join(', ')+'. <b class="warn">Measure</b> to collapse.'); } }
+        const P=this.problems(); this.setReadout('<b class="m">'+P.length+__L(' sums at once</b> &mdash; ',' Summen auf einmal</b> &mdash; ')+P.map(p=>p.a+'+'+p.b+'='+p.s).join(', ')+__L('. <b class="warn">Measure</b> to collapse.','. <b class="warn">Messen</b> zum Kollabieren.')); } }
       if(this.qcollapse>0&&this.qcollapse<1){ this.qcollapse=Math.min(1,this.qcollapse+dt*1.6);
         if(this.qcollapse>=1){ const P=this.problems(), p=P[this.qmeasured]||P[0];
-          this.setReadout('Collapsed to one: <b class="w">'+p.a+'</b> + <b class="c">'+p.b+'</b> = <b class="e">'+p.s+'</b> &mdash; just one random sum survives.'); } }
+          this.setReadout(__L('Collapsed to one: ','Kollabiert auf eine: ')+'<b class="w">'+p.a+'</b> + <b class="c">'+p.b+'</b> = <b class="e">'+p.s+'</b>'+__L(' &mdash; just one random sum survives.',' &mdash; nur eine zufällige Summe überlebt.')); } }
       return;
     }
     if(!this.running)return;
     this.prog+=dt*0.38;
     if(this.prog>=1){this.prog=1;this.running=false;this.landed=this.sim.outVals;
       const o=this.sim.outVals,s0=o[1],s1=o[4],s2=o[5];
-      if(this.stage===0) this.setReadout('A = <b class="w">'+this.A+'</b>, B = <b class="c">'+this.B+'</b> &mdash; six straight shots, nothing added yet.');
+      if(this.stage===0) this.setReadout('A = <b class="w">'+this.A+'</b>, B = <b class="c">'+this.B+'</b>'+__L(' &mdash; six straight shots, nothing added yet.',' &mdash; sechs gerade Schüsse, noch nichts addiert.'));
       else if(this.stage===6) this.setReadout('<b class="w">'+this.A+'</b> + <b class="c">'+this.B+'</b> = <b class="e">'+(this.A+this.B)+'</b> &nbsp; (s&#8322;s&#8321;s&#8320; = '+s2+s1+s0+')');
-      else this.setReadout('Built <b>'+this.stage+'/6</b> gates &mdash; partial result on the output lanes.');}
+      else this.setReadout(__L('Built <b>'+this.stage+'/6</b> gates &mdash; partial result on the output lanes.','<b>'+this.stage+'/6</b> Gatter gebaut &mdash; Teilergebnis auf den Ausgangs-Spuren.'));}
   },
   drawGate(g,gi){
     const x=G.adGX[gi],tg=g.tg,cy=G.adCy[tg],lg=G.adLG;
@@ -1604,9 +1651,9 @@ const S5={
       ctx.fillText('= '+s,c0x+cellsW+gap+8,y+4);
     }
     ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText(this.stage===0?'output register — nothing added yet'
-      :full?'output register · big = sum s₂s₁s₀ · small = discarded'
-      :'output register — partial (build more gates)',xc,y+r+18);
+    ctx.fillText(this.stage===0?__L('output register — nothing added yet','Ausgaberegister — noch nichts addiert')
+      :full?__L('output register · big = sum s₂s₁s₀ · small = discarded','Ausgaberegister · groß = Summe s₂s₁s₀ · klein = verworfen')
+      :__L('output register — partial (build more gates)','Ausgaberegister — unvollständig (baue mehr Gatter)'),xc,y+r+18);
     ctx.restore();
   },
   draw(){
@@ -1718,13 +1765,13 @@ function makeHadamardAdderScene(){
   s.A=2; s.B=1; s.stage=6;
   s.captionsFor=function(){
     return this.showSlit ? {
-      sub:'Same adder but now every wire fires a 0 and a gate prepares it.',
-      capt:'Every qubit starts at <b class="cool">0</b> — a gate decides what it becomes.',
-      caps:'The cannons no longer fire the "right" ball by magic — every wire really fires a plain <b class="cool">0</b>. Need a <b class="warm">1</b>? A <b class="elec">NOT</b> goes right after the cannon. Need a <b class="mist">superposition</b>? A <b class="mist">Hadamard (H)</b> goes there instead, fanning the <b class="cool">0</b> into a <b class="mist">mist</b> of <b class="warm">1</b> and <b class="cool">0</b>. Change <b class="w">A</b> or <b class="c">B</b> (try &#9733; all) and watch the gates rearrange themselves.'
+      sub:__L('Same adder but now every wire fires a 0 and a gate prepares it.','Derselbe Addierer — aber jetzt feuert jeder Draht eine 0, und ein Gatter bereitet sie vor.'),
+      capt:__L('Every qubit starts at <b class="cool">0</b> — a gate decides what it becomes.','Jedes Qubit startet bei <b class="cool">0</b> — ein Gatter entscheidet, was daraus wird.'),
+      caps:__L('The cannons no longer fire the "right" ball by magic — every wire really fires a plain <b class="cool">0</b>. Need a <b class="warm">1</b>? A <b class="elec">NOT</b> goes right after the cannon. Need a <b class="mist">superposition</b>? A <b class="mist">Hadamard (H)</b> goes there instead, fanning the <b class="cool">0</b> into a <b class="mist">mist</b> of <b class="warm">1</b> and <b class="cool">0</b>. Change <b class="w">A</b> or <b class="c">B</b> (try &#9733; all) and watch the gates rearrange themselves.','Die Kanonen feuern nicht mehr wie von Zauberhand die „richtige“ Kugel — jeder Draht feuert wirklich eine schlichte <b class="cool">0</b>. Brauchst du eine <b class="warm">1</b>? Ein <b class="elec">NOT</b> kommt direkt hinter die Kanone. Brauchst du eine <b class="mist">Überlagerung</b>? Dann kommt stattdessen ein <b class="mist">Hadamard (H)</b> dorthin und fächert die <b class="cool">0</b> zu einer <b class="mist">Wolke</b> aus <b class="warm">1</b> und <b class="cool">0</b> auf. Ändere <b class="w">A</b> oder <b class="c">B</b> (probiere &#9733; alle) und sieh zu, wie sich die Gatter neu anordnen.')
     } : {
-      sub:'Same idea, no double slit — just the circuit.',
-      capt:'No more slits — just <b class="mist">wires and gates</b>.',
-      caps:'Drop the double slit and this is exactly a real circuit diagram: wires left&rarr;right, boxes for gates. The rail a ball rides already encodes its value — the slit was only ever a teaching wheel.'
+      sub:__L('Same idea, no double slit — just the circuit.','Dieselbe Idee, ohne Doppelspalt — nur der Schaltkreis.'),
+      capt:__L('No more slits — just <b class="mist">wires and gates</b>.','Keine Spalte mehr — nur noch <b class="mist">Drähte und Gatter</b>.'),
+      caps:__L('Drop the double slit and this is exactly a real circuit diagram: wires left&rarr;right, boxes for gates. The rail a ball rides already encodes its value — the slit was only ever a teaching wheel.','Lass den Doppelspalt weg, und das hier ist genau ein echtes Schaltbild: Drähte von links nach rechts, Kästen für die Gatter. Die Schiene, auf der eine Kugel fährt, kodiert ihren Wert bereits — der Spalt war immer nur ein Stützrad.')
     };
   };
   s.buildControlsPrep=function(el){
@@ -1732,11 +1779,11 @@ function makeHadamardAdderScene(){
     const aB=mkbtn('','up',()=>{self.A=(self.A+1)%6;self._sync();self.afterSet();});
     const bB=mkbtn('','dn',()=>{self.B=(self.B+1)%5;self._sync();self.afterSet();});
     const cB=mkbtn('','',()=>{self.showSlit=!self.showSlit;self._sync();self.afterSet();});
-    el.append(aB,bB,cB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    el.append(aB,bB,cB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn(__L('Measure','Messen'),'',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
     this._sync=()=>{
-      aB.textContent='A = '+(self.A<4?self.A:(self.A===4?'{2,3}':'★ all')); aB.className='stepbtn '+(self.A>=4?'mist':'up');
-      bB.textContent='B = '+(self.B<4?self.B:'★ all'); bB.className='stepbtn '+(self.B>=4?'mist':'dn');
-      cB.textContent = self.showSlit ? 'Circuit' : '← Slit';
+      aB.textContent='A = '+(self.A<4?self.A:(self.A===4?'{2,3}':__L('★ all','★ alle'))); aB.className='stepbtn '+(self.A>=4?'mist':'up');
+      bB.textContent='B = '+(self.B<4?self.B:__L('★ all','★ alle')); bB.className='stepbtn '+(self.B>=4?'mist':'dn');
+      cB.textContent = self.showSlit ? __L('Circuit','Schaltkreis') : __L('← Slit','← Spalt');
       cB.className='stepbtn'+(self.showSlit?'':' mist');
     };this._sync();
   };
@@ -1879,6 +1926,60 @@ function makeHadamardAdderScene(){
 }
 const S6 = makeHadamardAdderScene();
 
+/* -------- German scene text (EN snapshots are taken at registration) ------ */
+__regDE(S1,{
+  tag:'1 · Qubit',
+  subtitle:'Feuere eine Kugel auf die beiden Spalte. Jetzt kann sie den oberen Spalt nehmen, den unteren — oder beide gleichzeitig.',
+  capTitle:'Ein Qubit kann <b class="warm">1</b>, <b class="cool">0</b> oder eine <b class="mist">Wolke</b> aus beidem sein.',
+  capSub:'Ein klassisches Bit muss sich für einen Spalt entscheiden. Ein <b class="mist">Qubit</b> kann durch <b class="warm">beide Spalte zugleich</b> gehen — eine <b class="mist">Überlagerung</b>. Wir zeichnen das als <b class="mist">Wolke</b>, die beide Möglichkeiten <b class="warm">1</b> und <b class="cool">0</b> enthält, bis wir <b>messen</b> — dann kollabiert sie zu einer einzigen Antwort.'
+});
+__regDE(S2,{
+  tag:'2 · NOT-Gatter',
+  subtitle:'Dasselbe Kreuzungs-Gatter — aber jetzt kann es auf eine ganze Wolke gleichzeitig wirken.',
+  capTitle:'<b class="elec">NOT</b> kippt <b class="mist">jeden Zweig</b> der Überlagerung gleichzeitig.',
+  capSub:'Ein eindeutiges Bit wechselt einfach die Spur, wie bisher. Feuerst du aber <b class="mist">beide</b>, kippt das Gatter <b class="warm">1</b>&rarr;<b class="cool">0</b> <i>und</i> <b class="cool">0</b>&rarr;<b class="warm">1</b> in einem einzigen Durchgang — die ganze <b class="mist">Wolke</b> wird auf einmal transformiert. Die ausgewogene Wolke bildet sich auf sich selbst ab, und doch ist jeder Zweig wirklich gekippt: ein erster Vorgeschmack auf <b class="mist">Quantenparallelismus</b>.'
+});
+__regDE(S3,{
+  tag:'3 · CNOT-Gatter',
+  subtitle:'Zwei Qubits. Jedes kann 0, 1 oder eine Wolke aus beidem sein. Das Gatter berücksichtigt alle Möglichkeiten gleichzeitig.',
+  capTitle:'<b class="elec">CNOT</b> auf einer überlagerten Kontrolle erzeugt eine <b class="mist">verschränkte</b> Wolke.',
+  capSub:'Mit eindeutiger Kontrolle ist es die alte Geschichte: Kontrolle <b class="warm">1</b> kippt das <b>Ziel</b>, Kontrolle <b class="cool">0</b> lässt es in Ruhe. Bringe die <b class="mist">Kontrolle</b> in eine Wolke aus beidem, und das Gatter wirkt auf jeden Zweig gleichzeitig — das Ergebnis ist eine Wolke aus zwei <i>verknüpften</i> Paaren: Misst du das eine Qubit, legt das auch das andere fest — <b class="mist">Verschränkung</b>. Überlagere auch das <b class="mist">Ziel</b>, und du bekommst eine größere Wolke — aber wenn die Kontrolle eindeutig ist, bleiben die Qubits unabhängig (eine schlichte Überlagerung, keine Verschränkung).'
+});
+__regDE(S4,{
+  tag:'4 · Toffoli-Gatter',
+  subtitle:'Drei Qubits. Das Ziel kippt nur, wenn BEIDE Kontrollen 1 sind — und jedes kann eine Wolke sein.',
+  capTitle:'<b class="elec">Toffoli</b>: Kippe das Ziel nur, wenn <b class="warm">beide</b> Kontrollen 1 sind.',
+  capSub:'Ein <b class="elec">AND</b>-gesteuertes Kippen: Das <b>Ziel ●</b> kreuzt nur, wenn <b>Dreieck ▲</b> und <b>Quadrat ■</b> beide <b class="warm">1</b> sind. Bringe die Kontrollen in eine <b class="mist">Wolke</b>, und das Gatter schreibt dieses AND ins Ziel — alle drei werden verschränkt. Überlagerst du nur das Ziel, verknüpft sich nichts — es ist bloß eine größere Überlagerung.'
+});
+__regDE(S5,{
+  tag:'5 · 2-Bit-Addierer',
+  subtitle:ADD_CSUB_DE,
+  capTitle:'Der ganze <b class="elec">Addierer</b>: Gatter verkettet zu einem Rangierbahnhof.',
+  capSub:'Sechs Bits fließen von links nach rechts &mdash; die Zahlen <b class="warm">A</b> und <b class="cool">B</b> plus zwei leere <b>Übertrag</b>-Bits. Drei Toffolis und drei CNOTs lenken die Kugeln so, dass die Ausgangs-Spuren <b class="e">A + B</b> ergeben. Zähl nach: sechs Kugeln rein, sechs raus &mdash; immer noch umkehrbar (reversibel).'
+});
+__regDE(S6,{ tag:'6 · Hadamard-Gatter' });
+__regDE(ADD_QCAP,{
+  t:'Ein Durchlauf, <b class="mist">alle Summen auf einmal</b>.',
+  s:'Bringe die Eingaben in eine <b class="mist">Wolke</b> aller Werte, und derselbe Addierer aus sechs Gattern berechnet <b class="warm">A</b>+<b class="cool">B</b> für <b>jedes</b> Paar gleichzeitig &mdash; die Ausgabe ist eine <b class="mist">Wolke von Summen</b>. Diese parallele Kraft ist das Herz des Quantencomputers. Der Haken: Die <b class="warn">Messung</b> lässt die Wolke auf nur <b>eine</b> zufällige Summe kollabieren &mdash; ein echter Quantenalgorithmus muss die nützliche Antwort also erst nach oben lenken.'
+});
+const STAGE_DE=[
+  {t:'Die Werkbank: sechs Bits, noch keine Gatter.',
+   s:'<b class="warm">a0, a1</b> sind die Bits der Zahl <b class="warm">A</b>; <b class="cool">b0, b1</b> sind Zahl <b class="cool">B</b>; <b>c1, c2</b> sind leere <b>Übertrag</b>-Bits (starten bei 0). Feuere &mdash; jede Kugel fliegt geradewegs zu ihrer Anzeige. Addiert wird noch nichts.'},
+  {t:'Einerspalte &mdash; schreibe den Übertrag.',
+   s:'Der erste <b class="elec">Toffoli</b> setzt c1 = a0 AND b0: den Übertrag aus der Einerspalte.'},
+  {t:'Einerspalte &mdash; schreibe die Summe (Halbaddierer fertig).',
+   s:'Ein <b class="elec">CNOT</b> macht aus b0 a0 XOR b0 = <b class="elec">s0</b>. Probiere <b class="warm">1</b>+<b class="warm">1</b>: Summe 0, Übertrag 1.'},
+  {t:'Zweierspalte &mdash; schreibe ihren Übertrag.',
+   s:'Ein zweiter <b class="elec">Toffoli</b> setzt c2 = a1 AND b1.'},
+  {t:'Zweierspalte &mdash; Teilsumme.',
+   s:'Ein <b class="elec">CNOT</b> faltet a1 in b1 hinein (a1 XOR b1) &mdash; fertig ist das erst, wenn der Übertrag ankommt.'},
+  {t:'Der Übertrag wandert &mdash; hinein in die Zweierspalte.',
+   s:'Ein <b class="elec">Toffoli</b> addiert den Einer-Übertrag c1 in c2 hinein (wenn b1 gesetzt ist).'},
+  {t:'Letztes Summenbit &mdash; der Addierer ist komplett.',
+   s:'Das letzte <b class="elec">CNOT</b> faltet c1 in b1 = <b class="elec">s1</b>. Die Ausgangs-Spuren ergeben jetzt <b class="elec">A + B</b>. Sechs Kugeln rein, sechs raus.'}
+];
+S5.STAGE.forEach((st,i)=>__regDE(st,STAGE_DE[i]));
+
 /* ----------------------------- scene manager ------------------------------ */
 const scenes=[S1,S2,S3,S4,S5,S6];
 const labels=['Qubit','NOT','CNOT','Toffoli','Adder','Hadamard'];
@@ -1898,6 +1999,7 @@ const dotEls=labels.map((l,i)=>{
   d.innerHTML='<span class="pip"></span><span class="dl">'+l+'</span>';
   d.onclick=()=>go(i);dotsWrap.appendChild(d);return d;
 });
+const labelsDE=['Qubit','NOT','CNOT','Toffoli','Addierer','Hadamard'];
 function applySceneUI(s){
   els.subtitle.innerHTML=s.subtitle;
   els.tag.textContent=s.tag;els.tag.style.color=s.tagColor;els.tag.style.borderColor=s.tagColor+'55';
@@ -1932,6 +2034,26 @@ resize();
 scenes[0].onEnter();
 applySceneUI(scenes[0]);
 requestAnimationFrame(frame);
+
+/* --------------------------- EN|DE live refresh --------------------------- */
+function __refreshLang(){
+  if(typeof dotEls!=='undefined'){
+    const L=window.__omLang==='de'?labelsDE:labels;
+    dotEls.forEach((d,i)=>{ d.querySelector('.dl').textContent=L[i]; });
+  }
+  const s=scenes[cur];
+  if(s===S5){
+    // S5.onEnter would reset the build stage; rebuild controls + repaint instead
+    s.buildControls(document.getElementById('sctrl'));
+    s.afterSet();
+  } else {
+    s.onEnter();
+  }
+  applySceneUI(s);
+}
+window.addEventListener('om-lang',__applyLang);
+window.__omApplyStatic();
+if(window.__omLang==='de') __applyLang();
 </script>
 </body>
 </html>

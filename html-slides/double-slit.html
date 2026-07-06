@@ -28,6 +28,14 @@
   header h1 .a{color:var(--cool)}
   header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;
     transition:opacity .3s}
+  header{position:relative}
+  .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+  .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+  .lang-switch button.active{background:#1b2350;color:var(--ink)}
+  .lang-switch button:not(.active):hover{color:var(--ink)}
 
   .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
   .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
@@ -108,7 +116,8 @@
 </head>
 <body>
   <header>
-    <h1>The <span class="a">Double-Slit</span> Experiment</h1>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="Das <span class='a'>Doppelspalt</span>-Experiment">The <span class="a">Double-Slit</span> Experiment</h1>
     <p id="subtitle"></p>
   </header>
 
@@ -123,25 +132,25 @@
           <img class="vthumb" src="https://img.youtube.com/vi/ZqS8Jjkk1HI/hqdefault.jpg"
             alt="The Double Slit Experiment Performed With Electrons">
           <span class="playbtn"></span>
-          <span class="playhint">▶ Watch on YouTube (opens in a new tab)</span>
+          <span class="playhint" data-de="▶ Auf YouTube ansehen (öffnet in neuem Tab)">▶ Watch on YouTube (opens in a new tab)</span>
         </a>
       </div>
       <div class="tag" id="tag"></div>
 
       <div class="qctrl" id="qctrl">
         <div class="toggle" id="obsToggle">
-          <span class="lab">👁 Observe which slit</span>
+          <span class="lab" data-de="👁 Spalt beobachten">👁 Observe which slit</span>
           <span class="switch"></span>
         </div>
-        <div class="counter">electrons: <b id="ecount">0</b></div>
-        <button class="qbtn" id="resetBtn">Reset screen</button>
+        <div class="counter"><span data-de="Elektronen:">electrons:</span> <b id="ecount">0</b></div>
+        <button class="qbtn" id="resetBtn" data-de="Schirm zurücksetzen">Reset screen</button>
       </div>
 
       <div class="speedctrl" id="speedctrl">
-        <button class="qbtn" id="sceneReset">↻ Reset</button>
-        <span>slow</span>
+        <button class="qbtn" id="sceneReset" data-de="↻ Zurücksetzen">↻ Reset</button>
+        <span data-de="langsam">slow</span>
         <input type="range" id="speed" min="0.075" max="6" step="0.025" value="0.075">
-        <span>fast</span>
+        <span data-de="schnell">fast</span>
       </div>
 
       <div class="caption" id="caption">
@@ -157,11 +166,48 @@
       <button class="nav" id="prev" title="Previous (←)">◀</button>
       <button class="nav" id="next" title="Next (→)">▶</button>
     </div>
-    <div class="hint">Use <b>◀ ▶</b> or the <b>arrow keys</b> to move between scenes · click a label to jump.</div>
+    <div class="hint" data-de="Nutze <b>◀ ▶</b> oder die <b>Pfeiltasten</b>, um zwischen den Szenen zu wechseln · klicke auf eine Beschriftung, um zu springen.">Use <b>◀ ▶</b> or the <b>arrow keys</b> to move between scenes · click a label to jump.</div>
   </div>
 
 <script>
 "use strict";
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+const __L=(en,de)=>window.__omLang==='de'?de:en;
+const __SWAPS=[];
+function __regDE(obj,de){ for(const k in de){ __SWAPS.push([obj,k,obj[k],de[k]]); } }
+function __applyLang(){
+  const de=window.__omLang==='de';
+  __SWAPS.forEach(s=>{ s[0][s[1]]=de?s[3]:s[2]; });
+  __refreshLang();
+}
+
 /* ============================================================================
    THE DOUBLE-SLIT EXPERIMENT  —  3 navigable scenes
      1) classical balls  -> two bands (no interference)
@@ -640,6 +686,7 @@ const dotEls=labels.map((l,i)=>{
   d.innerHTML=`<span class="pip"></span><span class="dl">${l}</span>`;
   d.onclick=()=>go(i); dotsWrap.appendChild(d); return d;
 });
+const labelsDE=['Bälle','Wellen','Das echte Experiment','Elektronen'];
 
 function applySceneUI(s){
   els.subtitle.textContent=s.subtitle;
@@ -690,6 +737,40 @@ scenes[0].onResize && scenes[0].onResize();
 scenes[0].onEnter && scenes[0].onEnter();
 applySceneUI(scenes[0]);
 requestAnimationFrame(loop);
+
+/* ---- German text for the JS-driven scene copy ---- */
+__regDE(sceneBalls,{
+  tag:'1 · Klassische Bälle',
+  subtitle:'Schieße Farbbälle auf eine Wand mit zwei Spalten. Was landet auf dem Schirm dahinter?',
+  capTitle:'Teilchen erzeugen <b class="warm">zwei Streifen</b>.',
+  capSub:'Jeder Ball fliegt durch <b class="warm">einen</b> Spalt oder den anderen und dann geradeaus weiter. Auf dem Schirm häufen sich die Treffer zu genau zwei Hügeln — einer hinter jeder Öffnung.',
+});
+__regDE(sceneWaves,{
+  tag:'2 · Wellen',
+  subtitle:'Jetzt schicken wir eine Welle auf dieselbe Wand — Wasserwellen, Schall, Licht. ',
+  capTitle:'Wellen erzeugen <b class="cool">viele Streifen</b> — Interferenz.',
+  capSub:'Eine Welle läuft durch <b class="cool">beide</b> Spalte gleichzeitig. Wo zwei Wellenberge zusammentreffen, verstärken sie sich (hell); wo ein Berg auf ein Tal trifft, löschen sie sich aus (dunkel). Das Ergebnis: ein Muster aus <b class="cool">vielen</b> Streifen.',
+});
+__regDE(sceneVideo,{
+  tag:'3 · Das echte Experiment',
+  subtitle:'Keine Simulation: das Doppelspalt-Experiment, tatsächlich mit Elektronen durchgeführt.',
+});
+__regDE(sceneElectrons,{
+  tag:'4 · Elektronen',
+  subtitle:'Quantenteilchen verhalten sich gleichzeitig wie Teilchen und wie Wellen.',
+  capTitle:'Materie baut das <b class="cool">Wellenmuster</b> auf — Punkt für Punkt.',
+  capSub:'Jedes Elektron landet als einzelner Punkt, doch tausende Punkte ergeben Interferenzstreifen. Unbeobachtet nimmt jedes Elektron <b class="elec">beide Wege gleichzeitig</b>. Frage <b class="warn">„welcher Spalt?“</b> — und die Streifen verschwinden: zurück zu zwei Streifen.',
+});
+function __refreshLang(){
+  applySceneUI(scenes[cur]);
+  if(typeof dotEls!=='undefined'){
+    const L=window.__omLang==='de'?labelsDE:labels;
+    dotEls.forEach((d,i)=>{ d.querySelector('.dl').textContent=L[i]; });
+  }
+}
+window.addEventListener('om-lang',__applyLang);
+window.__omApplyStatic();
+if(window.__omLang==='de') __applyLang();
 </script>
 </body>
 </html>

@@ -27,6 +27,14 @@
   header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
   header h1 .a{color:var(--cool)}
   header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;transition:opacity .3s}
+  header{position:relative}
+  .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+  .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+  .lang-switch button.active{background:#1b2350;color:var(--ink)}
+  .lang-switch button:not(.active):hover{color:var(--ink)}
 
   .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
   .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
@@ -94,7 +102,8 @@
 </head>
 <body>
   <header>
-    <h1>Bits as <span class="a">Cannonballs</span></h1>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="Bits als <span class='a'>Kanonenkugeln</span>">Bits as <span class="a">Cannonballs</span></h1>
     <p id="subtitle"></p>
   </header>
 
@@ -117,22 +126,58 @@
       <button class="nav" id="prev" title="Previous (&#8592;)">&#9664;</button>
       <button class="nav" id="next" title="Next (&#8594;)">&#9654;</button>
     </div>
-    <div class="hint">Use <b>&#9664; &#9654;</b> or the <b>arrow keys</b> to move between panels &middot; fire the cannon to send a bit.</div>
+    <div class="hint" data-de="Nutze <b>&#9664; &#9654;</b> oder die <b>Pfeiltasten</b>, um zwischen den Ansichten zu wechseln &middot; feuere die Kanone, um ein Bit zu senden.">Use <b>&#9664; &#9654;</b> or the <b>arrow keys</b> to move between panels &middot; fire the cannon to send a bit.</div>
   </div>
 
   <div class="wsheet" id="wsheet">
-    <div class="wsh-head"><b>binary addition</b><span class="wsh-badge" id="wshBadge">0/6</span></div>
+    <div class="wsh-head"><b data-de="binäre Addition">binary addition</b><span class="wsh-badge" id="wshBadge">0/6</span></div>
     <table class="wsh-grid">
-      <tr class="wsh-carry"><td class="wsh-lab">carry</td><td id="wsC4"></td><td id="wsC2"></td><td></td></tr>
+      <tr class="wsh-carry"><td class="wsh-lab" data-de="Übertrag">carry</td><td id="wsC4"></td><td id="wsC2"></td><td></td></tr>
       <tr><td class="wsh-lab">A</td><td></td><td id="wsA2"></td><td id="wsA1"></td></tr>
       <tr><td class="wsh-lab">+B</td><td></td><td id="wsB2"></td><td id="wsB1"></td></tr>
       <tr class="wsh-rule"><td></td><td colspan="3"><hr></td></tr>
-      <tr class="wsh-sum"><td class="wsh-lab">Sum</td><td id="wsS4"></td><td id="wsS2"></td><td id="wsS1"></td></tr>
+      <tr class="wsh-sum"><td class="wsh-lab" data-de="Summe">Sum</td><td id="wsS4"></td><td id="wsS2"></td><td id="wsS1"></td></tr>
     </table>
   </div>
 
 <script>
 "use strict";
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+const __L=(en,de)=>window.__omLang==='de'?de:en;
+const __SWAPS=[];
+function __regDE(obj,de){ for(const k in de){ __SWAPS.push([obj,k,obj[k],de[k]]); } }
+function __applyLang(){
+  const de=window.__omLang==='de';
+  __SWAPS.forEach(s=>{ s[0][s[1]]=de?s[3]:s[2]; });
+  __refreshLang();
+}
 /* ============================================================================
    BITS AS CANNONBALLS  —  reversible logic on slit-paths
      1) Bit      : one shot, up slit = 1 / down slit = 0; rides that lane.
@@ -237,7 +282,7 @@ function drawCannon(){
   ctx.beginPath();ctx.arc(G.sx,G.cy,Math.max(7,H*0.014),0,7);ctx.fillStyle=C.warm;ctx.fill();
   ctx.restore();
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText('cannon',G.sx,G.cy+H*0.05);
+  ctx.fillText(__L('cannon','Kanone'),G.sx,G.cy+H*0.05);
 }
 function drawReadout(landed){
   [[G.sTop,C.warm,'1',1],[G.sBot,C.cool,'0',0]].forEach(z=>{
@@ -251,7 +296,7 @@ function drawReadout(landed){
     ctx.fillStyle=on?'#10131f':z[1];ctx.fillText(z[2],G.rx,z[0]+5);
   });
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText('readout',G.rx,G.sBot+H*0.05);
+  ctx.fillText(__L('readout','Anzeige'),G.rx,G.sBot+H*0.05);
 }
 function drawNOTgate(){
   const x0=G.gateX-G.cw, x1=G.gateX+G.cw;
@@ -446,10 +491,10 @@ function makeScene(cfg){
     fire(v){
       this.landed=null; this.vin=v;
       this.ball={vin:v, vout:this.hasNOT?(1-v):v, x:G.sx, y:G.cy, phase:'toSlit'};
-      document.getElementById('readout').innerHTML='Firing&hellip;';
+      document.getElementById('readout').innerHTML=__L('Firing&hellip;','Feuern&hellip;');
     },
     reset(){ this.ball=null; this.landed=null; this.vin=null;
-      document.getElementById('readout').innerHTML=cfg.idle; },
+      document.getElementById('readout').innerHTML=cfg.idle(); },
     step(dt){
       const b=this.ball; if(!b) return;
       const vx=W*0.42*dt;
@@ -483,8 +528,8 @@ function makeScene(cfg){
     buildControls(el){
       el.innerHTML='';const self=this;
       el.append(
-        mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
-        mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
+        mkbtn(__L('Fire ▲ (1)','Feuer ▲ (1)'),'up',()=>self.fire(1)),
+        mkbtn(__L('Fire ▼ (0)','Feuer ▼ (0)'),'dn',()=>self.fire(0)),
         mkbtn('↻','',()=>self.reset())
       );
     },
@@ -499,8 +544,8 @@ const S1=makeScene({
   capTitle:'A bit is <b class="warm">which slit</b> the ball took.',
   capSub:'Aim <b class="warm">up</b> and the ball goes through the top slit &mdash; we call that <b class="warm">1</b>. Aim <b class="cool">down</b>, bottom slit, <b class="cool">0</b>. After the slit it rides that lane to the readout.',
   hasNOT:false,
-  idle:'Press <b class="w">Fire &#9650;</b> or <b class="c">Fire &#9660;</b> to send a bit.',
-  result:(vin,vout)=>'The ball took the '+(vout?'<b class="w">up</b> slit &rarr; bit = <b class="w">1</b>':'<b class="c">down</b> slit &rarr; bit = <b class="c">0</b>'),
+  idle:()=>__L('Press <b class="w">Fire &#9650;</b> or <b class="c">Fire &#9660;</b> to send a bit.','Drücke <b class="w">Feuer &#9650;</b> oder <b class="c">Feuer &#9660;</b>, um ein Bit zu senden.'),
+  result:(vin,vout)=>__L('The ball took the ','Die Kugel nahm den ')+(vout?__L('<b class="w">up</b> slit &rarr; bit = <b class="w">1</b>','<b class="w">oberen</b> Spalt &rarr; Bit = <b class="w">1</b>'):__L('<b class="c">down</b> slit &rarr; bit = <b class="c">0</b>','<b class="c">unteren</b> Spalt &rarr; Bit = <b class="c">0</b>')),
 });
 
 const S2=makeScene({
@@ -509,8 +554,8 @@ const S2=makeScene({
   capTitle:'<b class="elec">NOT</b> swaps the lanes &mdash; same ball, flipped bit.',
   capSub:'The crossover sends an <b class="warm">up</b> ball out on the <b class="cool">down</b> lane and vice-versa. Nothing is created or destroyed: one ball in, one ball out. That &ldquo;count stays the same&rdquo; rule is what makes it <b class="elec">reversible</b>.',
   hasNOT:true,
-  idle:'Fire a bit and watch the <b class="e">NOT</b> gate flip it.',
-  result:(vin,vout)=>'In <b class="'+(vin?'w':'c')+'">'+vin+'</b> &rarr; <b class="e">NOT</b> &rarr; out <b class="'+(vout?'w':'c')+'">'+vout+'</b>',
+  idle:()=>__L('Fire a bit and watch the <b class="e">NOT</b> gate flip it.','Feuere ein Bit und sieh zu, wie das <b class="e">NOT</b>-Gatter es kippt.'),
+  result:(vin,vout)=>__L('In ','Rein ')+'<b class="'+(vin?'w':'c')+'">'+vin+'</b> &rarr; <b class="e">NOT</b> &rarr; '+__L('out ','raus ')+'<b class="'+(vout?'w':'c')+'">'+vout+'</b>',
 });
 
 /* =========================================================================
@@ -527,26 +572,26 @@ const S3={
     el.innerHTML='';const self=this;
     const cB=mkbtn('','',()=>{self.cin^=1;self._sync();self.reset();});
     const tB=mkbtn('','',()=>{self.tin^=1;self._sync();self.reset();});
-    el.append(cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('↻','',()=>self.reset()));
+    el.append(cB,tB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn('↻','',()=>self.reset()));
     this._sync=function(){
-      cB.textContent='control '+(self.cin?'▲ 1':'▼ 0');cB.className='stepbtn '+(self.cin?'up':'dn');
-      tB.textContent='target '+(self.tin?'▲ 1':'▼ 0');tB.className='stepbtn '+(self.tin?'up':'dn');
+      cB.textContent=__L('control ','Kontrolle ')+(self.cin?'▲ 1':'▼ 0');cB.className='stepbtn '+(self.cin?'up':'dn');
+      tB.textContent=__L('target ','Ziel ')+(self.tin?'▲ 1':'▼ 0');tB.className='stepbtn '+(self.tin?'up':'dn');
     };this._sync();
   },
   reset(){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;
-    this.setReadout('Set the <b class="e">control</b> and <b class="w">target</b>, then press <b>Run</b>.'); },
+    this.setReadout(__L('Set the <b class="e">control</b> and <b class="w">target</b>, then press <b>Run</b>.','Stelle <b class="e">Kontrolle</b> und <b class="w">Ziel</b> ein, dann drücke <b>Start</b>.')); },
   run(){
     this.cLanded=this.tLanded=null;
     const active=this.cin===1, tout=active?(1-this.tin):this.tin;
     this.cball={x:G.sx,y:G.cyC,sy:(this.cin?G.cTop:G.cBot),vin:this.cin,phase:'toSlit'};
     this.tball={x:G.sx,y:G.cyT,syIn:(this.tin?G.tTop:G.tBot),syOut:(tout?G.tTop:G.tBot),vin:this.tin,vout:tout,phase:'toSlit'};
-    this.setReadout('Running&hellip;');
+    this.setReadout(__L('Running&hellip;','Läuft&hellip;'));
   },
   _result(){
     if(this.cball||this.tball)return;
     if(this.cLanded==null&&this.tLanded==null)return;
     const cin=this.cLanded,tout=this.tLanded;
-    this.setReadout('control <b class="'+(cin?'w':'c')+'">'+cin+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">CNOT</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+    this.setReadout(__L('control ','Kontrolle ')+'<b class="'+(cin?'w':'c')+'">'+cin+'</b> '+__L('(unchanged)','(unverändert)')+' &nbsp;·&nbsp; '+__L('target ','Ziel ')+'<b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">CNOT</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
   },
   step(dt){
     const vx=W*0.42*dt;
@@ -572,8 +617,8 @@ const S3={
                       {y:G.tTop,color:C.warm,lab:'1'},{y:G.tBot,color:C.cool,lab:'0'}],G.sH2);
     drawCannonAt(G.cyC,'square',colOf(this.cin));drawCannonAt(G.cyT,'circle',colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.cTop-12);
-    ctx.fillText('target',G.sx,G.tBot+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.cTop-12);
+    ctx.fillText(__L('target','Ziel'),G.sx,G.tBot+18);
     const drawB=(b,vbefore,vafter)=>{const v=b.x<G.gateX?vbefore:vafter,col=colOf(v);
       ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
       ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
@@ -600,7 +645,7 @@ const S4={
     const cA=mkbtn('','',()=>{self.c1^=1;self._sync();self.reset();});
     const cB=mkbtn('','',()=>{self.c2^=1;self._sync();self.reset();});
     const tB=mkbtn('','',()=>{self.tin^=1;self._sync();self.reset();});
-    el.append(cA,cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('↻','',()=>self.reset()));
+    el.append(cA,cB,tB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn('↻','',()=>self.reset()));
     this._sync=function(){
       cA.textContent='▲ '+(self.c1?'1':'0');cA.className='stepbtn '+(self.c1?'up':'dn');
       cB.textContent='■ '+(self.c2?'1':'0');cB.className='stepbtn '+(self.c2?'up':'dn');
@@ -608,19 +653,19 @@ const S4={
     };this._sync();
   },
   reset(){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;
-    this.setReadout('Set the two <b class="e">controls</b> (■ ▲) and the <b class="w">target</b> (●), then press <b>Run</b>.'); },
+    this.setReadout(__L('Set the two <b class="e">controls</b> (■ ▲) and the <b class="w">target</b> (●), then press <b>Run</b>.','Stelle die beiden <b class="e">Kontrollen</b> (■ ▲) und das <b class="w">Ziel</b> (●) ein, dann drücke <b>Start</b>.')); },
   run(){
     this.l1=this.l2=this.l3=null;const act=this.active(),tout=act?(1-this.tin):this.tin;
     this.b1={x:G.sx,y:G.t3a,sy:(this.c1?G.a1T:G.a1B),vin:this.c1,cy:G.t3a,phase:'toSlit'};
     this.b2={x:G.sx,y:G.t3b,sy:(this.c2?G.a2T:G.a2B),vin:this.c2,cy:G.t3b,phase:'toSlit'};
     this.b3={x:G.sx,y:G.t3c,syIn:(this.tin?G.a3T:G.a3B),syOut:(tout?G.a3T:G.a3B),vin:this.tin,vout:tout,cy:G.t3c,phase:'toSlit'};
-    this.setReadout('Running&hellip;');
+    this.setReadout(__L('Running&hellip;','Läuft&hellip;'));
   },
   _result(){
     if(this.b1||this.b2||this.b3)return;
     if(this.l1==null&&this.l2==null&&this.l3==null)return;
     const tout=this.l3;
-    this.setReadout('controls <b class="'+(this.l1?'w':'c')+'">'+this.l1+'</b> <b class="'+(this.l2?'w':'c')+'">'+this.l2+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">Toffoli</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+    this.setReadout(__L('controls ','Kontrollen ')+'<b class="'+(this.l1?'w':'c')+'">'+this.l1+'</b> <b class="'+(this.l2?'w':'c')+'">'+this.l2+'</b> '+__L('(unchanged)','(unverändert)')+' &nbsp;·&nbsp; '+__L('target ','Ziel ')+'<b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">Toffoli</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
   },
   step(dt){
     const vx=W*0.42*dt;
@@ -650,8 +695,8 @@ const S4={
                       {y:G.a3T,color:C.warm,lab:'1'},{y:G.a3B,color:C.cool,lab:'0'}],G.sH3);
     drawCannonAt(G.t3a,'triangle',colOf(this.c1));drawCannonAt(G.t3b,'square',colOf(this.c2));drawCannonAt(G.t3c,'circle',colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);
-    ctx.fillText('target',G.sx,G.a3B+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.a1T-12);ctx.fillText(__L('control','Kontrolle'),G.sx,G.a2T-12);
+    ctx.fillText(__L('target','Ziel'),G.sx,G.a3B+18);
     const drawB=(b,vb,va)=>{const v=b.x<G.gateX?vb:va,col=colOf(v);
       ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
       ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
@@ -696,7 +741,7 @@ const S5={
     const ct=document.getElementById('capTitle'),cs=document.getElementById('capSub');
     if(ct)ct.innerHTML=c.t;if(cs)cs.innerHTML=c.s;
     this.prog=0;this.running=false;this.landed=null;this.simulate();
-    this.setReadout(s===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+s+' gate'+(s>1?'s':'')+' built so far.');
+    this.setReadout(s===0?__L('Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.','Stelle <b class="w">A</b> und <b class="c">B</b> ein, dann <b>Start</b>: sechs gerade Schüsse.'):__L('Press <b>Run</b> to fire through the '+s+' gate'+(s>1?'s':'')+' built so far.',s>1?'Drücke <b>Start</b>, um durch die '+s+' bisher gebauten Gatter zu feuern.':'Drücke <b>Start</b>, um durch das bisher gebaute Gatter zu feuern.'));
     if(this._sync)this._sync();
   },
   setReadout(t){ document.getElementById('readout').innerHTML=t; },
@@ -728,20 +773,20 @@ const S5={
     const aB=mkbtn('','up',()=>{self.A=(self.A+1)%4;self._sync();self.reset();});
     const bB=mkbtn('','dn',()=>{self.B=(self.B+1)%4;self._sync();self.reset();});
     const buildB=mkbtn('','',()=>{self.setStage((self.stage+1)%7);});
-    el.append(aB,bB,buildB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('↻','',()=>self.reset()));
-    this._sync=()=>{aB.textContent='A = '+self.A;bB.textContent='B = '+self.B;buildB.textContent='Build ▶ '+self.stage+'/6';};this._sync();
+    el.append(aB,bB,buildB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn('↻','',()=>self.reset()));
+    this._sync=()=>{aB.textContent='A = '+self.A;bB.textContent='B = '+self.B;buildB.textContent=__L('Build ▶ ','Aufbau ▶ ')+self.stage+'/6';};this._sync();
   },
   reset(){ this.prog=0;this.running=false;this.landed=null;this.simulate();
-    this.setReadout(this.stage===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+this.stage+' gate'+(this.stage>1?'s':'')+' built so far.'); },
-  run(){ this.simulate();this.prog=0;this.running=true;this.landed=null;this.setReadout('Running&hellip;'); },
+    this.setReadout(this.stage===0?__L('Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.','Stelle <b class="w">A</b> und <b class="c">B</b> ein, dann <b>Start</b>: sechs gerade Schüsse.'):__L('Press <b>Run</b> to fire through the '+this.stage+' gate'+(this.stage>1?'s':'')+' built so far.',this.stage>1?'Drücke <b>Start</b>, um durch die '+this.stage+' bisher gebauten Gatter zu feuern.':'Drücke <b>Start</b>, um durch das bisher gebaute Gatter zu feuern.')); },
+  run(){ this.simulate();this.prog=0;this.running=true;this.landed=null;this.setReadout(__L('Running&hellip;','Läuft&hellip;')); },
   step(dt){
     if(!this.running)return;
     this.prog+=dt*0.38;
     if(this.prog>=1){this.prog=1;this.running=false;this.landed=this.sim.outVals;
       const o=this.sim.outVals,s0=o[1],s1=o[4],s2=o[5];
-      if(this.stage===0) this.setReadout('A = <b class="w">'+this.A+'</b>, B = <b class="c">'+this.B+'</b> &mdash; six straight shots, nothing added yet.');
+      if(this.stage===0) this.setReadout('A = <b class="w">'+this.A+'</b>, B = <b class="c">'+this.B+'</b>'+__L(' &mdash; six straight shots, nothing added yet.',' &mdash; sechs gerade Schüsse, noch nichts addiert.'));
       else if(this.stage===6) this.setReadout('<b class="w">'+this.A+'</b> + <b class="c">'+this.B+'</b> = <b class="e">'+(this.A+this.B)+'</b> &nbsp; (s&#8322;s&#8321;s&#8320; = '+s2+s1+s0+')');
-      else this.setReadout('Built <b>'+this.stage+'/6</b> gates &mdash; partial result on the output lanes.');}
+      else this.setReadout(__L('Built <b>','Erst <b>')+this.stage+__L('/6</b> gates &mdash; partial result on the output lanes.','/6</b> Gatter gebaut &mdash; Teilergebnis auf den Ausgangsspuren.'));}
   },
   drawGate(g,gi){
     const x=G.adGX[gi],tg=g.tg,cy=G.adCy[tg],lg=G.adLG;
@@ -822,9 +867,9 @@ const S5={
     }
     ctx.textBaseline='alphabetic';
     ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText(this.stage===0?'output register — nothing added yet'
-      :full?'output register · big = sum s₂s₁s₀ · small = discarded'
-      :'output register — partial (build more gates)',xc,y+r+18);
+    ctx.fillText(this.stage===0?__L('output register — nothing added yet','Ausgaberegister — noch nichts addiert')
+      :full?__L('output register · big = sum s₂s₁s₀ · small = discarded','Ausgaberegister · groß = Summe s₂s₁s₀ · klein = verworfen')
+      :__L('output register — partial (build more gates)','Ausgaberegister — unvollständig (baue mehr Gatter)'),xc,y+r+18);
     ctx.restore();
   },
   draw(){
@@ -849,7 +894,7 @@ const S5={
       ctx.font='800 12px Inter,system-ui';ctx.fillStyle=C.elec;ctx.textAlign='left';
       [[1,'s0'],[4,'s1'],[5,'s2']].forEach(p=>ctx.fillText(p[1],G.rx+rr+7,G.adCy[p[0]]+4));
       ctx.font='italic 10px Inter,system-ui';ctx.fillStyle=C.muted;
-      [0,2,3].forEach(i=>ctx.fillText('discard',G.rx+rr+7,G.adCy[i]+4));
+      [0,2,3].forEach(i=>ctx.fillText(__L('discard','verworfen'),G.rx+rr+7,G.adCy[i]+4));
     }
     this.gates.forEach((g,gi)=>{if(gi<this.stage)this.drawGate(g,gi);});
     const slits=[];for(let i=0;i<6;i++){slits.push({y:this.bitLane(i,1),color:C.warm});slits.push({y:this.bitLane(i,0),color:C.cool});}
@@ -891,6 +936,52 @@ const S5={
   onLeave(){ document.getElementById('panel').classList.remove('wsmode');document.getElementById('wsheet').classList.remove('show');this.running=false;this.prog=0; },
 };
 
+/* ---- German versions of the scene strings (registered after the English defs) ---- */
+__regDE(S1,{
+  tag:'1 · Bit',
+  subtitle:'Feuere eine Kugel auf eine Wand mit zwei Spalten. Durch welchen Spalt sie fliegt — das IST das Bit.',
+  capTitle:'Ein Bit ist: <b class="warm">welchen Spalt</b> die Kugel genommen hat.',
+  capSub:'Ziele <b class="warm">nach oben</b>, und die Kugel fliegt durch den oberen Spalt &mdash; das nennen wir <b class="warm">1</b>. Ziele <b class="cool">nach unten</b>: unterer Spalt, <b class="cool">0</b>. Nach dem Spalt läuft sie auf ihrer Spur bis zur Anzeige.',
+});
+__regDE(S2,{
+  tag:'2 · NOT-Gatter',
+  subtitle:'Ein Gatter ist eine Weiche auf den Spuren. &bdquo;NOT&ldquo; ist das einfachste: Es kreuzt sie einfach.',
+  capTitle:'<b class="elec">NOT</b> vertauscht die Spuren &mdash; gleiche Kugel, gekipptes Bit.',
+  capSub:'Die Kreuzung schickt eine Kugel von der <b class="warm">oberen</b> Spur auf der <b class="cool">unteren</b> hinaus &mdash; und umgekehrt. Nichts entsteht, nichts verschwindet: eine Kugel rein, eine Kugel raus. Die Regel &bdquo;die Anzahl bleibt gleich&ldquo; macht das Gatter <b class="elec">umkehrbar</b> (reversibel).',
+});
+__regDE(S3,{
+  tag:'3 · CNOT-Gatter',
+  subtitle:'Jetzt zwei Bits. Ein Kontrollbit entscheidet, ob das NOT auf das Ziel wirkt.',
+  capTitle:'<b class="elec">CNOT</b>: Kippe das Ziel nur, wenn die Kontrolle <b class="warm">1</b> ist.',
+  capSub:'Das obere Bit ist die <b class="elec">Kontrolle</b>. Läuft seine Kugel auf der <b class="warm">oberen&nbsp;(1)</b>-Spur, legt sie die Weiche um und die <b class="cool">Ziel</b>-Box kreuzt; ist die Kontrolle <b class="cool">0</b>, fliegt das Ziel einfach geradeaus hindurch. Die Kontrolle selbst wird nie verändert — zwei Kugeln rein, zwei Kugeln raus.',
+});
+__regDE(S4,{
+  tag:'4 · Toffoli-Gatter',
+  subtitle:'Drei Bits. Das Ziel kippt nur, wenn BEIDE Kontrollen 1 sind.',
+  capTitle:'<b class="elec">Toffoli</b>: Kippe das Ziel nur, wenn <b class="warm">beide</b> Kontrollen 1 sind.',
+  capSub:'Die <b class="cool">Ziel</b>-Box kreuzt nur, wenn <b>Quadrat</b> und <b>Dreieck</b> beide auf ihrer <b class="warm">oberen&nbsp;(1)</b>-Spur laufen &mdash; eine Weiche, verdrahtet als <b class="elec">UND</b>. Immer noch umkehrbar: drei Kugeln rein, drei Kugeln raus.',
+});
+__regDE(S5,{
+  tag:'5 · 2-Bit-Addierer',
+  subtitle:'Verkette die Gatter zu einer Maschine, die zwei 2-Bit-Zahlen addiert.',
+  capTitle:'Der ganze <b class="elec">Addierer</b>: Gatter verkettet zu einem Rangierbahnhof.',
+  capSub:'Sechs Bits fließen von links&rarr;rechts &mdash; die Zahlen <b class="warm">A</b> und <b class="cool">B</b> plus zwei leere <b>Übertrag</b>-Bits. Drei Toffolis und drei CNOTs lenken die Kugeln so, dass auf den Ausgangsspuren <b class="e">A + B</b> steht. Zähl nach: sechs Kugeln rein, sechs raus &mdash; immer noch umkehrbar.',
+});
+__regDE(S5.STAGE[0],{t:'Die Werkbank: sechs Bits, noch keine Gatter.',
+ s:'<b class="warm">a0, a1</b> sind die Bits der Zahl <b class="warm">A</b>; <b class="cool">b0, b1</b> sind die Zahl <b class="cool">B</b>; <b>c1, c2</b> sind leere <b>Übertrag</b>-Bits (sie starten bei 0). Feuere &mdash; jede Kugel fliegt geradeaus zu ihrer Anzeige. Noch wird nichts addiert.'});
+__regDE(S5.STAGE[1],{t:'Einerspalte &mdash; schreibe den Übertrag.',
+ s:'Das erste <b class="elec">Toffoli</b> setzt c1 = a0 UND b0: den Übertrag aus der Einerspalte.'});
+__regDE(S5.STAGE[2],{t:'Einerspalte &mdash; schreibe die Summe (Halbaddierer fertig).',
+ s:'Ein <b class="elec">CNOT</b> macht aus b0 nun a0 XOR b0 = <b class="elec">s0</b>. Probiere <b class="warm">1</b>+<b class="warm">1</b>: Summe 0, Übertrag 1.'});
+__regDE(S5.STAGE[3],{t:'Zweierspalte &mdash; schreibe ihren Übertrag.',
+ s:'Ein zweites <b class="elec">Toffoli</b> setzt c2 = a1 UND b1.'});
+__regDE(S5.STAGE[4],{t:'Zweierspalte &mdash; Teilsumme.',
+ s:'Ein <b class="elec">CNOT</b> faltet a1 in b1 hinein (a1 XOR b1) &mdash; fertig ist das erst, wenn der Übertrag ankommt.'});
+__regDE(S5.STAGE[5],{t:'Eins im Sinn &mdash; hinüber in die Zweierspalte.',
+ s:'Ein <b class="elec">Toffoli</b> addiert den Einer-Übertrag c1 in c2 hinein (wenn b1 gesetzt ist).'});
+__regDE(S5.STAGE[6],{t:'Letztes Summenbit &mdash; der Addierer ist komplett.',
+ s:'Das letzte <b class="elec">CNOT</b> faltet c1 in b1 hinein = <b class="elec">s1</b>. Auf den Ausgangsspuren steht jetzt <b class="elec">A + B</b>. Sechs Kugeln rein, sechs raus.'});
+
 /* ----------------------------- scene manager ------------------------------ */
 const scenes=[S1,S2,S3,S4,S5];
 const labels=['Bit','NOT','CNOT','Toffoli','Adder'];
@@ -910,6 +1001,7 @@ const dotEls=labels.map((l,i)=>{
   d.innerHTML='<span class="pip"></span><span class="dl">'+l+'</span>';
   d.onclick=()=>go(i);dotsWrap.appendChild(d);return d;
 });
+const labelsDE=['Bit','NOT','CNOT','Toffoli','Addierer'];
 function applySceneUI(s){
   els.subtitle.innerHTML=s.subtitle;
   els.tag.textContent=s.tag;els.tag.style.color=s.tagColor;els.tag.style.borderColor=s.tagColor+'55';
@@ -944,6 +1036,21 @@ resize();
 scenes[0].onEnter();
 applySceneUI(scenes[0]);
 requestAnimationFrame(frame);
+
+/* ------------------------- EN|DE refresh + boot --------------------------- */
+function __refreshLang(){
+  if(typeof dotEls!=='undefined'){
+    const L=window.__omLang==='de'?labelsDE:labels;
+    dotEls.forEach((d,i)=>{ d.querySelector('.dl').textContent=L[i]; });
+  }
+  const s=scenes[cur];
+  s.buildControls(document.getElementById('sctrl'));
+  if(s===S5) s.setStage(s.stage); else s.reset();
+  applySceneUI(s);
+}
+window.addEventListener('om-lang',__applyLang);
+window.__omApplyStatic();
+if(window.__omLang==='de') __applyLang();
 </script>
 </body>
 </html>

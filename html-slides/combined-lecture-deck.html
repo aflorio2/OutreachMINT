@@ -36,6 +36,14 @@ button.gnav:hover{background:#1b2350} button.gnav:active{transform:scale(.94)}
 button.gnav:disabled{opacity:.3;cursor:default}
 
 #deck-scales header{text-align:center;padding:16px 16px 8px;flex:0 0 auto}
+#deck-scales header{position:relative}
+#deck-scales .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+#deck-scales .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+#deck-scales .lang-switch button.active{background:#1b2350;color:var(--ink)}
+#deck-scales .lang-switch button:not(.active):hover{color:var(--ink)}
 #deck-scales header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
 #deck-scales header h1 .q{color:var(--accentL)}
 #deck-scales header h1 .c{color:var(--accentR)}
@@ -146,6 +154,14 @@ button.gnav:disabled{opacity:.3;cursor:default}
 #deck-slit header h1 .a{color:var(--cool)}
 #deck-slit header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;
     transition:opacity .3s}
+#deck-slit header{position:relative}
+#deck-slit .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+#deck-slit .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+#deck-slit .lang-switch button.active{background:#1b2350;color:var(--ink)}
+#deck-slit .lang-switch button:not(.active):hover{color:var(--ink)}
 #deck-slit .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
 #deck-slit .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
     overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset}
@@ -229,6 +245,14 @@ button.gnav:disabled{opacity:.3;cursor:default}
 #deck-b2 header h1 .a{color:var(--cool)}
 #deck-b2 header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;
     transition:opacity .3s}
+#deck-b2 header{position:relative}
+#deck-b2 .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+#deck-b2 .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+#deck-b2 .lang-switch button.active{background:#1b2350;color:var(--ink)}
+#deck-b2 .lang-switch button:not(.active):hover{color:var(--ink)}
 #deck-b2 .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
 #deck-b2 .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
     overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset;
@@ -353,6 +377,14 @@ button.gnav:disabled{opacity:.3;cursor:default}
 #deck-cannon header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
 #deck-cannon header h1 .a{color:var(--cool)}
 #deck-cannon header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;transition:opacity .3s}
+#deck-cannon header{position:relative}
+#deck-cannon .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+#deck-cannon .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+#deck-cannon .lang-switch button.active{background:#1b2350;color:var(--ink)}
+#deck-cannon .lang-switch button:not(.active):hover{color:var(--ink)}
 #deck-cannon .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
 #deck-cannon .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
     overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset;}
@@ -425,6 +457,14 @@ button.gnav:disabled{opacity:.3;cursor:default}
 #deck-cannonq header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
 #deck-cannonq header h1 .a{color:var(--cool)}
 #deck-cannonq header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;transition:opacity .3s}
+#deck-cannonq header{position:relative}
+#deck-cannonq .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+#deck-cannonq .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+#deck-cannonq .lang-switch button.active{background:#1b2350;color:var(--ink)}
+#deck-cannonq .lang-switch button:not(.active):hover{color:var(--ink)}
 #deck-cannonq .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
 #deck-cannonq .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
     overflow:hidden;background:#000;box-shadow:0 0 40px rgba(0,0,0,.6) inset;}
@@ -497,6 +537,14 @@ button.gnav:disabled{opacity:.3;cursor:default}
   backdrop-filter:blur(4px);transition:background .15s,color .15s}
 #deck-cannonq .home-link:hover{background:#1b2350;color:var(--ink)}
 #deck-resources header{text-align:center;padding:clamp(16px,3vh,30px) 16px 6px;flex:0 0 auto}
+#deck-resources header{position:relative}
+#deck-resources .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+#deck-resources .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+#deck-resources .lang-switch button.active{background:#1b2350;color:var(--ink)}
+#deck-resources .lang-switch button:not(.active):hover{color:var(--ink)}
 #deck-resources header h1{font-size:clamp(21px,3vw,36px);font-weight:700;letter-spacing:.4px;
     animation:rise .6s ease-out forwards}
 #deck-resources header h1 .a{color:var(--mist)}
@@ -557,14 +605,15 @@ button.gnav:disabled{opacity:.3;cursor:default}
 <section id="deck-scales" class="deck active">
 
   <header>
-    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener">← Back to aflorio.science</a>
-    <h1><span class="q">The Very Small</span> &nbsp;⟷&nbsp; <span class="c">The Very Large</span></h1>
-    <ul class="lede"><li>Each step <b>inward</b> (left) mirrors a step <b>outward</b> (right) — the same factor in opposite directions.</li></ul>
+    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener" data-de="← Zurück zu aflorio.science">← Back to aflorio.science</a>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="<span class='q'>Das ganz Kleine</span> &nbsp;⟷&nbsp; <span class='c'>Das ganz Große</span>"><span class="q">The Very Small</span> &nbsp;⟷&nbsp; <span class="c">The Very Large</span></h1>
+    <ul class="lede"><li data-de="Jeder Schritt nach <b>innen</b> (links) spiegelt einen Schritt nach <b>außen</b> (rechts) — derselbe Faktor in entgegengesetzten Richtungen.">Each step <b>inward</b> (left) mirrors a step <b>outward</b> (right) — the same factor in opposite directions.</li></ul>
   </header>
 
   <div class="stage">
     <div class="panel left" id="panelL-scales">
-      <div class="tag">Zoom in · matter</div>
+      <div class="tag" data-de="Hineinzoomen · Materie">Zoom in · matter</div>
       <div class="imgwrap" id="wrapL-scales"></div>
       <div class="readout"><div class="col"><div class="name" id="nameL-scales"></div><div class="sub" id="subL-scales"></div><a class="reflink" id="refL-scales" target="_blank" rel="noopener"></a></div><div class="size" id="sizeL-scales"></div></div>
     </div>
@@ -572,7 +621,7 @@ button.gnav:disabled{opacity:.3;cursor:default}
     <div class="divider"></div>
 
     <div class="panel right" id="panelR-scales">
-      <div class="tag">Zoom out · space</div>
+      <div class="tag" data-de="Herauszoomen · Weltraum">Zoom out · space</div>
       <div class="imgwrap" id="wrapR-scales"></div>
       <div class="readout"><div class="size" id="sizeR-scales"></div><div class="col"><div class="name" id="nameR-scales"></div><div class="sub" id="subR-scales"></div><a class="reflink" id="refR-scales" target="_blank" rel="noopener"></a></div></div>
     </div>
@@ -590,8 +639,9 @@ button.gnav:disabled{opacity:.3;cursor:default}
 <section id="deck-slit" class="deck">
 
   <header>
-    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener">← Back to aflorio.science</a>
-    <h1>The <span class="a">Double-Slit</span> Experiment</h1>
+    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener" data-de="← Zurück zu aflorio.science">← Back to aflorio.science</a>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="Das <span class='a'>Doppelspalt</span>-Experiment">The <span class="a">Double-Slit</span> Experiment</h1>
     <p id="subtitle-slit"></p>
   </header>
 
@@ -606,25 +656,25 @@ button.gnav:disabled{opacity:.3;cursor:default}
           <img class="vthumb" src="https://img.youtube.com/vi/ZqS8Jjkk1HI/hqdefault.jpg"
             alt="The Double Slit Experiment Performed With Electrons">
           <span class="playbtn"></span>
-          <span class="playhint">▶ Watch on YouTube (opens in a new tab)</span>
+          <span class="playhint" data-de="▶ Auf YouTube ansehen (öffnet in neuem Tab)">▶ Watch on YouTube (opens in a new tab)</span>
         </a>
       </div>
       <div class="tag" id="tag-slit"></div>
 
       <div class="qctrl" id="qctrl-slit">
         <div class="toggle" id="obsToggle-slit">
-          <span class="lab">👁 Observe which slit</span>
+          <span class="lab" data-de="👁 Spalt beobachten">👁 Observe which slit</span>
           <span class="switch"></span>
         </div>
-        <div class="counter">electrons: <b id="ecount-slit">0</b></div>
-        <button class="qbtn" id="resetBtn-slit">Reset screen</button>
+        <div class="counter"><span data-de="Elektronen:">electrons:</span> <b id="ecount-slit">0</b></div>
+        <button class="qbtn" id="resetBtn-slit" data-de="Schirm zurücksetzen">Reset screen</button>
       </div>
 
       <div class="speedctrl" id="speedctrl-slit">
-        <button class="qbtn" id="sceneReset-slit">↻ Reset</button>
-        <span>slow</span>
+        <button class="qbtn" id="sceneReset-slit" data-de="↻ Zurücksetzen">↻ Reset</button>
+        <span data-de="langsam">slow</span>
         <input type="range" id="speed-slit" min="0.075" max="6" step="0.025" value="0.075">
-        <span>fast</span>
+        <span data-de="schnell">fast</span>
       </div>
 
       <div class="caption" id="caption-slit">
@@ -639,8 +689,9 @@ button.gnav:disabled{opacity:.3;cursor:default}
 <section id="deck-b2" class="deck">
 
   <header>
-    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener">← Back to aflorio.science</a>
-    <h1>Counting &amp; Adding in <span class="a">Base 2</span></h1>
+    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener" data-de="← Zurück zu aflorio.science">← Back to aflorio.science</a>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="Zählen &amp; Addieren in <span class='a'>Basis 2</span>">Counting &amp; Adding in <span class="a">Base 2</span></h1>
     <p id="subtitle-b2"></p>
   </header>
 
@@ -653,7 +704,7 @@ button.gnav:disabled{opacity:.3;cursor:default}
         <div class="s1ctrl">
           <button class="stepbtn" id="s1minus-b2">− 1</button>
           <button class="stepbtn" id="s1plus-b2">+ 1</button>
-          <button class="stepbtn play" id="s1play-b2">▶ Count</button>
+          <button class="stepbtn play" id="s1play-b2">▶ Count</button><!-- text managed by JS (__L) -->
         </div>
 
         <div class="s1wrap">
@@ -662,12 +713,12 @@ button.gnav:disabled{opacity:.3;cursor:default}
           <div class="readout">
             <div>
               <div class="bignum"><span class="bincode" id="binBig-b2">0000</span></div>
-              <div class="numlab">binary</div>
+              <div class="numlab" data-de="binär">binary</div>
             </div>
             <div class="bignum eq">=</div>
             <div>
               <div class="bignum"><span class="deccode" id="decBig-b2">0</span></div>
-              <div class="numlab">decimal</div>
+              <div class="numlab" data-de="dezimal">decimal</div>
             </div>
           </div>
         </div>
@@ -686,8 +737,8 @@ button.gnav:disabled{opacity:.3;cursor:default}
             <input type="range" id="inB-b2" min="0" max="3" step="1" value="3">
             <span class="val" id="valB-b2">3</span>
           </div>
-          <button class="stepbtn" id="addStep-b2">Step ▶</button>
-          <button class="stepbtn play" id="addAuto-b2">Add it ⚡</button>
+          <button class="stepbtn" id="addStep-b2" data-de="Schritt ▶">Step ▶</button>
+          <button class="stepbtn play" id="addAuto-b2">Add it ⚡</button><!-- text managed by JS (__L) -->
           <button class="stepbtn" id="addReset-b2">↻</button>
         </div>
 
@@ -707,8 +758,9 @@ button.gnav:disabled{opacity:.3;cursor:default}
 <section id="deck-cannon" class="deck">
 
   <header>
-    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener">← Back to aflorio.science</a>
-    <h1>Bits as <span class="a">Cannonballs</span></h1>
+    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener" data-de="← Zurück zu aflorio.science">← Back to aflorio.science</a>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="Bits als <span class='a'>Kanonenkugeln</span>">Bits as <span class="a">Cannonballs</span></h1>
     <p id="subtitle-cannon"></p>
   </header>
 
@@ -726,13 +778,13 @@ button.gnav:disabled{opacity:.3;cursor:default}
   </div>
 
   <div class="wsheet" id="wsheet-cannon">
-    <div class="wsh-head"><b>binary addition</b><span class="wsh-badge" id="wshBadge-cannon">0/6</span></div>
+    <div class="wsh-head"><b data-de="binäre Addition">binary addition</b><span class="wsh-badge" id="wshBadge-cannon">0/6</span></div>
     <table class="wsh-grid">
-      <tr class="wsh-carry"><td class="wsh-lab">carry</td><td id="wsC4-cannon"></td><td id="wsC2-cannon"></td><td></td></tr>
+      <tr class="wsh-carry"><td class="wsh-lab" data-de="Übertrag">carry</td><td id="wsC4-cannon"></td><td id="wsC2-cannon"></td><td></td></tr>
       <tr><td class="wsh-lab">A</td><td></td><td id="wsA2-cannon"></td><td id="wsA1-cannon"></td></tr>
       <tr><td class="wsh-lab">+B</td><td></td><td id="wsB2-cannon"></td><td id="wsB1-cannon"></td></tr>
       <tr class="wsh-rule"><td></td><td colspan="3"><hr></td></tr>
-      <tr class="wsh-sum"><td class="wsh-lab">Sum</td><td id="wsS4-cannon"></td><td id="wsS2-cannon"></td><td id="wsS1-cannon"></td></tr>
+      <tr class="wsh-sum"><td class="wsh-lab" data-de="Summe">Sum</td><td id="wsS4-cannon"></td><td id="wsS2-cannon"></td><td id="wsS1-cannon"></td></tr>
     </table>
   </div>
 
@@ -741,8 +793,9 @@ button.gnav:disabled{opacity:.3;cursor:default}
 <section id="deck-cannonq" class="deck">
 
   <header>
-    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener">← Back to aflorio.science</a>
-    <h1><span class="a">Qubits</span> as Cannonballs</h1>
+    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener" data-de="← Zurück zu aflorio.science">← Back to aflorio.science</a>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="Qubits als <span class='a'>Kanonenkugeln</span>"><span class="a">Qubits</span> as Cannonballs</h1>
     <p id="subtitle-cannonq"></p>
   </header>
 
@@ -760,13 +813,13 @@ button.gnav:disabled{opacity:.3;cursor:default}
   </div>
 
   <div class="wsheet" id="wsheet-cannonq">
-    <div class="wsh-head"><b>binary addition</b><span class="wsh-badge" id="wshBadge-cannonq">0/6</span></div>
+    <div class="wsh-head"><b data-de="bin&auml;re Addition">binary addition</b><span class="wsh-badge" id="wshBadge-cannonq">0/6</span></div>
     <table class="wsh-grid">
-      <tr class="wsh-carry"><td class="wsh-lab">carry</td><td id="wsC4-cannonq"></td><td id="wsC2-cannonq"></td><td></td></tr>
+      <tr class="wsh-carry"><td class="wsh-lab" data-de="&Uuml;bertrag">carry</td><td id="wsC4-cannonq"></td><td id="wsC2-cannonq"></td><td></td></tr>
       <tr><td class="wsh-lab">A</td><td></td><td id="wsA2-cannonq"></td><td id="wsA1-cannonq"></td></tr>
       <tr><td class="wsh-lab">+B</td><td></td><td id="wsB2-cannonq"></td><td id="wsB1-cannonq"></td></tr>
       <tr class="wsh-rule"><td></td><td colspan="3"><hr></td></tr>
-      <tr class="wsh-sum"><td class="wsh-lab">Sum</td><td id="wsS4-cannonq"></td><td id="wsS2-cannonq"></td><td id="wsS1-cannonq"></td></tr>
+      <tr class="wsh-sum"><td class="wsh-lab" data-de="Summe">Sum</td><td id="wsS4-cannonq"></td><td id="wsS2-cannonq"></td><td id="wsS1-cannonq"></td></tr>
     </table>
   </div>
 
@@ -775,9 +828,10 @@ button.gnav:disabled{opacity:.3;cursor:default}
 <section id="deck-resources" class="deck">
 
   <header>
-    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener">← Back to aflorio.science</a>
-    <h1><span class="a">Going</span> Further</h1>
-    <p>Where this lecture's notation comes from — and where to keep exploring.</p>
+    <a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener" data-de="← Zurück zu aflorio.science">← Back to aflorio.science</a>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="<span class='a'>Weiter</span> geht’s"><span class="a">Going</span> Further</h1>
+    <p data-de="Woher die Notation dieser Vorlesung stammt — und wo du weiter entdecken kannst.">Where this lecture's notation comes from — and where to keep exploring.</p>
   </header>
 
   <div class="stage">
@@ -785,8 +839,8 @@ button.gnav:disabled{opacity:.3;cursor:default}
       <div class="content">
         <div class="grid">
           <div class="card notation">
-            <div class="card-head"><span class="dot elec"></span>Notation used in this lecture</div>
-            <p>The circuit diagrams and "cloud" superposition pictures used throughout this lecture are adapted from:</p>
+            <div class="card-head" data-de="<span class='dot elec'></span>Notation in dieser Vorlesung"><span class="dot elec"></span>Notation used in this lecture</div>
+            <p data-de="Die Schaltbilder und die „Wolken“-Bilder für Überlagerungen in dieser Vorlesung sind angelehnt an:">The circuit diagrams and "cloud" superposition pictures used throughout this lecture are adapted from:</p>
             <div class="paper">
               <div class="paper-title">"Q is for Quantum"</div>
               <div class="paper-authors">Terry Rudolph</div>
@@ -802,28 +856,60 @@ button.gnav:disabled{opacity:.3;cursor:default}
               <div class="paper-authors">S. E. Economou &amp; E. Barnes</div>
               <a class="paper-link" href="https://arxiv.org/pdf/2210.02868" target="_blank" rel="noopener">arXiv:2210.02868 &#8599;</a>
             </div>
-            <div class="thanks">With thanks to Sophia Economou and Ed Barnes for sharing their enthusiasm for quantum outreach.</div>
+            <div class="thanks" data-de="Mit Dank an Sophia Economou und Ed Barnes, die ihre Begeisterung für Quanten-Outreach mit uns geteilt haben.">With thanks to Sophia Economou and Ed Barnes for sharing their enthusiasm for quantum outreach.</div>
           </div>
 
           <div class="card explore">
-            <div class="card-head"><span class="dot mist"></span>Keep exploring</div>
+            <div class="card-head" data-de="<span class='dot mist'></span>Weiter entdecken"><span class="dot mist"></span>Keep exploring</div>
             <div class="explore-title"><a href="https://www.qisforquantum.org" target="_blank" rel="noopener">Q is for Quantum &#8599;</a></div>
-            <p>A free, rigorous introduction to quantum computing by Terry Rudolph, starting from nothing more than
+            <p data-de="Eine kostenlose, gründliche Einführung ins Quantencomputing von Terry Rudolph, die nicht mehr als Grundrechenarten voraussetzt — der natürliche nächste Schritt nach dieser Vorlesung.">A free, rigorous introduction to quantum computing by Terry Rudolph, starting from nothing more than
               basic arithmetic — the natural next step after this lecture.</p>
           </div>
         </div>
 
         <div class="card advanced">
-          <div class="card-head"><span class="dot warm"></span>Advanced reading</div>
-          <p>For a full, graduate-level mathematical treatment once you're ready to go deeper:</p>
+          <div class="card-head" data-de="<span class='dot warm'></span>Vertiefende Literatur"><span class="dot warm"></span>Advanced reading</div>
+          <p data-de="Für die vollständige mathematische Behandlung auf Hochschulniveau, wenn du tiefer einsteigen möchtest:">For a full, graduate-level mathematical treatment once you're ready to go deeper:</p>
           <ul class="reflist">
-            <li>M. A. Nielsen &amp; I. L. Chuang, <i>Quantum Computation and Quantum Information</i> — the standard textbook in the field</li>
-            <li>John Preskill, <a href="http://theory.caltech.edu/~preskill/ph219/" target="_blank" rel="noopener">Caltech Ph219/CS219 lecture notes</a></li>
+            <li data-de="M. A. Nielsen &amp;amp; I. L. Chuang, <i>Quantum Computation and Quantum Information</i> — das Standardlehrbuch des Fachs">M. A. Nielsen &amp; I. L. Chuang, <i>Quantum Computation and Quantum Information</i> — the standard textbook in the field</li>
+            <li data-de="John Preskill, <a href='http://theory.caltech.edu/~preskill/ph219/' target='_blank' rel='noopener'>Vorlesungsskript Ph219/CS219 (Caltech)</a>">John Preskill, <a href="http://theory.caltech.edu/~preskill/ph219/" target="_blank" rel="noopener">Caltech Ph219/CS219 lecture notes</a></li>
           </ul>
         </div>
       </div>
     </div>
   </div>
+
+<script>
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+window.__omApplyStatic();
+</script>
 
 </section>
 
@@ -840,6 +926,43 @@ window.__DECKS = [];
 </script>
 <script>
 (function(){
+
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+const __L=(en,de)=>window.__omLang==='de'?de:en;
+const __SWAPS=[];
+function __regDE(obj,de){ for(const k in de){ __SWAPS.push([obj,k,obj[k],de[k]]); } }
+function __applyLang(){
+  const de=window.__omLang==='de';
+  __SWAPS.forEach(s=>{ s[0][s[1]]=de?s[3]:s[2]; });
+  __refreshLang();
+}
 
 const FP = "https://commons.wikimedia.org/wiki/Special:FilePath/";
 function fpath(name){return FP + encodeURIComponent(name);}
@@ -910,19 +1033,19 @@ const RIGHT = [
   {name:"Earth",         local:"earth.jpg",  exp:7.10, sub:"the whole planet · ≈12,700 km"},
   {name:"To the Moon", exp:8.58, sub:"distance to the Moon · ≈384,000 km",
     content:distance({space:true,
-      a:{img:"earth.jpg", size:24, xpc:20, label:"Earth"},
-      b:{img:"moon.jpg", size:13, xpc:80, label:"Moon"},
-      pill:"≈ 384,000 km · 30 Earths apart"})},
+      a:{img:"earth.jpg", size:24, xpc:20, label:"<span data-de='Erde'>Earth</span>"},
+      b:{img:"moon.jpg", size:13, xpc:80, label:"<span data-de='Mond'>Moon</span>"},
+      pill:"<span data-de='≈ 384.000 km · 30 Erden Abstand'>≈ 384,000 km · 30 Earths apart</span>"})},
   {name:"To the Sun", exp:11.17, sub:"≈ distance to the Sun · 1 AU",
     content:distance({space:true,
-      a:{img:"earth.jpg", size:9, xpc:16, label:"Earth"},
-      b:{img:"sun.jpg", size:34, xpc:78, label:"Sun"},
-      pill:"≈ 1 AU · 150 million km · 8 light-minutes"})},
+      a:{img:"earth.jpg", size:9, xpc:16, label:"<span data-de='Erde'>Earth</span>"},
+      b:{img:"sun.jpg", size:34, xpc:78, label:"<span data-de='Sonne'>Sun</span>"},
+      pill:"<span data-de='≈ 1 AE · 150 Millionen km · 8 Lichtminuten'>≈ 1 AU · 150 million km · 8 light-minutes</span>"})},
   {name:"To Proxima", exp:16.60, sub:"≈ distance to the nearest star · 4.2 ly",
     content:distance({space:true,
-      a:{img:"sun.jpg", size:18, xpc:17, label:"our Sun"},
+      a:{img:"sun.jpg", size:18, xpc:17, label:"<span data-de='unsere Sonne'>our Sun</span>"},
       b:{star:true, size:5, xpc:83, label:"Proxima Centauri"},
-      pill:"≈ 4.2 light-years · 40 trillion km"})},
+      pill:"<span data-de='≈ 4,2 Lichtjahre · 40 Billionen km'>≈ 4.2 light-years · 40 trillion km</span>"})},
 ];
 
 const N = LEFT.length;       // 7
@@ -996,7 +1119,7 @@ const nameL=document.getElementById('nameL-scales'), subL=document.getElementByI
 const nameR=document.getElementById('nameR-scales'), subR=document.getElementById('subR-scales'), sizeR=document.getElementById('sizeR-scales');
 const refL=document.getElementById('refL-scales'), refR=document.getElementById('refR-scales');
 function setRef(el,d){
-  if(d.ref){el.href=d.ref; el.textContent='↗ '+(d.refLabel||'reference'); el.style.display='inline-block';}
+  if(d.ref){el.href=d.ref; el.textContent='↗ '+(d.refLabel||__L('reference','Quelle')); el.style.display='inline-block';}
   else {el.style.display='none';}
 }
 
@@ -1019,9 +1142,38 @@ document.getElementById('prev-scales').onclick=()=>animateTo(Math.round(current)
 
 render(0);
 
+/* ---- German text for the JS-driven readouts ---- */
+[
+  [LEFT[0], {name:'Mensch',  sub:'ein Mensch · ≈1,7 m'}],
+  [LEFT[1], {name:'Haar',    sub:'ein menschliches Haar · ≈0,08 mm'}],
+  [LEFT[2], {name:'Zelle',   sub:'eine lebende Zelle · ≈2 µm'}],
+  [LEFT[3], {name:'Virus',   sub:'ein Virus · ≈150 nm'}],
+  [LEFT[4], {name:'Protein', sub:'ein Protein / DNA · ≈3 nm'}],
+  [LEFT[5], {name:'Atom',    sub:'ein Atom · ≈0,1 nm'}],
+  [LEFT[6], {name:'Atomkern',sub:'ein Atomkern · ≈1 fm'}],
+  [RIGHT[0],{name:'Mensch',  sub:'ein Mensch · ≈1,7 m'}],
+  [RIGHT[1],{sub:'zwei Nachbarstädte · ≈15 km'}],
+  [RIGHT[2],{name:'Deutschland', sub:'Deutschland Nord–Süd · ≈880 km'}],
+  [RIGHT[3],{name:'Erde',    sub:'der ganze Planet · ≈12.700 km'}],
+  [RIGHT[4],{name:'Zum Mond',sub:'Entfernung zum Mond · ≈384.000 km'}],
+  [RIGHT[5],{name:'Zur Sonne',sub:'≈ Entfernung zur Sonne · 1 AE'}],
+  [RIGHT[6],{name:'Zu Proxima',sub:'≈ Entfernung zum nächsten Stern · 4,2 Lj'}],
+].forEach(p=>__regDE(p[0],p[1]));
+
+function __refreshLang(){
+  if(typeof tickEls!=='undefined'){
+    tickEls.forEach((el,i)=>{ el.innerHTML = i===0 ? LEFT[0].name : `${LEFT[i].name} ⟷ ${RIGHT[i].name}`; });
+  }
+  render(current);
+}
+window.addEventListener('om-lang',__applyLang);
+window.__omApplyStatic();
+if(window.__omLang==='de') __applyLang();
+
 window.__DECKS.push({
   sectionId: 'deck-scales',
   labels: ['Scales'],
+  labelsDE: ['Skalen'],
   goto(i){ animateTo(0); },
   activate(){},
   deactivate(){},
@@ -1033,6 +1185,43 @@ window.__DECKS.push({
 (function(){
 
 "use strict";
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+const __L=(en,de)=>window.__omLang==='de'?de:en;
+const __SWAPS=[];
+function __regDE(obj,de){ for(const k in de){ __SWAPS.push([obj,k,obj[k],de[k]]); } }
+function __applyLang(){
+  const de=window.__omLang==='de';
+  __SWAPS.forEach(s=>{ s[0][s[1]]=de?s[3]:s[2]; });
+  __refreshLang();
+}
+
 /* ============================================================================
    THE DOUBLE-SLIT EXPERIMENT  —  3 navigable scenes
      1) classical balls  -> two bands (no interference)
@@ -1503,6 +1692,7 @@ let SPEED = 0.075;
 document.getElementById('speed-slit').addEventListener('input',e=> SPEED=parseFloat(e.target.value));
 
 const labels=['Balls','Waves','The real thing','Electrons'];
+const labelsDE=['Bälle','Wellen','Das echte Experiment','Elektronen'];
 
 function applySceneUI(s){
   els.subtitle.textContent=s.subtitle;
@@ -1549,9 +1739,44 @@ scenes[0].onEnter && scenes[0].onEnter();
 applySceneUI(scenes[0]);
 requestAnimationFrame(loop);
 
+/* ---- German text for the JS-driven scene copy ---- */
+__regDE(sceneBalls,{
+  tag:'1 · Klassische Bälle',
+  subtitle:'Schieße Farbbälle auf eine Wand mit zwei Spalten. Was landet auf dem Schirm dahinter?',
+  capTitle:'Teilchen erzeugen <b class="warm">zwei Streifen</b>.',
+  capSub:'Jeder Ball fliegt durch <b class="warm">einen</b> Spalt oder den anderen und dann geradeaus weiter. Auf dem Schirm häufen sich die Treffer zu genau zwei Hügeln — einer hinter jeder Öffnung.',
+});
+__regDE(sceneWaves,{
+  tag:'2 · Wellen',
+  subtitle:'Jetzt schicken wir eine Welle auf dieselbe Wand — Wasserwellen, Schall, Licht. ',
+  capTitle:'Wellen erzeugen <b class="cool">viele Streifen</b> — Interferenz.',
+  capSub:'Eine Welle läuft durch <b class="cool">beide</b> Spalte gleichzeitig. Wo zwei Wellenberge zusammentreffen, verstärken sie sich (hell); wo ein Berg auf ein Tal trifft, löschen sie sich aus (dunkel). Das Ergebnis: ein Muster aus <b class="cool">vielen</b> Streifen.',
+});
+__regDE(sceneVideo,{
+  tag:'3 · Das echte Experiment',
+  subtitle:'Keine Simulation: das Doppelspalt-Experiment, tatsächlich mit Elektronen durchgeführt.',
+});
+__regDE(sceneElectrons,{
+  tag:'4 · Elektronen',
+  subtitle:'Quantenteilchen verhalten sich gleichzeitig wie Teilchen und wie Wellen.',
+  capTitle:'Materie baut das <b class="cool">Wellenmuster</b> auf — Punkt für Punkt.',
+  capSub:'Jedes Elektron landet als einzelner Punkt, doch tausende Punkte ergeben Interferenzstreifen. Unbeobachtet nimmt jedes Elektron <b class="elec">beide Wege gleichzeitig</b>. Frage <b class="warn">„welcher Spalt?“</b> — und die Streifen verschwinden: zurück zu zwei Streifen.',
+});
+function __refreshLang(){
+  applySceneUI(scenes[cur]);
+  if(typeof dotEls!=='undefined'){
+    const L=window.__omLang==='de'?labelsDE:labels;
+    dotEls.forEach((d,i)=>{ d.querySelector('.dl').textContent=L[i]; });
+  }
+}
+window.addEventListener('om-lang',__applyLang);
+window.__omApplyStatic();
+if(window.__omLang==='de') __applyLang();
+
 window.__DECKS.push({
   sectionId: 'deck-slit',
   labels: labels,
+  labelsDE: labelsDE,
   goto(i){ go(i); },
   activate(){ __active = true; last = performance.now(); },
   deactivate(){ __active = false; },
@@ -1563,6 +1788,43 @@ window.__DECKS.push({
 (function(){
 
 "use strict";
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+const __L=(en,de)=>window.__omLang==='de'?de:en;
+const __SWAPS=[];
+function __regDE(obj,de){ for(const k in de){ __SWAPS.push([obj,k,obj[k],de[k]]); } }
+function __applyLang(){
+  const de=window.__omLang==='de';
+  __SWAPS.forEach(s=>{ s[0][s[1]]=de?s[3]:s[2]; });
+  __refreshLang();
+}
+
 /* ============================================================================
    COUNTING & ADDING IN BASE 2  —  2 navigable scenes
      1) Counting: 4 clickable bits (8 4 2 1), live binary<->decimal, auto-count
@@ -1621,7 +1883,7 @@ const S1 = {
     document.getElementById('binBig-b2').textContent=this.bits.join('');
     document.getElementById('decBig-b2').textContent=v;
     const sum=document.getElementById('s1sum-b2');
-    if(parts.length===0){ sum.innerHTML='Nothing lit → <span class="t">0</span>'; }
+    if(parts.length===0){ sum.innerHTML=__L('Nothing lit → ','Nichts leuchtet → ')+'<span class="t">0</span>'; }
     else { sum.innerHTML=parts.join(' <span style="color:var(--muted)">+</span> ')+
             ' <span style="color:var(--muted)">=</span> <span class="t">'+v+'</span>'; }
   },
@@ -1629,7 +1891,7 @@ const S1 = {
     this.playing=!this.playing;
     const btn=document.getElementById('s1play-b2');
     btn.classList.toggle('on',this.playing);
-    btn.textContent=this.playing?'⏸ Pause':'▶ Count';
+    btn.textContent=this.playing?'⏸ Pause':__L('▶ Count','▶ Zählen');
     if(this.playing){ this.timer=setInterval(()=>this.set(this.value+1),750); }
     else { clearInterval(this.timer); }
   },
@@ -1665,7 +1927,7 @@ const S2 = {
     const placeOf=(colFromLeft)=> Math.pow(2, COLS-1-colFromLeft); // value of column
 
     // --- row 0: carries (label + COLS) ---
-    g.appendChild(mk('lab','carry →'));
+    g.appendChild(mk('lab',__L('carry →','Übertrag →')));
     for(let c=0;c<COLS;c++){ const e=mk('carry',''); this.cells.carry.push(e); g.appendChild(e); }
     // --- row 1: place labels ---
     g.appendChild(mk('lab',''));
@@ -1679,7 +1941,7 @@ const S2 = {
     // --- rule line ---
     const r=document.createElement('div'); r.className='rule'; g.appendChild(r);
     // --- row 4: result ---
-    g.appendChild(labHTML('<b style="color:var(--elec)">Sum</b>'));
+    g.appendChild(labHTML('<b style="color:var(--elec)">'+__L('Sum','Summe')+'</b>'));
     for(let c=0;c<COLS;c++){ const e=cellEl(); e.classList.add('res'); this.cells.res.push(e); g.appendChild(e); }
 
     this.reset();
@@ -1693,7 +1955,7 @@ const S2 = {
   reset(){
     clearInterval(this.autoTimer); this.autoTimer=null;
     document.getElementById('addAuto-b2').classList.remove('on');
-    document.getElementById('addAuto-b2').textContent='Add it ⚡';
+    document.getElementById('addAuto-b2').textContent=__L('Add it ⚡','Addieren ⚡');
     this.step=-1;
     const COLS=this.NB+1;
     const ab=this.bitsOf(this.a,COLS), bb=this.bitsOf(this.b,COLS);
@@ -1711,7 +1973,7 @@ const S2 = {
     document.getElementById('s2status-b2').innerHTML=
       'A = <b style="color:var(--warm)">'+this.a+'</b> ('+this.a.toString(2).padStart(this.NB,'0')+
       ')  +  B = <b style="color:var(--cool)">'+this.b+'</b> ('+this.b.toString(2).padStart(this.NB,'0')+
-      ')  —  press <b>Step</b> or <b>Add it</b>.';
+      ')'+__L('  —  press <b>Step</b> or <b>Add it</b>.','  —  drücke <b>Schritt</b> oder <b>Addieren</b>.');
     function paint(el,bit){ el.textContent=bit; el.classList.toggle('one',bit===1); }
   },
   // advance one column (right to left). step counts columns done.
@@ -1740,10 +2002,10 @@ const S2 = {
       this.cells.carry[col-1].classList.toggle('show',cout===1);
     }
     const pv=Math.pow(2,this.step);
-    const cinTxt = cin? ' + carry <span class="c">1</span>' : '';
-    let line='Column '+pv+': <b style="color:var(--warm)">'+ab[col]+'</b> + <b style="color:var(--cool)">'+bb[col]+'</b>'+cinTxt+
-             ' = '+sum+' → write <span class="r">'+bit+'</span>';
-    if(cout) line+=', carry <span class="c">1</span> left';
+    const cinTxt = cin? __L(' + carry <span class="c">1</span>',' + Übertrag <span class="c">1</span>') : '';
+    let line=__L('Column ','Spalte ')+pv+': <b style="color:var(--warm)">'+ab[col]+'</b> + <b style="color:var(--cool)">'+bb[col]+'</b>'+cinTxt+
+             ' = '+sum+__L(' → write <span class="r">',' → schreibe <span class="r">')+bit+'</span>';
+    if(cout) line+=__L(', carry <span class="c">1</span> left',', Übertrag <span class="c">1</span> nach links');
     document.getElementById('s2status-b2').innerHTML=line;
     if(this.step>=COLS-1){ setTimeout(()=>this.finish(),10); }
     return true;
@@ -1752,18 +2014,18 @@ const S2 = {
     [...this.cells.a,...this.cells.b,...this.cells.res].forEach(e=>e.classList.remove('active'));
     clearInterval(this.autoTimer); this.autoTimer=null;
     document.getElementById('addAuto-b2').classList.remove('on');
-    document.getElementById('addAuto-b2').textContent='Add it ⚡';
+    document.getElementById('addAuto-b2').textContent=__L('Add it ⚡','Addieren ⚡');
     const tot=this.a+this.b;
     const COLS=this.NB+1;
     document.getElementById('s2status-b2').innerHTML=
       '<b style="color:var(--warm)">'+this.a+'</b> + <b style="color:var(--cool)">'+this.b+'</b> = '+
-      '<span class="r">'+tot+'</span>  =  <span class="r">'+tot.toString(2).padStart(COLS,'0')+'</span> in binary.';
+      '<span class="r">'+tot+'</span>  =  <span class="r">'+tot.toString(2).padStart(COLS,'0')+'</span>'+__L(' in binary.',' im Binärsystem.');
   },
   auto(){
     if(this.autoTimer){ // pause
       clearInterval(this.autoTimer); this.autoTimer=null;
       document.getElementById('addAuto-b2').classList.remove('on');
-      document.getElementById('addAuto-b2').textContent='Add it ⚡';
+      document.getElementById('addAuto-b2').textContent=__L('Add it ⚡','Addieren ⚡');
       return;
     }
     if(this.step>=this.NB){ this.reset(); }
@@ -1791,6 +2053,7 @@ const sceneEls=[document.getElementById('scene1-b2'),document.getElementById('sc
 let cur=0;
 
 const labels=['Counting','Adding'];
+const labelsDE=['Zählen','Addieren'];
 
 function applySceneUI(s){
   els.subtitle.textContent=s.subtitle;
@@ -1815,9 +2078,38 @@ function go(i){
 scenes[0].onEnter && scenes[0].onEnter();
 applySceneUI(scenes[0]);
 
+/* ---- German text for the JS-driven scene copy ---- */
+__regDE(S1,{
+  tag:'1 · Zählen',
+  subtitle:'Wir haben nur zwei Ziffern: 0 und 1. Klicke auf die Kästchen — jedes ist doppelt so viel wert wie das rechts daneben.',
+  capTitle:'Jede Zahl ist eine Summe von <b class="cool">Zweierpotenzen</b>.',
+  capSub:'Jedes Kästchen ist ein <b class="warm">Bit</b>: aus = 0, an = 1. Ein Kästchen, das <b class="warm">an</b> ist, zählt seinen Wert (8, 4, 2 oder 1). Addiere die leuchtenden Kästchen und du bekommst die Dezimalzahl — mehr bedeutet „Basis 2“ nicht.',
+});
+__regDE(S2,{
+  tag:'2 · Addieren',
+  subtitle:'Addiere zwei Zahlen genau wie in der Schule — von rechts nach links — nur mit der einen Regel: 1 + 1 = 10 (Übertrag 1).',
+  capTitle:'Addiere Spalte für Spalte; bei <b class="warn">1 + 1 wandert ein Übertrag</b> in die nächste.',
+  capSub:'In jeder Spalte addierst du die beiden Bits plus einen möglichen <b class="warn">Übertrag</b>. 0+0=0, 1+0=1, und <b class="warn">1+1 = „0, Übertrag 1“</b>. Der Übertrag rutscht nach links in die nächste Spalte — genau wie der Zehnerübertrag beim schriftlichen Addieren.',
+});
+function __refreshLang(){
+  applySceneUI(scenes[cur]);
+  if(typeof dotEls!=='undefined'){
+    const L=window.__omLang==='de'?labelsDE:labels;
+    dotEls.forEach((d,i)=>{ d.querySelector('.dl').textContent=L[i]; });
+  }
+  const pb=document.getElementById('s1play-b2');
+  if(pb) pb.textContent=S1.playing?'⏸ Pause':__L('▶ Count','▶ Zählen');
+  if(S1.cells.length) S1.sync();
+  if(S2.cells.a.length) S2.build();
+}
+window.addEventListener('om-lang',__applyLang);
+window.__omApplyStatic();
+if(window.__omLang==='de') __applyLang();
+
 window.__DECKS.push({
   sectionId: 'deck-b2',
   labels: labels,
+  labelsDE: labelsDE,
   goto(i){ go(i); },
   activate(){},
   deactivate(){ clearInterval(S1.timer); clearInterval(S2.autoTimer); },
@@ -1829,6 +2121,42 @@ window.__DECKS.push({
 (function(){
 
 "use strict";
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+const __L=(en,de)=>window.__omLang==='de'?de:en;
+const __SWAPS=[];
+function __regDE(obj,de){ for(const k in de){ __SWAPS.push([obj,k,obj[k],de[k]]); } }
+function __applyLang(){
+  const de=window.__omLang==='de';
+  __SWAPS.forEach(s=>{ s[0][s[1]]=de?s[3]:s[2]; });
+  __refreshLang();
+}
 /* ============================================================================
    BITS AS CANNONBALLS  —  reversible logic on slit-paths
      1) Bit      : one shot, up slit = 1 / down slit = 0; rides that lane.
@@ -1933,7 +2261,7 @@ function drawCannon(){
   ctx.beginPath();ctx.arc(G.sx,G.cy,Math.max(7,H*0.014),0,7);ctx.fillStyle=C.warm;ctx.fill();
   ctx.restore();
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText('cannon',G.sx,G.cy+H*0.05);
+  ctx.fillText(__L('cannon','Kanone'),G.sx,G.cy+H*0.05);
 }
 function drawReadout(landed){
   [[G.sTop,C.warm,'1',1],[G.sBot,C.cool,'0',0]].forEach(z=>{
@@ -1947,7 +2275,7 @@ function drawReadout(landed){
     ctx.fillStyle=on?'#10131f':z[1];ctx.fillText(z[2],G.rx,z[0]+5);
   });
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText('readout',G.rx,G.sBot+H*0.05);
+  ctx.fillText(__L('readout','Anzeige'),G.rx,G.sBot+H*0.05);
 }
 function drawNOTgate(){
   const x0=G.gateX-G.cw, x1=G.gateX+G.cw;
@@ -2142,10 +2470,10 @@ function makeScene(cfg){
     fire(v){
       this.landed=null; this.vin=v;
       this.ball={vin:v, vout:this.hasNOT?(1-v):v, x:G.sx, y:G.cy, phase:'toSlit'};
-      document.getElementById('readout-cannon').innerHTML='Firing&hellip;';
+      document.getElementById('readout-cannon').innerHTML=__L('Firing&hellip;','Feuern&hellip;');
     },
     reset(){ this.ball=null; this.landed=null; this.vin=null;
-      document.getElementById('readout-cannon').innerHTML=cfg.idle; },
+      document.getElementById('readout-cannon').innerHTML=cfg.idle(); },
     step(dt){
       const b=this.ball; if(!b) return;
       const vx=W*0.42*dt;
@@ -2179,8 +2507,8 @@ function makeScene(cfg){
     buildControls(el){
       el.innerHTML='';const self=this;
       el.append(
-        mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
-        mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
+        mkbtn(__L('Fire ▲ (1)','Feuer ▲ (1)'),'up',()=>self.fire(1)),
+        mkbtn(__L('Fire ▼ (0)','Feuer ▼ (0)'),'dn',()=>self.fire(0)),
         mkbtn('↻','',()=>self.reset())
       );
     },
@@ -2195,8 +2523,8 @@ const S1=makeScene({
   capTitle:'A bit is <b class="warm">which slit</b> the ball took.',
   capSub:'Aim <b class="warm">up</b> and the ball goes through the top slit &mdash; we call that <b class="warm">1</b>. Aim <b class="cool">down</b>, bottom slit, <b class="cool">0</b>. After the slit it rides that lane to the readout.',
   hasNOT:false,
-  idle:'Press <b class="w">Fire &#9650;</b> or <b class="c">Fire &#9660;</b> to send a bit.',
-  result:(vin,vout)=>'The ball took the '+(vout?'<b class="w">up</b> slit &rarr; bit = <b class="w">1</b>':'<b class="c">down</b> slit &rarr; bit = <b class="c">0</b>'),
+  idle:()=>__L('Press <b class="w">Fire &#9650;</b> or <b class="c">Fire &#9660;</b> to send a bit.','Drücke <b class="w">Feuer &#9650;</b> oder <b class="c">Feuer &#9660;</b>, um ein Bit zu senden.'),
+  result:(vin,vout)=>__L('The ball took the ','Die Kugel nahm den ')+(vout?__L('<b class="w">up</b> slit &rarr; bit = <b class="w">1</b>','<b class="w">oberen</b> Spalt &rarr; Bit = <b class="w">1</b>'):__L('<b class="c">down</b> slit &rarr; bit = <b class="c">0</b>','<b class="c">unteren</b> Spalt &rarr; Bit = <b class="c">0</b>')),
 });
 
 const S2=makeScene({
@@ -2205,8 +2533,8 @@ const S2=makeScene({
   capTitle:'<b class="elec">NOT</b> swaps the lanes &mdash; same ball, flipped bit.',
   capSub:'The crossover sends an <b class="warm">up</b> ball out on the <b class="cool">down</b> lane and vice-versa. Nothing is created or destroyed: one ball in, one ball out. That &ldquo;count stays the same&rdquo; rule is what makes it <b class="elec">reversible</b>.',
   hasNOT:true,
-  idle:'Fire a bit and watch the <b class="e">NOT</b> gate flip it.',
-  result:(vin,vout)=>'In <b class="'+(vin?'w':'c')+'">'+vin+'</b> &rarr; <b class="e">NOT</b> &rarr; out <b class="'+(vout?'w':'c')+'">'+vout+'</b>',
+  idle:()=>__L('Fire a bit and watch the <b class="e">NOT</b> gate flip it.','Feuere ein Bit und sieh zu, wie das <b class="e">NOT</b>-Gatter es kippt.'),
+  result:(vin,vout)=>__L('In ','Rein ')+'<b class="'+(vin?'w':'c')+'">'+vin+'</b> &rarr; <b class="e">NOT</b> &rarr; '+__L('out ','raus ')+'<b class="'+(vout?'w':'c')+'">'+vout+'</b>',
 });
 
 /* =========================================================================
@@ -2223,26 +2551,26 @@ const S3={
     el.innerHTML='';const self=this;
     const cB=mkbtn('','',()=>{self.cin^=1;self._sync();self.reset();});
     const tB=mkbtn('','',()=>{self.tin^=1;self._sync();self.reset();});
-    el.append(cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('↻','',()=>self.reset()));
+    el.append(cB,tB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn('↻','',()=>self.reset()));
     this._sync=function(){
-      cB.textContent='control '+(self.cin?'▲ 1':'▼ 0');cB.className='stepbtn '+(self.cin?'up':'dn');
-      tB.textContent='target '+(self.tin?'▲ 1':'▼ 0');tB.className='stepbtn '+(self.tin?'up':'dn');
+      cB.textContent=__L('control ','Kontrolle ')+(self.cin?'▲ 1':'▼ 0');cB.className='stepbtn '+(self.cin?'up':'dn');
+      tB.textContent=__L('target ','Ziel ')+(self.tin?'▲ 1':'▼ 0');tB.className='stepbtn '+(self.tin?'up':'dn');
     };this._sync();
   },
   reset(){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;
-    this.setReadout('Set the <b class="e">control</b> and <b class="w">target</b>, then press <b>Run</b>.'); },
+    this.setReadout(__L('Set the <b class="e">control</b> and <b class="w">target</b>, then press <b>Run</b>.','Stelle <b class="e">Kontrolle</b> und <b class="w">Ziel</b> ein, dann drücke <b>Start</b>.')); },
   run(){
     this.cLanded=this.tLanded=null;
     const active=this.cin===1, tout=active?(1-this.tin):this.tin;
     this.cball={x:G.sx,y:G.cyC,sy:(this.cin?G.cTop:G.cBot),vin:this.cin,phase:'toSlit'};
     this.tball={x:G.sx,y:G.cyT,syIn:(this.tin?G.tTop:G.tBot),syOut:(tout?G.tTop:G.tBot),vin:this.tin,vout:tout,phase:'toSlit'};
-    this.setReadout('Running&hellip;');
+    this.setReadout(__L('Running&hellip;','Läuft&hellip;'));
   },
   _result(){
     if(this.cball||this.tball)return;
     if(this.cLanded==null&&this.tLanded==null)return;
     const cin=this.cLanded,tout=this.tLanded;
-    this.setReadout('control <b class="'+(cin?'w':'c')+'">'+cin+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">CNOT</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+    this.setReadout(__L('control ','Kontrolle ')+'<b class="'+(cin?'w':'c')+'">'+cin+'</b> '+__L('(unchanged)','(unverändert)')+' &nbsp;·&nbsp; '+__L('target ','Ziel ')+'<b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">CNOT</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
   },
   step(dt){
     const vx=W*0.42*dt;
@@ -2268,8 +2596,8 @@ const S3={
                       {y:G.tTop,color:C.warm,lab:'1'},{y:G.tBot,color:C.cool,lab:'0'}],G.sH2);
     drawCannonAt(G.cyC,'square',colOf(this.cin));drawCannonAt(G.cyT,'circle',colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.cTop-12);
-    ctx.fillText('target',G.sx,G.tBot+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.cTop-12);
+    ctx.fillText(__L('target','Ziel'),G.sx,G.tBot+18);
     const drawB=(b,vbefore,vafter)=>{const v=b.x<G.gateX?vbefore:vafter,col=colOf(v);
       ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
       ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
@@ -2296,7 +2624,7 @@ const S4={
     const cA=mkbtn('','',()=>{self.c1^=1;self._sync();self.reset();});
     const cB=mkbtn('','',()=>{self.c2^=1;self._sync();self.reset();});
     const tB=mkbtn('','',()=>{self.tin^=1;self._sync();self.reset();});
-    el.append(cA,cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('↻','',()=>self.reset()));
+    el.append(cA,cB,tB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn('↻','',()=>self.reset()));
     this._sync=function(){
       cA.textContent='▲ '+(self.c1?'1':'0');cA.className='stepbtn '+(self.c1?'up':'dn');
       cB.textContent='■ '+(self.c2?'1':'0');cB.className='stepbtn '+(self.c2?'up':'dn');
@@ -2304,19 +2632,19 @@ const S4={
     };this._sync();
   },
   reset(){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;
-    this.setReadout('Set the two <b class="e">controls</b> (■ ▲) and the <b class="w">target</b> (●), then press <b>Run</b>.'); },
+    this.setReadout(__L('Set the two <b class="e">controls</b> (■ ▲) and the <b class="w">target</b> (●), then press <b>Run</b>.','Stelle die beiden <b class="e">Kontrollen</b> (■ ▲) und das <b class="w">Ziel</b> (●) ein, dann drücke <b>Start</b>.')); },
   run(){
     this.l1=this.l2=this.l3=null;const act=this.active(),tout=act?(1-this.tin):this.tin;
     this.b1={x:G.sx,y:G.t3a,sy:(this.c1?G.a1T:G.a1B),vin:this.c1,cy:G.t3a,phase:'toSlit'};
     this.b2={x:G.sx,y:G.t3b,sy:(this.c2?G.a2T:G.a2B),vin:this.c2,cy:G.t3b,phase:'toSlit'};
     this.b3={x:G.sx,y:G.t3c,syIn:(this.tin?G.a3T:G.a3B),syOut:(tout?G.a3T:G.a3B),vin:this.tin,vout:tout,cy:G.t3c,phase:'toSlit'};
-    this.setReadout('Running&hellip;');
+    this.setReadout(__L('Running&hellip;','Läuft&hellip;'));
   },
   _result(){
     if(this.b1||this.b2||this.b3)return;
     if(this.l1==null&&this.l2==null&&this.l3==null)return;
     const tout=this.l3;
-    this.setReadout('controls <b class="'+(this.l1?'w':'c')+'">'+this.l1+'</b> <b class="'+(this.l2?'w':'c')+'">'+this.l2+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">Toffoli</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+    this.setReadout(__L('controls ','Kontrollen ')+'<b class="'+(this.l1?'w':'c')+'">'+this.l1+'</b> <b class="'+(this.l2?'w':'c')+'">'+this.l2+'</b> '+__L('(unchanged)','(unverändert)')+' &nbsp;·&nbsp; '+__L('target ','Ziel ')+'<b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">Toffoli</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
   },
   step(dt){
     const vx=W*0.42*dt;
@@ -2346,8 +2674,8 @@ const S4={
                       {y:G.a3T,color:C.warm,lab:'1'},{y:G.a3B,color:C.cool,lab:'0'}],G.sH3);
     drawCannonAt(G.t3a,'triangle',colOf(this.c1));drawCannonAt(G.t3b,'square',colOf(this.c2));drawCannonAt(G.t3c,'circle',colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);
-    ctx.fillText('target',G.sx,G.a3B+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.a1T-12);ctx.fillText(__L('control','Kontrolle'),G.sx,G.a2T-12);
+    ctx.fillText(__L('target','Ziel'),G.sx,G.a3B+18);
     const drawB=(b,vb,va)=>{const v=b.x<G.gateX?vb:va,col=colOf(v);
       ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
       ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
@@ -2392,7 +2720,7 @@ const S5={
     const ct=document.getElementById('capTitle-cannon'),cs=document.getElementById('capSub-cannon');
     if(ct)ct.innerHTML=c.t;if(cs)cs.innerHTML=c.s;
     this.prog=0;this.running=false;this.landed=null;this.simulate();
-    this.setReadout(s===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+s+' gate'+(s>1?'s':'')+' built so far.');
+    this.setReadout(s===0?__L('Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.','Stelle <b class="w">A</b> und <b class="c">B</b> ein, dann <b>Start</b>: sechs gerade Schüsse.'):__L('Press <b>Run</b> to fire through the '+s+' gate'+(s>1?'s':'')+' built so far.',s>1?'Drücke <b>Start</b>, um durch die '+s+' bisher gebauten Gatter zu feuern.':'Drücke <b>Start</b>, um durch das bisher gebaute Gatter zu feuern.'));
     if(this._sync)this._sync();
   },
   setReadout(t){ document.getElementById('readout-cannon').innerHTML=t; },
@@ -2424,20 +2752,20 @@ const S5={
     const aB=mkbtn('','up',()=>{self.A=(self.A+1)%4;self._sync();self.reset();});
     const bB=mkbtn('','dn',()=>{self.B=(self.B+1)%4;self._sync();self.reset();});
     const buildB=mkbtn('','',()=>{self.setStage((self.stage+1)%7);});
-    el.append(aB,bB,buildB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('↻','',()=>self.reset()));
-    this._sync=()=>{aB.textContent='A = '+self.A;bB.textContent='B = '+self.B;buildB.textContent='Build ▶ '+self.stage+'/6';};this._sync();
+    el.append(aB,bB,buildB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn('↻','',()=>self.reset()));
+    this._sync=()=>{aB.textContent='A = '+self.A;bB.textContent='B = '+self.B;buildB.textContent=__L('Build ▶ ','Aufbau ▶ ')+self.stage+'/6';};this._sync();
   },
   reset(){ this.prog=0;this.running=false;this.landed=null;this.simulate();
-    this.setReadout(this.stage===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+this.stage+' gate'+(this.stage>1?'s':'')+' built so far.'); },
-  run(){ this.simulate();this.prog=0;this.running=true;this.landed=null;this.setReadout('Running&hellip;'); },
+    this.setReadout(this.stage===0?__L('Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.','Stelle <b class="w">A</b> und <b class="c">B</b> ein, dann <b>Start</b>: sechs gerade Schüsse.'):__L('Press <b>Run</b> to fire through the '+this.stage+' gate'+(this.stage>1?'s':'')+' built so far.',this.stage>1?'Drücke <b>Start</b>, um durch die '+this.stage+' bisher gebauten Gatter zu feuern.':'Drücke <b>Start</b>, um durch das bisher gebaute Gatter zu feuern.')); },
+  run(){ this.simulate();this.prog=0;this.running=true;this.landed=null;this.setReadout(__L('Running&hellip;','Läuft&hellip;')); },
   step(dt){
     if(!this.running)return;
     this.prog+=dt*0.38;
     if(this.prog>=1){this.prog=1;this.running=false;this.landed=this.sim.outVals;
       const o=this.sim.outVals,s0=o[1],s1=o[4],s2=o[5];
-      if(this.stage===0) this.setReadout('A = <b class="w">'+this.A+'</b>, B = <b class="c">'+this.B+'</b> &mdash; six straight shots, nothing added yet.');
+      if(this.stage===0) this.setReadout('A = <b class="w">'+this.A+'</b>, B = <b class="c">'+this.B+'</b>'+__L(' &mdash; six straight shots, nothing added yet.',' &mdash; sechs gerade Schüsse, noch nichts addiert.'));
       else if(this.stage===6) this.setReadout('<b class="w">'+this.A+'</b> + <b class="c">'+this.B+'</b> = <b class="e">'+(this.A+this.B)+'</b> &nbsp; (s&#8322;s&#8321;s&#8320; = '+s2+s1+s0+')');
-      else this.setReadout('Built <b>'+this.stage+'/6</b> gates &mdash; partial result on the output lanes.');}
+      else this.setReadout(__L('Built <b>','Erst <b>')+this.stage+__L('/6</b> gates &mdash; partial result on the output lanes.','/6</b> Gatter gebaut &mdash; Teilergebnis auf den Ausgangsspuren.'));}
   },
   drawGate(g,gi){
     const x=G.adGX[gi],tg=g.tg,cy=G.adCy[tg],lg=G.adLG;
@@ -2518,9 +2846,9 @@ const S5={
     }
     ctx.textBaseline='alphabetic';
     ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText(this.stage===0?'output register — nothing added yet'
-      :full?'output register · big = sum s₂s₁s₀ · small = discarded'
-      :'output register — partial (build more gates)',xc,y+r+18);
+    ctx.fillText(this.stage===0?__L('output register — nothing added yet','Ausgaberegister — noch nichts addiert')
+      :full?__L('output register · big = sum s₂s₁s₀ · small = discarded','Ausgaberegister · groß = Summe s₂s₁s₀ · klein = verworfen')
+      :__L('output register — partial (build more gates)','Ausgaberegister — unvollständig (baue mehr Gatter)'),xc,y+r+18);
     ctx.restore();
   },
   draw(){
@@ -2545,7 +2873,7 @@ const S5={
       ctx.font='800 12px Inter,system-ui';ctx.fillStyle=C.elec;ctx.textAlign='left';
       [[1,'s0'],[4,'s1'],[5,'s2']].forEach(p=>ctx.fillText(p[1],G.rx+rr+7,G.adCy[p[0]]+4));
       ctx.font='italic 10px Inter,system-ui';ctx.fillStyle=C.muted;
-      [0,2,3].forEach(i=>ctx.fillText('discard',G.rx+rr+7,G.adCy[i]+4));
+      [0,2,3].forEach(i=>ctx.fillText(__L('discard','verworfen'),G.rx+rr+7,G.adCy[i]+4));
     }
     this.gates.forEach((g,gi)=>{if(gi<this.stage)this.drawGate(g,gi);});
     const slits=[];for(let i=0;i<6;i++){slits.push({y:this.bitLane(i,1),color:C.warm});slits.push({y:this.bitLane(i,0),color:C.cool});}
@@ -2587,6 +2915,52 @@ const S5={
   onLeave(){ document.getElementById('panel-cannon').classList.remove('wsmode');document.getElementById('wsheet-cannon').classList.remove('show');this.running=false;this.prog=0; },
 };
 
+/* ---- German versions of the scene strings (registered after the English defs) ---- */
+__regDE(S1,{
+  tag:'1 · Bit',
+  subtitle:'Feuere eine Kugel auf eine Wand mit zwei Spalten. Durch welchen Spalt sie fliegt — das IST das Bit.',
+  capTitle:'Ein Bit ist: <b class="warm">welchen Spalt</b> die Kugel genommen hat.',
+  capSub:'Ziele <b class="warm">nach oben</b>, und die Kugel fliegt durch den oberen Spalt &mdash; das nennen wir <b class="warm">1</b>. Ziele <b class="cool">nach unten</b>: unterer Spalt, <b class="cool">0</b>. Nach dem Spalt läuft sie auf ihrer Spur bis zur Anzeige.',
+});
+__regDE(S2,{
+  tag:'2 · NOT-Gatter',
+  subtitle:'Ein Gatter ist eine Weiche auf den Spuren. &bdquo;NOT&ldquo; ist das einfachste: Es kreuzt sie einfach.',
+  capTitle:'<b class="elec">NOT</b> vertauscht die Spuren &mdash; gleiche Kugel, gekipptes Bit.',
+  capSub:'Die Kreuzung schickt eine Kugel von der <b class="warm">oberen</b> Spur auf der <b class="cool">unteren</b> hinaus &mdash; und umgekehrt. Nichts entsteht, nichts verschwindet: eine Kugel rein, eine Kugel raus. Die Regel &bdquo;die Anzahl bleibt gleich&ldquo; macht das Gatter <b class="elec">umkehrbar</b> (reversibel).',
+});
+__regDE(S3,{
+  tag:'3 · CNOT-Gatter',
+  subtitle:'Jetzt zwei Bits. Ein Kontrollbit entscheidet, ob das NOT auf das Ziel wirkt.',
+  capTitle:'<b class="elec">CNOT</b>: Kippe das Ziel nur, wenn die Kontrolle <b class="warm">1</b> ist.',
+  capSub:'Das obere Bit ist die <b class="elec">Kontrolle</b>. Läuft seine Kugel auf der <b class="warm">oberen&nbsp;(1)</b>-Spur, legt sie die Weiche um und die <b class="cool">Ziel</b>-Box kreuzt; ist die Kontrolle <b class="cool">0</b>, fliegt das Ziel einfach geradeaus hindurch. Die Kontrolle selbst wird nie verändert — zwei Kugeln rein, zwei Kugeln raus.',
+});
+__regDE(S4,{
+  tag:'4 · Toffoli-Gatter',
+  subtitle:'Drei Bits. Das Ziel kippt nur, wenn BEIDE Kontrollen 1 sind.',
+  capTitle:'<b class="elec">Toffoli</b>: Kippe das Ziel nur, wenn <b class="warm">beide</b> Kontrollen 1 sind.',
+  capSub:'Die <b class="cool">Ziel</b>-Box kreuzt nur, wenn <b>Quadrat</b> und <b>Dreieck</b> beide auf ihrer <b class="warm">oberen&nbsp;(1)</b>-Spur laufen &mdash; eine Weiche, verdrahtet als <b class="elec">UND</b>. Immer noch umkehrbar: drei Kugeln rein, drei Kugeln raus.',
+});
+__regDE(S5,{
+  tag:'5 · 2-Bit-Addierer',
+  subtitle:'Verkette die Gatter zu einer Maschine, die zwei 2-Bit-Zahlen addiert.',
+  capTitle:'Der ganze <b class="elec">Addierer</b>: Gatter verkettet zu einem Rangierbahnhof.',
+  capSub:'Sechs Bits fließen von links&rarr;rechts &mdash; die Zahlen <b class="warm">A</b> und <b class="cool">B</b> plus zwei leere <b>Übertrag</b>-Bits. Drei Toffolis und drei CNOTs lenken die Kugeln so, dass auf den Ausgangsspuren <b class="e">A + B</b> steht. Zähl nach: sechs Kugeln rein, sechs raus &mdash; immer noch umkehrbar.',
+});
+__regDE(S5.STAGE[0],{t:'Die Werkbank: sechs Bits, noch keine Gatter.',
+ s:'<b class="warm">a0, a1</b> sind die Bits der Zahl <b class="warm">A</b>; <b class="cool">b0, b1</b> sind die Zahl <b class="cool">B</b>; <b>c1, c2</b> sind leere <b>Übertrag</b>-Bits (sie starten bei 0). Feuere &mdash; jede Kugel fliegt geradeaus zu ihrer Anzeige. Noch wird nichts addiert.'});
+__regDE(S5.STAGE[1],{t:'Einerspalte &mdash; schreibe den Übertrag.',
+ s:'Das erste <b class="elec">Toffoli</b> setzt c1 = a0 UND b0: den Übertrag aus der Einerspalte.'});
+__regDE(S5.STAGE[2],{t:'Einerspalte &mdash; schreibe die Summe (Halbaddierer fertig).',
+ s:'Ein <b class="elec">CNOT</b> macht aus b0 nun a0 XOR b0 = <b class="elec">s0</b>. Probiere <b class="warm">1</b>+<b class="warm">1</b>: Summe 0, Übertrag 1.'});
+__regDE(S5.STAGE[3],{t:'Zweierspalte &mdash; schreibe ihren Übertrag.',
+ s:'Ein zweites <b class="elec">Toffoli</b> setzt c2 = a1 UND b1.'});
+__regDE(S5.STAGE[4],{t:'Zweierspalte &mdash; Teilsumme.',
+ s:'Ein <b class="elec">CNOT</b> faltet a1 in b1 hinein (a1 XOR b1) &mdash; fertig ist das erst, wenn der Übertrag ankommt.'});
+__regDE(S5.STAGE[5],{t:'Eins im Sinn &mdash; hinüber in die Zweierspalte.',
+ s:'Ein <b class="elec">Toffoli</b> addiert den Einer-Übertrag c1 in c2 hinein (wenn b1 gesetzt ist).'});
+__regDE(S5.STAGE[6],{t:'Letztes Summenbit &mdash; der Addierer ist komplett.',
+ s:'Das letzte <b class="elec">CNOT</b> faltet c1 in b1 hinein = <b class="elec">s1</b>. Auf den Ausgangsspuren steht jetzt <b class="elec">A + B</b>. Sechs Kugeln rein, sechs raus.'});
+
 /* ----------------------------- scene manager ------------------------------ */
 const scenes=[S1,S2,S3,S4,S5];
 const labels=['Bit','NOT','CNOT','Toffoli','Adder'];
@@ -2599,6 +2973,7 @@ const els={
   capSub:document.getElementById('capSub-cannon'),
 };
 
+const labelsDE=['Bit','NOT','CNOT','Toffoli','Addierer'];
 function applySceneUI(s){
   els.subtitle.innerHTML=s.subtitle;
   els.tag.textContent=s.tag;els.tag.style.color=s.tagColor;els.tag.style.borderColor=s.tagColor+'55';
@@ -2629,9 +3004,25 @@ scenes[0].onEnter();
 applySceneUI(scenes[0]);
 requestAnimationFrame(frame);
 
+/* ------------------------- EN|DE refresh + boot --------------------------- */
+function __refreshLang(){
+  if(typeof dotEls!=='undefined'){
+    const L=window.__omLang==='de'?labelsDE:labels;
+    dotEls.forEach((d,i)=>{ d.querySelector('.dl').textContent=L[i]; });
+  }
+  const s=scenes[cur];
+  s.buildControls(document.getElementById('sctrl-cannon'));
+  if(s===S5) s.setStage(s.stage); else s.reset();
+  applySceneUI(s);
+}
+window.addEventListener('om-lang',__applyLang);
+window.__omApplyStatic();
+if(window.__omLang==='de') __applyLang();
+
 window.__DECKS.push({
   sectionId: 'deck-cannon',
   labels: labels,
+  labelsDE: (typeof labelsDE!=='undefined')?labelsDE:null,
   goto(i){ go(i); },
   activate(){ __active = true; last = performance.now(); },
   deactivate(){ __active = false; },
@@ -2643,6 +3034,42 @@ window.__DECKS.push({
 (function(){
 
 "use strict";
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+const __L=(en,de)=>window.__omLang==='de'?de:en;
+const __SWAPS=[];
+function __regDE(obj,de){ for(const k in de){ __SWAPS.push([obj,k,obj[k],de[k]]); } }
+function __applyLang(){
+  const de=window.__omLang==='de';
+  __SWAPS.forEach(s=>{ s[0][s[1]]=de?s[3]:s[2]; });
+  __refreshLang();
+}
 /* ============================================================================
    QUBITS AS CANNONBALLS  —  quantum version of the slit-path deck
      1) Qubit    : one shot, up slit = 1 / down slit = 0 — OR BOTH at once
@@ -2749,7 +3176,7 @@ function drawCannon(){
   ctx.beginPath();ctx.arc(G.sx,G.cy,Math.max(7,H*0.014),0,7);ctx.fillStyle=C.warm;ctx.fill();
   ctx.restore();
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText('cannon',G.sx,G.cy+H*0.05);
+  ctx.fillText(__L('cannon','Kanone'),G.sx,G.cy+H*0.05);
 }
 function drawReadout(landed){
   [[G.sTop,C.warm,'1',1],[G.sBot,C.cool,'0',0]].forEach(z=>{
@@ -2763,7 +3190,7 @@ function drawReadout(landed){
     ctx.fillStyle=on?'#10131f':z[1];ctx.fillText(z[2],G.rx,z[0]+5);
   });
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText('readout',G.rx,G.sBot+H*0.05);
+  ctx.fillText(__L('readout','Anzeige'),G.rx,G.sBot+H*0.05);
 }
 
 /* fuzzy probability blob (double-slit slide style): radial-gradient ellipse */
@@ -2866,7 +3293,7 @@ function drawMistCloud(intensity, measured, collapse){
     ctx.restore();
   });
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText(collapse>=1?'readout':'cloud · both at once',xr,cyMid+cry+14);
+  ctx.fillText(collapse>=1?__L('readout','Anzeige'):__L('cloud · both at once','Wolke · beides zugleich'),xr,cyMid+cry+14);
 }
 
 function drawNOTgate(){
@@ -3066,23 +3493,23 @@ const S1={
   setReadout(t){ document.getElementById('readout-cannonq').innerHTML=t; },
   reset(){
     this.ball=null;this.ghosts=null;this.landed=null;this.mist=false;this.collapse=0;this.measured=null;
-    this.setReadout('Fire a definite <b class="w">1</b> / <b class="c">0</b>, or <b class="m">both</b> for a superposition.');
+    this.setReadout(__L('Fire a definite <b class="w">1</b> / <b class="c">0</b>, or <b class="m">both</b> for a superposition.','Feuere eine eindeutige <b class="w">1</b> / <b class="c">0</b> — oder <b class="m">beide</b> für eine Überlagerung.'));
   },
   fire(v){
     this.reset();
     this.ball={vin:v,x:G.sx,y:G.cy,phase:'toSlit'};
-    this.setReadout('Firing&hellip;');
+    this.setReadout(__L('Firing&hellip;','Feuern&hellip;'));
   },
   fireSuper(){
     this.reset();
     this.ball={sup:true,t:0};
-    this.setReadout('Firing through <b class="m">both</b> slits at once&hellip;');
+    this.setReadout(__L('Firing through <b class="m">both</b> slits at once&hellip;','Feuern durch <b class="m">beide</b> Spalte gleichzeitig&hellip;'));
   },
   measure(){
     if(!this.mist||this.collapse>0) return;
     this.measured = Math.random()<0.5 ? 0 : 1;
     this.collapse = 0.0001;
-    this.setReadout('Measuring&hellip;');
+    this.setReadout(__L('Measuring&hellip;','Messung&hellip;'));
   },
   step(dt){
     const vx=W*0.42*dt;
@@ -3092,7 +3519,7 @@ const S1={
         b.t += dt*0.6;
         if(b.t>=1){
           this.ball=null; this.mist=true;
-          this.setReadout('Superposition: <b class="w">1</b> and <b class="c">0</b> at once — a <b class="m">cloud</b>. Press <b>Measure</b> to look.');
+          this.setReadout(__L('Superposition: <b class="w">1</b> and <b class="c">0</b> at once — a <b class="m">cloud</b>. Press <b>Measure</b> to look.','Überlagerung: <b class="w">1</b> und <b class="c">0</b> zugleich — eine <b class="m">Wolke</b>. Drücke <b>Messen</b>, um nachzusehen.'));
         }
       } else {
         if(b.phase==='toSlit'){
@@ -3104,8 +3531,8 @@ const S1={
           if(b.x>=G.rx){
             this.landed=b.vin; this.ball=null;
             this.setReadout(b.vin
-              ? 'The ball took the <b class="w">up</b> slit &rarr; qubit = <b class="w">1</b> (definite).'
-              : 'The ball took the <b class="c">down</b> slit &rarr; qubit = <b class="c">0</b> (definite).');
+              ? __L('The ball took the <b class="w">up</b> slit &rarr; qubit = <b class="w">1</b> (definite).','Die Kugel nahm den <b class="w">oberen</b> Spalt &rarr; Qubit = <b class="w">1</b> (eindeutig).')
+              : __L('The ball took the <b class="c">down</b> slit &rarr; qubit = <b class="c">0</b> (definite).','Die Kugel nahm den <b class="c">unteren</b> Spalt &rarr; Qubit = <b class="c">0</b> (eindeutig).'));
           }
         }
       }
@@ -3114,7 +3541,7 @@ const S1={
       this.collapse=Math.min(1,this.collapse+dt*1.6);
       if(this.collapse>=1){
         this.mist=false; this.landed=this.measured;
-        this.setReadout('Measured <b class="'+(this.measured?'w':'c')+'">'+this.measured+'</b> — the <b class="m">cloud</b> collapsed to one answer. Fire <b class="m">both</b> again to retry.');
+        this.setReadout(__L('Measured ','Gemessen: ')+'<b class="'+(this.measured?'w':'c')+'">'+this.measured+'</b>'+__L(' — the <b class="m">cloud</b> collapsed to one answer. Fire <b class="m">both</b> again to retry.',' — die <b class="m">Wolke</b> ist zu einer Antwort kollabiert. Feuere wieder <b class="m">beide</b>, um es noch einmal zu versuchen.'));
       }
     }
   },
@@ -3158,10 +3585,10 @@ const S1={
   buildControls(el){
     el.innerHTML='';const self=this;
     el.append(
-      mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
-      mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
-      mkbtn('Fire ◐ both','mist',()=>self.fireSuper()),
-      mkbtn('Measure','',()=>self.measure()),
+      mkbtn(__L('Fire ▲ (1)','Feuer ▲ (1)'),'up',()=>self.fire(1)),
+      mkbtn(__L('Fire ▼ (0)','Feuer ▼ (0)'),'dn',()=>self.fire(0)),
+      mkbtn(__L('Fire ◐ both','Feuer ◐ beide'),'mist',()=>self.fireSuper()),
+      mkbtn(__L('Measure','Messen'),'',()=>self.measure()),
       mkbtn('↻','',()=>self.reset())
     );
   },
@@ -3180,7 +3607,7 @@ function makeScene(cfg){
     fire(v){
       this.landed=null; this.vin=v;
       this.ball={vin:v, vout:this.hasNOT?(1-v):v, x:G.sx, y:G.cy, phase:'toSlit'};
-      document.getElementById('readout-cannonq').innerHTML='Firing&hellip;';
+      document.getElementById('readout-cannonq').innerHTML=__L('Firing&hellip;','Feuern&hellip;');
     },
     reset(){ this.ball=null; this.landed=null; this.vin=null;
       document.getElementById('readout-cannonq').innerHTML=cfg.idle; },
@@ -3217,8 +3644,8 @@ function makeScene(cfg){
     buildControls(el){
       el.innerHTML='';const self=this;
       el.append(
-        mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
-        mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
+        mkbtn(__L('Fire ▲ (1)','Feuer ▲ (1)'),'up',()=>self.fire(1)),
+        mkbtn(__L('Fire ▼ (0)','Feuer ▼ (0)'),'dn',()=>self.fire(0)),
         mkbtn('↻','',()=>self.reset())
       );
     },
@@ -3239,23 +3666,23 @@ const S2={
   setReadout(t){ document.getElementById('readout-cannonq').innerHTML=t; },
   reset(){
     this.ball=null;this.landed=null;this.mist=false;this.collapse=0;this.measured=null;
-    this.setReadout('Fire a definite <b class="w">1</b>/<b class="c">0</b>, or <b class="m">both</b>, through the <b class="e">NOT</b>.');
+    this.setReadout(__L('Fire a definite <b class="w">1</b>/<b class="c">0</b>, or <b class="m">both</b>, through the <b class="e">NOT</b>.','Feuere eine eindeutige <b class="w">1</b>/<b class="c">0</b> — oder <b class="m">beide</b> — durch das <b class="e">NOT</b>.'));
   },
   fire(v){
     this.reset();
     this.ball={vin:v,vout:1-v,x:G.sx,y:G.cy,phase:'toSlit'};
-    this.setReadout('Firing&hellip;');
+    this.setReadout(__L('Firing&hellip;','Feuern&hellip;'));
   },
   fireSuper(){
     this.reset();
     this.ball={sup:true,t:0};
-    this.setReadout('Sending <b class="m">both</b> branches through the <b class="e">NOT</b>&hellip;');
+    this.setReadout(__L('Sending <b class="m">both</b> branches through the <b class="e">NOT</b>&hellip;','Schicke <b class="m">beide</b> Zweige durch das <b class="e">NOT</b>&hellip;'));
   },
   measure(){
     if(!this.mist||this.collapse>0) return;
     this.measured = Math.random()<0.5 ? 0 : 1;
     this.collapse = 0.0001;
-    this.setReadout('Measuring&hellip;');
+    this.setReadout(__L('Measuring&hellip;','Messung&hellip;'));
   },
   step(dt){
     const vx=W*0.42*dt;
@@ -3265,7 +3692,7 @@ const S2={
         b.t += dt*0.5;
         if(b.t>=1){
           this.ball=null; this.mist=true;
-          this.setReadout('<b class="e">NOT</b> flipped <b>both</b> branches at once (<b class="w">1</b>&harr;<b class="c">0</b>). Still a <b class="m">cloud</b> — <b>Measure</b> to look.');
+          this.setReadout(__L('<b class="e">NOT</b> flipped <b>both</b> branches at once (<b class="w">1</b>&harr;<b class="c">0</b>). Still a <b class="m">cloud</b> — <b>Measure</b> to look.','<b class="e">NOT</b> hat <b>beide</b> Zweige gleichzeitig gekippt (<b class="w">1</b>&harr;<b class="c">0</b>). Immer noch eine <b class="m">Wolke</b> — <b>Messen</b>, um nachzusehen.'));
         }
       } else {
         if(b.phase==='toSlit'){
@@ -3276,7 +3703,7 @@ const S2={
           b.x+=vx; b.y=laneY(b.x,b.vin,b.vout,true);
           if(b.x>=G.rx){
             this.landed=b.vout; this.ball=null;
-            this.setReadout('In <b class="'+(b.vin?'w':'c')+'">'+b.vin+'</b> &rarr; <b class="e">NOT</b> &rarr; out <b class="'+(b.vout?'w':'c')+'">'+b.vout+'</b> (definite).');
+            this.setReadout(__L('In ','Rein: ')+'<b class="'+(b.vin?'w':'c')+'">'+b.vin+'</b>'+__L(' &rarr; <b class="e">NOT</b> &rarr; out ',' &rarr; <b class="e">NOT</b> &rarr; raus: ')+'<b class="'+(b.vout?'w':'c')+'">'+b.vout+'</b>'+__L(' (definite).',' (eindeutig).'));
           }
         }
       }
@@ -3285,7 +3712,7 @@ const S2={
       this.collapse=Math.min(1,this.collapse+dt*1.6);
       if(this.collapse>=1){
         this.mist=false; this.landed=this.measured;
-        this.setReadout('Measured <b class="'+(this.measured?'w':'c')+'">'+this.measured+'</b> — the cloud collapsed. Fire <b class="m">both</b> again to retry.');
+        this.setReadout(__L('Measured ','Gemessen: ')+'<b class="'+(this.measured?'w':'c')+'">'+this.measured+'</b>'+__L(' — the cloud collapsed. Fire <b class="m">both</b> again to retry.',' — die Wolke ist kollabiert. Feuere wieder <b class="m">beide</b>, um es noch einmal zu versuchen.'));
       }
     }
   },
@@ -3336,10 +3763,10 @@ const S2={
   buildControls(el){
     el.innerHTML='';const self=this;
     el.append(
-      mkbtn('Fire ▲ (1)','up',()=>self.fire(1)),
-      mkbtn('Fire ▼ (0)','dn',()=>self.fire(0)),
-      mkbtn('Fire ◐ both','mist',()=>self.fireSuper()),
-      mkbtn('Measure','',()=>self.measure()),
+      mkbtn(__L('Fire ▲ (1)','Feuer ▲ (1)'),'up',()=>self.fire(1)),
+      mkbtn(__L('Fire ▼ (0)','Feuer ▼ (0)'),'dn',()=>self.fire(0)),
+      mkbtn(__L('Fire ◐ both','Feuer ◐ beide'),'mist',()=>self.fireSuper()),
+      mkbtn(__L('Measure','Messen'),'',()=>self.measure()),
       mkbtn('↻','',()=>self.reset())
     );
   },
@@ -3397,7 +3824,7 @@ function drawJointCloud(configs, measured, collapse, intensity, entangled){
     ctx.restore();
   });
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  const lab=collapse>=1?'measured · ▪ control  ● target':((entangled?'entangled':'superposed')+' cloud · ▪ control  ● target');
+  const lab=collapse>=1?__L('measured · ▪ control  ● target','gemessen · ▪ Kontrolle  ● Ziel'):((entangled?__L('entangled','verschränkte'):__L('superposed','überlagerte'))+__L(' cloud · ▪ control  ● target',' Wolke · ▪ Kontrolle  ● Ziel'));
   ctx.fillText(lab,xr,cyMid+cry+15);
 }
 /* control link in superposition (mist) style: both control values tap the gate */
@@ -3432,42 +3859,42 @@ const S3={
     el.innerHTML='';const self=this;
     const cB=mkbtn('','',()=>{self.cin=(self.cin+1)%3;self._sync();self.reset();});
     const tB=mkbtn('','',()=>{self.tin=(self.tin+1)%3;self._sync();self.reset();});
-    el.append(cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    el.append(cB,tB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn(__L('Measure','Messen'),'',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
     this._sync=function(){
-      cB.textContent='control '+(self.cin===2?'◐ both':(self.cin?'▲ 1':'▼ 0'));
+      cB.textContent=__L('control ','Kontrolle ')+(self.cin===2?__L('◐ both','◐ beide'):(self.cin?'▲ 1':'▼ 0'));
       cB.className='stepbtn '+(self.cin===2?'mist':(self.cin?'up':'dn'));
-      tB.textContent='target '+(self.tin===2?'◐ both':(self.tin?'▲ 1':'▼ 0'));
+      tB.textContent=__L('target ','Ziel ')+(self.tin===2?__L('◐ both','◐ beide'):(self.tin?'▲ 1':'▼ 0'));
       tB.className='stepbtn '+(self.tin===2?'mist':(self.tin?'up':'dn'));
     };this._sync();
   },
   reset(){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;this.sup=null;this.mist=false;this.collapse=0;this.measured=null;
     this.setReadout(this.quantum()
-      ? 'At least one qubit is a <b class="m">cloud</b>. Press <b>Run</b>, then <b>Measure</b>.'
-      : 'Set the <b class="e">control</b> and <b class="w">target</b>, then press <b>Run</b>.'); },
+      ? __L('At least one qubit is a <b class="m">cloud</b>. Press <b>Run</b>, then <b>Measure</b>.','Mindestens ein Qubit ist eine <b class="m">Wolke</b>. Drücke <b>Start</b>, dann <b>Messen</b>.')
+      : __L('Set the <b class="e">control</b> and <b class="w">target</b>, then press <b>Run</b>.','Stelle <b class="e">Kontrolle</b> und <b class="w">Ziel</b> ein, dann drücke <b>Start</b>.')); },
   run(){
     this.measured=null;this.collapse=0;this.mist=false;
-    if(this.quantum()){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;this.sup={t:0};this.setReadout('Running all branches&hellip;');return; }
+    if(this.quantum()){ this.cball=this.tball=null;this.cLanded=this.tLanded=null;this.sup={t:0};this.setReadout(__L('Running all branches&hellip;','Alle Zweige laufen&hellip;'));return; }
     this.cLanded=this.tLanded=null;
     const active=this.cin===1, tout=active?(1-this.tin):this.tin;
     this.cball={x:G.sx,y:G.cyC,sy:(this.cin?G.cTop:G.cBot),vin:this.cin,phase:'toSlit'};
     this.tball={x:G.sx,y:G.cyT,syIn:(this.tin?G.tTop:G.tBot),syOut:(tout?G.tTop:G.tBot),vin:this.tin,vout:tout,phase:'toSlit'};
-    this.setReadout('Running&hellip;');
+    this.setReadout(__L('Running&hellip;','Läuft&hellip;'));
   },
-  measure(){ if(!this.mist||this.collapse>0)return; this.measured=Math.floor(Math.random()*this.configList().length); this.collapse=0.0001; this.setReadout('Measuring&hellip;'); },
+  measure(){ if(!this.mist||this.collapse>0)return; this.measured=Math.floor(Math.random()*this.configList().length); this.collapse=0.0001; this.setReadout(__L('Measuring&hellip;','Messung&hellip;')); },
   _result(){
     if(this.cball||this.tball)return;
     if(this.cLanded==null&&this.tLanded==null)return;
     const cin=this.cLanded,tout=this.tLanded;
-    this.setReadout('control <b class="'+(cin?'w':'c')+'">'+cin+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">CNOT</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+    this.setReadout(__L('control ','Kontrolle ')+'<b class="'+(cin?'w':'c')+'">'+cin+'</b>'+__L(' (unchanged) &nbsp;·&nbsp; target ',' (unverändert) &nbsp;·&nbsp; Ziel ')+'<b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">CNOT</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
   },
   step(dt){
     if(this.sup){ this.sup.t+=dt*0.5; if(this.sup.t>=1){ this.sup=null; this.mist=true;
       const cfgs=this.configList(), ent=this.entangled();
       const list=cfgs.map(c=>'▪'+c.c+'●'+c.t).join(' &nbsp;|&nbsp; ');
-      this.setReadout((ent?'<b class="m">Entangled!</b> ':'<b class="m">Superposition.</b> ')+'The cloud holds '+list+'. <b>Measure</b> to collapse'+(ent?' — the two always agree.':'.')); } }
+      this.setReadout((ent?__L('<b class="m">Entangled!</b> ','<b class="m">Verschränkt!</b> '):__L('<b class="m">Superposition.</b> ','<b class="m">Überlagerung.</b> '))+__L('The cloud holds ','Die Wolke enthält ')+list+__L('. <b>Measure</b> to collapse','. <b>Messen</b> zum Kollabieren')+(ent?__L(' — the two always agree.',' — die beiden stimmen immer überein.'):'.')); } }
     if(this.collapse>0 && this.collapse<1){ this.collapse=Math.min(1,this.collapse+dt*1.6);
       if(this.collapse>=1){ const cfgs=this.configList(), c=cfgs[this.measured]||cfgs[0], ent=this.entangled();
-        this.setReadout('Measured ▪<b class="'+(c.c?'w':'c')+'">'+c.c+'</b> ●<b class="'+(c.t?'w':'c')+'">'+c.t+'</b>'+(ent?' — measuring one fixed the other. <b class="m">Entanglement</b>.':'.')); } }
+        this.setReadout(__L('Measured ','Gemessen: ')+'▪<b class="'+(c.c?'w':'c')+'">'+c.c+'</b> ●<b class="'+(c.t?'w':'c')+'">'+c.t+'</b>'+(ent?__L(' — measuring one fixed the other. <b class="m">Entanglement</b>.',' — die Messung des einen hat das andere festgelegt. <b class="m">Verschränkung</b>.'):'.')); } }
     const vx=W*0.42*dt;
     let b=this.cball;
     if(b){
@@ -3491,7 +3918,7 @@ const S3={
     drawCannonAt(G.cyC,'square',this.cin===2?C.mist:colOf(this.cin));
     drawCannonAt(G.cyT,'circle',this.tin===2?C.mist:colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.cTop-12);ctx.fillText('target',G.sx,G.tBot+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.cTop-12);ctx.fillText(__L('target','Ziel'),G.sx,G.tBot+18);
     if(this.sup){
       const t=this.sup.t, coreR=Math.max(4,H*0.011), startR=Math.max(4,H*0.012), spanRyC=G.gap2/2+G.sH2;
       const cS=this.cin===2, tS=this.tin===2, gateL=G.gateX-G.cw;
@@ -3542,8 +3969,8 @@ const S3={
                       {y:G.tTop,color:C.warm,lab:'1'},{y:G.tBot,color:C.cool,lab:'0'}],G.sH2);
     drawCannonAt(G.cyC,'square',colOf(this.cin));drawCannonAt(G.cyT,'circle',colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.cTop-12);
-    ctx.fillText('target',G.sx,G.tBot+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.cTop-12);
+    ctx.fillText(__L('target','Ziel'),G.sx,G.tBot+18);
     const drawB=(b,vbefore,vafter)=>{const v=b.x<G.gateX?vbefore:vafter,col=colOf(v);
       ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
       ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
@@ -3593,11 +4020,11 @@ function drawConfigCloud(configs, shapes, measured, collapse, intensity, entangl
     ctx.restore();
   });
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  const lab=collapse>=1?('measured · '+legend):((entangled?'entangled':'superposed')+' cloud · '+legend);
+  const lab=collapse>=1?(__L('measured · ','gemessen · ')+legend):((entangled?__L('entangled','verschränkte'):__L('superposed','überlagerte'))+__L(' cloud · ',' Wolke · ')+legend);
   ctx.fillText(lab,xr,cyMid+cry+14);
 }
 
-const TOF_SHAPES=['triangle','square','circle'], TOF_LEGEND='▲■ controls  ● target';
+const TOF_SHAPES=['triangle','square','circle'], TOF_LEGEND='▲■ controls  ● target', TOF_LEGEND_DE='▲■ Kontrollen  ● Ziel';
 const S4={
   tag:'4 · Toffoli gate', tagColor:'var(--elec)',
   subtitle:'Three qubits. The target flips only when BOTH controls are 1 — and each can be a cloud.',
@@ -3623,7 +4050,7 @@ const S4={
     el.innerHTML='';const self=this;
     const cyc=p=>()=>{self[p]=(self[p]+1)%3;self._sync();self.reset();};
     const cA=mkbtn('','',cyc('c1')), cB=mkbtn('','',cyc('c2')), tB=mkbtn('','',cyc('tin'));
-    el.append(cA,cB,tB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    el.append(cA,cB,tB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn(__L('Measure','Messen'),'',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
     const lab=(sym,s)=>sym+' '+(s===2?'◐':(s?'1':'0')), cls=s=>'stepbtn '+(s===2?'mist':(s?'up':'dn'));
     this._sync=function(){
       cA.textContent=lab('▲',self.c1);cA.className=cls(self.c1);
@@ -3633,32 +4060,32 @@ const S4={
   },
   reset(){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;this.sup=null;this.mist=false;this.collapse=0;this.measured=null;
     this.setReadout(this.quantum()
-      ? 'At least one qubit is a <b class="m">cloud</b>. Press <b>Run</b>, then <b>Measure</b>.'
-      : 'Set the two <b class="e">controls</b> (▲ ■) and the <b class="w">target</b> (●), then press <b>Run</b>.'); },
-  measure(){ if(!this.mist||this.collapse>0)return; this.measured=Math.floor(Math.random()*this.configList().length); this.collapse=0.0001; this.setReadout('Measuring&hellip;'); },
+      ? __L('At least one qubit is a <b class="m">cloud</b>. Press <b>Run</b>, then <b>Measure</b>.','Mindestens ein Qubit ist eine <b class="m">Wolke</b>. Drücke <b>Start</b>, dann <b>Messen</b>.')
+      : __L('Set the two <b class="e">controls</b> (▲ ■) and the <b class="w">target</b> (●), then press <b>Run</b>.','Stelle die beiden <b class="e">Kontrollen</b> (▲ ■) und das <b class="w">Ziel</b> (●) ein, dann drücke <b>Start</b>.')); },
+  measure(){ if(!this.mist||this.collapse>0)return; this.measured=Math.floor(Math.random()*this.configList().length); this.collapse=0.0001; this.setReadout(__L('Measuring&hellip;','Messung&hellip;')); },
   run(){
     this.measured=null;this.collapse=0;this.mist=false;
-    if(this.quantum()){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;this.sup={t:0};this.setReadout('Running all branches&hellip;');return; }
+    if(this.quantum()){ this.b1=this.b2=this.b3=null;this.l1=this.l2=this.l3=null;this.sup={t:0};this.setReadout(__L('Running all branches&hellip;','Alle Zweige laufen&hellip;'));return; }
     this.l1=this.l2=this.l3=null;const act=this.active(),tout=act?(1-this.tin):this.tin;
     this.b1={x:G.sx,y:G.t3a,sy:(this.c1?G.a1T:G.a1B),vin:this.c1,cy:G.t3a,phase:'toSlit'};
     this.b2={x:G.sx,y:G.t3b,sy:(this.c2?G.a2T:G.a2B),vin:this.c2,cy:G.t3b,phase:'toSlit'};
     this.b3={x:G.sx,y:G.t3c,syIn:(this.tin?G.a3T:G.a3B),syOut:(tout?G.a3T:G.a3B),vin:this.tin,vout:tout,cy:G.t3c,phase:'toSlit'};
-    this.setReadout('Running&hellip;');
+    this.setReadout(__L('Running&hellip;','Läuft&hellip;'));
   },
   _result(){
     if(this.b1||this.b2||this.b3)return;
     if(this.l1==null&&this.l2==null&&this.l3==null)return;
     const tout=this.l3;
-    this.setReadout('controls <b class="'+(this.l1?'w':'c')+'">'+this.l1+'</b> <b class="'+(this.l2?'w':'c')+'">'+this.l2+'</b> (unchanged) &nbsp;·&nbsp; target <b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">Toffoli</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
+    this.setReadout(__L('controls ','Kontrollen ')+'<b class="'+(this.l1?'w':'c')+'">'+this.l1+'</b> <b class="'+(this.l2?'w':'c')+'">'+this.l2+'</b>'+__L(' (unchanged) &nbsp;·&nbsp; target ',' (unverändert) &nbsp;·&nbsp; Ziel ')+'<b class="'+(this.tin?'w':'c')+'">'+this.tin+'</b> &rarr; <b class="e">Toffoli</b> &rarr; <b class="'+(tout?'w':'c')+'">'+tout+'</b>');
   },
   step(dt){
     if(this.sup){ this.sup.t+=dt*0.5; if(this.sup.t>=1){ this.sup=null; this.mist=true;
       const cfgs=this.configList(), ent=this.entangled();
       const list=cfgs.map(c=>'▲'+c[0]+'■'+c[1]+'●'+c[2]).join(' &nbsp;|&nbsp; ');
-      this.setReadout((ent?'<b class="m">Entangled!</b> ':'<b class="m">Superposition.</b> ')+'Cloud of '+cfgs.length+': '+list+'. <b>Measure</b> to collapse.'); } }
+      this.setReadout((ent?__L('<b class="m">Entangled!</b> ','<b class="m">Verschränkt!</b> '):__L('<b class="m">Superposition.</b> ','<b class="m">Überlagerung.</b> '))+__L('Cloud of ','Wolke aus ')+cfgs.length+': '+list+__L('. <b>Measure</b> to collapse.','. <b>Messen</b> zum Kollabieren.')); } }
     if(this.collapse>0 && this.collapse<1){ this.collapse=Math.min(1,this.collapse+dt*1.6);
       if(this.collapse>=1){ const cfgs=this.configList(), c=cfgs[this.measured]||cfgs[0], ent=this.entangled();
-        this.setReadout('Measured ▲<b class="'+(c[0]?'w':'c')+'">'+c[0]+'</b> ■<b class="'+(c[1]?'w':'c')+'">'+c[1]+'</b> ●<b class="'+(c[2]?'w':'c')+'">'+c[2]+'</b>'+(ent?' — one measurement fixed all three. <b class="m">Entanglement</b>.':'.')); } }
+        this.setReadout(__L('Measured ','Gemessen: ')+'▲<b class="'+(c[0]?'w':'c')+'">'+c[0]+'</b> ■<b class="'+(c[1]?'w':'c')+'">'+c[1]+'</b> ●<b class="'+(c[2]?'w':'c')+'">'+c[2]+'</b>'+(ent?__L(' — one measurement fixed all three. <b class="m">Entanglement</b>.',' — eine Messung hat alle drei festgelegt. <b class="m">Verschränkung</b>.'):'.')); } }
     const vx=W*0.42*dt;
     const moveStraight=(b,set)=>{
       if(b.phase==='toSlit'){const dx=G.bx-G.sx,dy=b.sy-b.cy,L=Math.hypot(dx,dy)||1;b.x+=dx/L*vx;b.y+=dy/L*vx;if(b.x>=G.bx){b.x=G.bx;b.y=b.sy;b.phase='lane';}return false;}
@@ -3689,7 +4116,7 @@ const S4={
     drawChannelLanes([{yT:G.a1T,yB:G.a1B,gated:false},{yT:G.a2T,yB:G.a2B,gated:false},{yT:G.a3T,yB:G.a3B,gated:true}]);
     const cfgs=this.configList(), ent=this.entangled();
     if(this.mist||this.collapse>0){ const inten=this.collapse>0?(1-this.collapse):1;
-      drawConfigCloud(cfgs,TOF_SHAPES,this.measured,this.collapse,inten,ent,TOF_LEGEND); }
+      drawConfigCloud(cfgs,TOF_SHAPES,this.measured,this.collapse,inten,ent,__L(TOF_LEGEND,TOF_LEGEND_DE)); }
     const canFlip=(this.c1!==0)&&(this.c2!==0);
     drawGateBox(G.a3T,G.a3B,canFlip,'NOT');
     this.drawLinks();
@@ -3700,7 +4127,7 @@ const S4={
     drawCannonAt(G.t3b,'square',this.c2===2?C.mist:colOf(this.c2));
     drawCannonAt(G.t3c,'circle',this.tin===2?C.mist:colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);ctx.fillText('target',G.sx,G.a3B+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.a1T-12);ctx.fillText(__L('control','Kontrolle'),G.sx,G.a2T-12);ctx.fillText(__L('target','Ziel'),G.sx,G.a3B+18);
     if(this.sup){
       const t=this.sup.t, coreR=Math.max(4,H*0.010), startR=Math.max(4,H*0.011), spanRy=G.gap3/2+G.sH3;
       const c1S=this.c1===2,c2S=this.c2===2,tS=this.tin===2,gateL=G.gateX-G.cw;
@@ -3723,7 +4150,7 @@ const S4={
         else if(canFlip2){ tv.forEach(v=>{const sy=v?G.a3T:G.a3B; fuzz(x,sy,colOf(v),a*0.92);
           const ly=(1-v)?G.a3T:G.a3B, yc=crossYabs(x,sy,ly), val=x<G.gateX?v:1-v; fuzz(x,yc,colOf(val),a*0.92);}); }
         else { tv.forEach(v=>{const y=v?G.a3T:G.a3B; tS?fuzz(x,y,colOf(v),a):crisp(x,y,colOf(v),a);}); }
-        if(k>0) drawConfigCloud(cfgs,TOF_SHAPES,null,0,k,ent,TOF_LEGEND);
+        if(k>0) drawConfigCloud(cfgs,TOF_SHAPES,null,0,k,ent,__L(TOF_LEGEND,TOF_LEGEND_DE));
       }
     }
   },
@@ -3742,8 +4169,8 @@ const S4={
                       {y:G.a3T,color:C.warm,lab:'1'},{y:G.a3B,color:C.cool,lab:'0'}],G.sH3);
     drawCannonAt(G.t3a,'triangle',colOf(this.c1));drawCannonAt(G.t3b,'square',colOf(this.c2));drawCannonAt(G.t3c,'circle',colOf(this.tin));
     ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText('control',G.sx,G.a1T-12);ctx.fillText('control',G.sx,G.a2T-12);
-    ctx.fillText('target',G.sx,G.a3B+18);
+    ctx.fillText(__L('control','Kontrolle'),G.sx,G.a1T-12);ctx.fillText(__L('control','Kontrolle'),G.sx,G.a2T-12);
+    ctx.fillText(__L('target','Ziel'),G.sx,G.a3B+18);
     const drawB=(b,vb,va)=>{const v=b.x<G.gateX?vb:va,col=colOf(v);
       ctx.save();ctx.shadowColor=col;ctx.shadowBlur=14;ctx.beginPath();
       ctx.arc(b.x,b.y,Math.max(5,H*0.011),0,7);ctx.fillStyle=col;ctx.fill();ctx.restore();};
@@ -3793,7 +4220,7 @@ function drawSumCloud(probs, measured, collapse, intensity){
   });
   ctx.globalAlpha=1; ctx.textBaseline='alphabetic';
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText(collapse>=1?'measured — one sum':'cloud of sums · every A+B at once', xr, cyMid+cry+14);
+  ctx.fillText(collapse>=1?__L('measured — one sum','gemessen — eine Summe'):__L('cloud of sums · every A+B at once','Wolke von Summen · jedes A+B auf einmal'), xr, cyMid+cry+14);
 }
 /* explicit output state (few branches): the FULL six-qubit output register.
    The adder is reversible — six wires in, six out. Shape marks each wire's
@@ -3844,9 +4271,10 @@ function drawRegStateCloud(items, measured, collapse, intensity){
   });
   ctx.textBaseline='alphabetic';
   ctx.font='11px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-  ctx.fillText(collapse>=1?'measured — one 6-qubit state':'output register · big = sum s₂s₁s₀,  small = garbage', xr, cyMid+cry+14);
+  ctx.fillText(collapse>=1?__L('measured — one 6-qubit state','gemessen — ein 6-Qubit-Zustand'):__L('output register · big = sum s₂s₁s₀,  small = garbage','Ausgaberegister · groß = Summe s₂s₁s₀,  klein = Müll'), xr, cyMid+cry+14);
 }
 const ADD_CSUB='Now all additions can be performed at the same time!';
+const ADD_CSUB_DE='Jetzt lassen sich alle Additionen gleichzeitig ausführen!';
 const ADD_QCAP={
   t:'One run, <b class="mist">every sum at once</b>.',
   s:'Put the inputs in a <b class="mist">cloud</b> of all values and the same six-gate adder computes <b class="warm">A</b>+<b class="cool">B</b> for <b>every</b> pair simultaneously &mdash; the output is a <b class="mist">cloud of sums</b>. That parallel power is the heart of quantum computing. The catch: <b class="warn">measuring</b> collapses the cloud to just <b>one</b> random sum, so a real quantum algorithm must first steer the useful answer to the top.'
@@ -3880,7 +4308,7 @@ const S5={
     const ct=document.getElementById('capTitle-cannonq'),cs=document.getElementById('capSub-cannonq');
     if(ct)ct.innerHTML=c.t;if(cs)cs.innerHTML=c.s;
     this.prog=0;this.running=false;this.landed=null;this.simulate();
-    this.setReadout(s===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+s+' gate'+(s>1?'s':'')+' built so far.');
+    this.setReadout(s===0?__L('Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.','Stelle <b class="w">A</b> und <b class="c">B</b> ein, dann <b>Start</b> für die sechs geraden Schüsse.'):__L('Press <b>Run</b> to fire through the '+s+' gate'+(s>1?'s':'')+' built so far.','Drücke <b>Start</b> und feuere durch '+(s>1?'die '+s+' bisher gebauten Gatter':'das bisher gebaute Gatter')+'.'));
     if(this._sync)this._sync();
   },
   setReadout(t){ document.getElementById('readout-cannonq').innerHTML=t; },
@@ -3901,10 +4329,11 @@ const S5={
   valAtFor(sim,i,x){ let v=sim.inVals[i];for(const e of sim.events[i]){if(x>=e.x)v=e.to;else break;}return v; },
   setCap(t,s){ this.capTitle=t;this.capSub=s;const ct=document.getElementById('capTitle-cannonq'),cs=document.getElementById('capSub-cannonq');if(ct)ct.innerHTML=t;if(cs)cs.innerHTML=s; },
   qreset(){ this.qrun=false;this.qprog=0;this.qmist=false;this.qcollapse=0;this.qmeasured=null;
-    this.setReadout('Inputs are a <b class="m">cloud</b>. Press <b>Run</b> to add them all at once, then <b>Measure</b>.'); },
+    this.setReadout(__L('Inputs are a <b class="m">cloud</b>. Press <b>Run</b> to add them all at once, then <b>Measure</b>.','Die Eingaben sind eine <b class="m">Wolke</b>. Drücke <b>Start</b>, um alle auf einmal zu addieren, dann <b>Messen</b>.')); },
   afterSet(){
     const panel=document.getElementById('panel-cannonq');
-    this.subtitle=ADD_CSUB; document.getElementById('subtitle-cannonq').innerHTML=ADD_CSUB;
+    const __sub=__L(ADD_CSUB,ADD_CSUB_DE);
+    this.subtitle=__sub; document.getElementById('subtitle-cannonq').innerHTML=__sub;
     if(this.quantum()){
       panel.classList.remove('wsmode');
       document.getElementById('wsheet-cannonq').classList.remove('show');
@@ -3916,7 +4345,7 @@ const S5={
       this.setStage(this.stage);
     }
   },
-  measure(){ if(!this.qmist||this.qcollapse>0)return; this.qmeasured=Math.floor(Math.random()*this.problems().length); this.qcollapse=0.0001; this.setReadout('Measuring&hellip;'); },
+  measure(){ if(!this.qmist||this.qcollapse>0)return; this.qmeasured=Math.floor(Math.random()*this.problems().length); this.qcollapse=0.0001; this.setReadout(__L('Measuring&hellip;','Messung&hellip;')); },
   bitLane(i,v){ return v?(G.adCy[i]-G.adLG/2):(G.adCy[i]+G.adLG/2); },
   simulate(){
     const A=this.A,B=this.B,a0=A&1,a1=(A>>1)&1,b0=B&1,b1=(B>>1)&1;
@@ -3945,34 +4374,34 @@ const S5={
     const aB=mkbtn('','up',()=>{self.A=(self.A+1)%6;self._sync();self.afterSet();});
     const bB=mkbtn('','dn',()=>{self.B=(self.B+1)%5;self._sync();self.afterSet();});
     const buildB=mkbtn('','',()=>{ if(self.quantum())return; self.setStage((self.stage+1)%7); });
-    el.append(aB,bB,buildB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    el.append(aB,bB,buildB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn(__L('Measure','Messen'),'',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
     this._sync=()=>{
-      aB.textContent='A = '+(self.A<4?self.A:(self.A===4?'{2,3}':'★ all')); aB.className='stepbtn '+(self.A>=4?'mist':'up');
-      bB.textContent='B = '+(self.B<4?self.B:'★ all'); bB.className='stepbtn '+(self.B>=4?'mist':'dn');
-      buildB.textContent='Build ▶ '+self.stage+'/6'; buildB.style.opacity=self.quantum()?0.4:1;
+      aB.textContent='A = '+(self.A<4?self.A:(self.A===4?'{2,3}':__L('★ all','★ alle'))); aB.className='stepbtn '+(self.A>=4?'mist':'up');
+      bB.textContent='B = '+(self.B<4?self.B:__L('★ all','★ alle')); bB.className='stepbtn '+(self.B>=4?'mist':'dn');
+      buildB.textContent=__L('Build ▶ ','Aufbau ▶ ')+self.stage+'/6'; buildB.style.opacity=self.quantum()?0.4:1;
     };this._sync();
   },
   reset(){ if(this.quantum()){ this.qreset(); return; }
     this.prog=0;this.running=false;this.landed=null;this.simulate();
-    this.setReadout(this.stage===0?'Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.':'Press <b>Run</b> to fire through the '+this.stage+' gate'+(this.stage>1?'s':'')+' built so far.'); },
-  run(){ if(this.quantum()){ this.qrun=true;this.qprog=0;this.qmist=false;this.qcollapse=0;this.qmeasured=null;this.setReadout('Computing <b class="m">all sums</b> in parallel&hellip;'); return; }
-    this.simulate();this.prog=0;this.running=true;this.landed=null;this.setReadout('Running&hellip;'); },
+    this.setReadout(this.stage===0?__L('Set <b class="w">A</b> and <b class="c">B</b>, then <b>Run</b> the six straight shots.','Stelle <b class="w">A</b> und <b class="c">B</b> ein, dann <b>Start</b> für die sechs geraden Schüsse.'):__L('Press <b>Run</b> to fire through the '+this.stage+' gate'+(this.stage>1?'s':'')+' built so far.','Drücke <b>Start</b> und feuere durch '+(this.stage>1?'die '+this.stage+' bisher gebauten Gatter':'das bisher gebaute Gatter')+'.')); },
+  run(){ if(this.quantum()){ this.qrun=true;this.qprog=0;this.qmist=false;this.qcollapse=0;this.qmeasured=null;this.setReadout(__L('Computing <b class="m">all sums</b> in parallel&hellip;','Berechne <b class="m">alle Summen</b> parallel&hellip;')); return; }
+    this.simulate();this.prog=0;this.running=true;this.landed=null;this.setReadout(__L('Running&hellip;','Läuft&hellip;')); },
   step(dt){
     if(this.quantum()){
       if(this.qrun){ this.qprog+=dt*0.4; if(this.qprog>=1){ this.qprog=1;this.qrun=false;this.qmist=true;
-        const P=this.problems(); this.setReadout('<b class="m">'+P.length+' sums at once</b> &mdash; '+P.map(p=>p.a+'+'+p.b+'='+p.s).join(', ')+'. <b class="warn">Measure</b> to collapse.'); } }
+        const P=this.problems(); this.setReadout('<b class="m">'+P.length+__L(' sums at once</b> &mdash; ',' Summen auf einmal</b> &mdash; ')+P.map(p=>p.a+'+'+p.b+'='+p.s).join(', ')+__L('. <b class="warn">Measure</b> to collapse.','. <b class="warn">Messen</b> zum Kollabieren.')); } }
       if(this.qcollapse>0&&this.qcollapse<1){ this.qcollapse=Math.min(1,this.qcollapse+dt*1.6);
         if(this.qcollapse>=1){ const P=this.problems(), p=P[this.qmeasured]||P[0];
-          this.setReadout('Collapsed to one: <b class="w">'+p.a+'</b> + <b class="c">'+p.b+'</b> = <b class="e">'+p.s+'</b> &mdash; just one random sum survives.'); } }
+          this.setReadout(__L('Collapsed to one: ','Kollabiert auf eine: ')+'<b class="w">'+p.a+'</b> + <b class="c">'+p.b+'</b> = <b class="e">'+p.s+'</b>'+__L(' &mdash; just one random sum survives.',' &mdash; nur eine zufällige Summe überlebt.')); } }
       return;
     }
     if(!this.running)return;
     this.prog+=dt*0.38;
     if(this.prog>=1){this.prog=1;this.running=false;this.landed=this.sim.outVals;
       const o=this.sim.outVals,s0=o[1],s1=o[4],s2=o[5];
-      if(this.stage===0) this.setReadout('A = <b class="w">'+this.A+'</b>, B = <b class="c">'+this.B+'</b> &mdash; six straight shots, nothing added yet.');
+      if(this.stage===0) this.setReadout('A = <b class="w">'+this.A+'</b>, B = <b class="c">'+this.B+'</b>'+__L(' &mdash; six straight shots, nothing added yet.',' &mdash; sechs gerade Schüsse, noch nichts addiert.'));
       else if(this.stage===6) this.setReadout('<b class="w">'+this.A+'</b> + <b class="c">'+this.B+'</b> = <b class="e">'+(this.A+this.B)+'</b> &nbsp; (s&#8322;s&#8321;s&#8320; = '+s2+s1+s0+')');
-      else this.setReadout('Built <b>'+this.stage+'/6</b> gates &mdash; partial result on the output lanes.');}
+      else this.setReadout(__L('Built <b>'+this.stage+'/6</b> gates &mdash; partial result on the output lanes.','<b>'+this.stage+'/6</b> Gatter gebaut &mdash; Teilergebnis auf den Ausgangs-Spuren.'));}
   },
   drawGate(g,gi){
     const x=G.adGX[gi],tg=g.tg,cy=G.adCy[tg],lg=G.adLG;
@@ -4112,9 +4541,9 @@ const S5={
       ctx.fillText('= '+s,c0x+cellsW+gap+8,y+4);
     }
     ctx.font='10px Inter,system-ui';ctx.fillStyle=C.muted;ctx.textAlign='center';
-    ctx.fillText(this.stage===0?'output register — nothing added yet'
-      :full?'output register · big = sum s₂s₁s₀ · small = discarded'
-      :'output register — partial (build more gates)',xc,y+r+18);
+    ctx.fillText(this.stage===0?__L('output register — nothing added yet','Ausgaberegister — noch nichts addiert')
+      :full?__L('output register · big = sum s₂s₁s₀ · small = discarded','Ausgaberegister · groß = Summe s₂s₁s₀ · klein = verworfen')
+      :__L('output register — partial (build more gates)','Ausgaberegister — unvollständig (baue mehr Gatter)'),xc,y+r+18);
     ctx.restore();
   },
   draw(){
@@ -4226,13 +4655,13 @@ function makeHadamardAdderScene(){
   s.A=2; s.B=1; s.stage=6;
   s.captionsFor=function(){
     return this.showSlit ? {
-      sub:'Same adder but now every wire fires a 0 and a gate prepares it.',
-      capt:'Every qubit starts at <b class="cool">0</b> — a gate decides what it becomes.',
-      caps:'The cannons no longer fire the "right" ball by magic — every wire really fires a plain <b class="cool">0</b>. Need a <b class="warm">1</b>? A <b class="elec">NOT</b> goes right after the cannon. Need a <b class="mist">superposition</b>? A <b class="mist">Hadamard (H)</b> goes there instead, fanning the <b class="cool">0</b> into a <b class="mist">mist</b> of <b class="warm">1</b> and <b class="cool">0</b>. Change <b class="w">A</b> or <b class="c">B</b> (try &#9733; all) and watch the gates rearrange themselves.'
+      sub:__L('Same adder but now every wire fires a 0 and a gate prepares it.','Derselbe Addierer — aber jetzt feuert jeder Draht eine 0, und ein Gatter bereitet sie vor.'),
+      capt:__L('Every qubit starts at <b class="cool">0</b> — a gate decides what it becomes.','Jedes Qubit startet bei <b class="cool">0</b> — ein Gatter entscheidet, was daraus wird.'),
+      caps:__L('The cannons no longer fire the "right" ball by magic — every wire really fires a plain <b class="cool">0</b>. Need a <b class="warm">1</b>? A <b class="elec">NOT</b> goes right after the cannon. Need a <b class="mist">superposition</b>? A <b class="mist">Hadamard (H)</b> goes there instead, fanning the <b class="cool">0</b> into a <b class="mist">mist</b> of <b class="warm">1</b> and <b class="cool">0</b>. Change <b class="w">A</b> or <b class="c">B</b> (try &#9733; all) and watch the gates rearrange themselves.','Die Kanonen feuern nicht mehr wie von Zauberhand die „richtige“ Kugel — jeder Draht feuert wirklich eine schlichte <b class="cool">0</b>. Brauchst du eine <b class="warm">1</b>? Ein <b class="elec">NOT</b> kommt direkt hinter die Kanone. Brauchst du eine <b class="mist">Überlagerung</b>? Dann kommt stattdessen ein <b class="mist">Hadamard (H)</b> dorthin und fächert die <b class="cool">0</b> zu einer <b class="mist">Wolke</b> aus <b class="warm">1</b> und <b class="cool">0</b> auf. Ändere <b class="w">A</b> oder <b class="c">B</b> (probiere &#9733; alle) und sieh zu, wie sich die Gatter neu anordnen.')
     } : {
-      sub:'Same idea, no double slit — just the circuit.',
-      capt:'No more slits — just <b class="mist">wires and gates</b>.',
-      caps:'Drop the double slit and this is exactly a real circuit diagram: wires left&rarr;right, boxes for gates. The rail a ball rides already encodes its value — the slit was only ever a teaching wheel.'
+      sub:__L('Same idea, no double slit — just the circuit.','Dieselbe Idee, ohne Doppelspalt — nur der Schaltkreis.'),
+      capt:__L('No more slits — just <b class="mist">wires and gates</b>.','Keine Spalte mehr — nur noch <b class="mist">Drähte und Gatter</b>.'),
+      caps:__L('Drop the double slit and this is exactly a real circuit diagram: wires left&rarr;right, boxes for gates. The rail a ball rides already encodes its value — the slit was only ever a teaching wheel.','Lass den Doppelspalt weg, und das hier ist genau ein echtes Schaltbild: Drähte von links nach rechts, Kästen für die Gatter. Die Schiene, auf der eine Kugel fährt, kodiert ihren Wert bereits — der Spalt war immer nur ein Stützrad.')
     };
   };
   s.buildControlsPrep=function(el){
@@ -4240,11 +4669,11 @@ function makeHadamardAdderScene(){
     const aB=mkbtn('','up',()=>{self.A=(self.A+1)%6;self._sync();self.afterSet();});
     const bB=mkbtn('','dn',()=>{self.B=(self.B+1)%5;self._sync();self.afterSet();});
     const cB=mkbtn('','',()=>{self.showSlit=!self.showSlit;self._sync();self.afterSet();});
-    el.append(aB,bB,cB,mkbtn('Run ⚡','',()=>self.run()),mkbtn('Measure','',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
+    el.append(aB,bB,cB,mkbtn(__L('Run ⚡','Start ⚡'),'',()=>self.run()),mkbtn(__L('Measure','Messen'),'',()=>self.measure()),mkbtn('↻','',()=>self.reset()));
     this._sync=()=>{
-      aB.textContent='A = '+(self.A<4?self.A:(self.A===4?'{2,3}':'★ all')); aB.className='stepbtn '+(self.A>=4?'mist':'up');
-      bB.textContent='B = '+(self.B<4?self.B:'★ all'); bB.className='stepbtn '+(self.B>=4?'mist':'dn');
-      cB.textContent = self.showSlit ? 'Circuit' : '← Slit';
+      aB.textContent='A = '+(self.A<4?self.A:(self.A===4?'{2,3}':__L('★ all','★ alle'))); aB.className='stepbtn '+(self.A>=4?'mist':'up');
+      bB.textContent='B = '+(self.B<4?self.B:__L('★ all','★ alle')); bB.className='stepbtn '+(self.B>=4?'mist':'dn');
+      cB.textContent = self.showSlit ? __L('Circuit','Schaltkreis') : __L('← Slit','← Spalt');
       cB.className='stepbtn'+(self.showSlit?'':' mist');
     };this._sync();
   };
@@ -4387,6 +4816,60 @@ function makeHadamardAdderScene(){
 }
 const S6 = makeHadamardAdderScene();
 
+/* -------- German scene text (EN snapshots are taken at registration) ------ */
+__regDE(S1,{
+  tag:'1 · Qubit',
+  subtitle:'Feuere eine Kugel auf die beiden Spalte. Jetzt kann sie den oberen Spalt nehmen, den unteren — oder beide gleichzeitig.',
+  capTitle:'Ein Qubit kann <b class="warm">1</b>, <b class="cool">0</b> oder eine <b class="mist">Wolke</b> aus beidem sein.',
+  capSub:'Ein klassisches Bit muss sich für einen Spalt entscheiden. Ein <b class="mist">Qubit</b> kann durch <b class="warm">beide Spalte zugleich</b> gehen — eine <b class="mist">Überlagerung</b>. Wir zeichnen das als <b class="mist">Wolke</b>, die beide Möglichkeiten <b class="warm">1</b> und <b class="cool">0</b> enthält, bis wir <b>messen</b> — dann kollabiert sie zu einer einzigen Antwort.'
+});
+__regDE(S2,{
+  tag:'2 · NOT-Gatter',
+  subtitle:'Dasselbe Kreuzungs-Gatter — aber jetzt kann es auf eine ganze Wolke gleichzeitig wirken.',
+  capTitle:'<b class="elec">NOT</b> kippt <b class="mist">jeden Zweig</b> der Überlagerung gleichzeitig.',
+  capSub:'Ein eindeutiges Bit wechselt einfach die Spur, wie bisher. Feuerst du aber <b class="mist">beide</b>, kippt das Gatter <b class="warm">1</b>&rarr;<b class="cool">0</b> <i>und</i> <b class="cool">0</b>&rarr;<b class="warm">1</b> in einem einzigen Durchgang — die ganze <b class="mist">Wolke</b> wird auf einmal transformiert. Die ausgewogene Wolke bildet sich auf sich selbst ab, und doch ist jeder Zweig wirklich gekippt: ein erster Vorgeschmack auf <b class="mist">Quantenparallelismus</b>.'
+});
+__regDE(S3,{
+  tag:'3 · CNOT-Gatter',
+  subtitle:'Zwei Qubits. Jedes kann 0, 1 oder eine Wolke aus beidem sein. Das Gatter berücksichtigt alle Möglichkeiten gleichzeitig.',
+  capTitle:'<b class="elec">CNOT</b> auf einer überlagerten Kontrolle erzeugt eine <b class="mist">verschränkte</b> Wolke.',
+  capSub:'Mit eindeutiger Kontrolle ist es die alte Geschichte: Kontrolle <b class="warm">1</b> kippt das <b>Ziel</b>, Kontrolle <b class="cool">0</b> lässt es in Ruhe. Bringe die <b class="mist">Kontrolle</b> in eine Wolke aus beidem, und das Gatter wirkt auf jeden Zweig gleichzeitig — das Ergebnis ist eine Wolke aus zwei <i>verknüpften</i> Paaren: Misst du das eine Qubit, legt das auch das andere fest — <b class="mist">Verschränkung</b>. Überlagere auch das <b class="mist">Ziel</b>, und du bekommst eine größere Wolke — aber wenn die Kontrolle eindeutig ist, bleiben die Qubits unabhängig (eine schlichte Überlagerung, keine Verschränkung).'
+});
+__regDE(S4,{
+  tag:'4 · Toffoli-Gatter',
+  subtitle:'Drei Qubits. Das Ziel kippt nur, wenn BEIDE Kontrollen 1 sind — und jedes kann eine Wolke sein.',
+  capTitle:'<b class="elec">Toffoli</b>: Kippe das Ziel nur, wenn <b class="warm">beide</b> Kontrollen 1 sind.',
+  capSub:'Ein <b class="elec">AND</b>-gesteuertes Kippen: Das <b>Ziel ●</b> kreuzt nur, wenn <b>Dreieck ▲</b> und <b>Quadrat ■</b> beide <b class="warm">1</b> sind. Bringe die Kontrollen in eine <b class="mist">Wolke</b>, und das Gatter schreibt dieses AND ins Ziel — alle drei werden verschränkt. Überlagerst du nur das Ziel, verknüpft sich nichts — es ist bloß eine größere Überlagerung.'
+});
+__regDE(S5,{
+  tag:'5 · 2-Bit-Addierer',
+  subtitle:ADD_CSUB_DE,
+  capTitle:'Der ganze <b class="elec">Addierer</b>: Gatter verkettet zu einem Rangierbahnhof.',
+  capSub:'Sechs Bits fließen von links nach rechts &mdash; die Zahlen <b class="warm">A</b> und <b class="cool">B</b> plus zwei leere <b>Übertrag</b>-Bits. Drei Toffolis und drei CNOTs lenken die Kugeln so, dass die Ausgangs-Spuren <b class="e">A + B</b> ergeben. Zähl nach: sechs Kugeln rein, sechs raus &mdash; immer noch umkehrbar (reversibel).'
+});
+__regDE(S6,{ tag:'6 · Hadamard-Gatter' });
+__regDE(ADD_QCAP,{
+  t:'Ein Durchlauf, <b class="mist">alle Summen auf einmal</b>.',
+  s:'Bringe die Eingaben in eine <b class="mist">Wolke</b> aller Werte, und derselbe Addierer aus sechs Gattern berechnet <b class="warm">A</b>+<b class="cool">B</b> für <b>jedes</b> Paar gleichzeitig &mdash; die Ausgabe ist eine <b class="mist">Wolke von Summen</b>. Diese parallele Kraft ist das Herz des Quantencomputers. Der Haken: Die <b class="warn">Messung</b> lässt die Wolke auf nur <b>eine</b> zufällige Summe kollabieren &mdash; ein echter Quantenalgorithmus muss die nützliche Antwort also erst nach oben lenken.'
+});
+const STAGE_DE=[
+  {t:'Die Werkbank: sechs Bits, noch keine Gatter.',
+   s:'<b class="warm">a0, a1</b> sind die Bits der Zahl <b class="warm">A</b>; <b class="cool">b0, b1</b> sind Zahl <b class="cool">B</b>; <b>c1, c2</b> sind leere <b>Übertrag</b>-Bits (starten bei 0). Feuere &mdash; jede Kugel fliegt geradewegs zu ihrer Anzeige. Addiert wird noch nichts.'},
+  {t:'Einerspalte &mdash; schreibe den Übertrag.',
+   s:'Der erste <b class="elec">Toffoli</b> setzt c1 = a0 AND b0: den Übertrag aus der Einerspalte.'},
+  {t:'Einerspalte &mdash; schreibe die Summe (Halbaddierer fertig).',
+   s:'Ein <b class="elec">CNOT</b> macht aus b0 a0 XOR b0 = <b class="elec">s0</b>. Probiere <b class="warm">1</b>+<b class="warm">1</b>: Summe 0, Übertrag 1.'},
+  {t:'Zweierspalte &mdash; schreibe ihren Übertrag.',
+   s:'Ein zweiter <b class="elec">Toffoli</b> setzt c2 = a1 AND b1.'},
+  {t:'Zweierspalte &mdash; Teilsumme.',
+   s:'Ein <b class="elec">CNOT</b> faltet a1 in b1 hinein (a1 XOR b1) &mdash; fertig ist das erst, wenn der Übertrag ankommt.'},
+  {t:'Der Übertrag wandert &mdash; hinein in die Zweierspalte.',
+   s:'Ein <b class="elec">Toffoli</b> addiert den Einer-Übertrag c1 in c2 hinein (wenn b1 gesetzt ist).'},
+  {t:'Letztes Summenbit &mdash; der Addierer ist komplett.',
+   s:'Das letzte <b class="elec">CNOT</b> faltet c1 in b1 = <b class="elec">s1</b>. Die Ausgangs-Spuren ergeben jetzt <b class="elec">A + B</b>. Sechs Kugeln rein, sechs raus.'}
+];
+S5.STAGE.forEach((st,i)=>__regDE(st,STAGE_DE[i]));
+
 /* ----------------------------- scene manager ------------------------------ */
 const scenes=[S1,S2,S3,S4,S5,S6];
 const labels=['Qubit','NOT','CNOT','Toffoli','Adder','Hadamard'];
@@ -4399,6 +4882,7 @@ const els={
   capSub:document.getElementById('capSub-cannonq'),
 };
 
+const labelsDE=['Qubit','NOT','CNOT','Toffoli','Addierer','Hadamard'];
 function applySceneUI(s){
   els.subtitle.innerHTML=s.subtitle;
   els.tag.textContent=s.tag;els.tag.style.color=s.tagColor;els.tag.style.borderColor=s.tagColor+'55';
@@ -4429,9 +4913,30 @@ scenes[0].onEnter();
 applySceneUI(scenes[0]);
 requestAnimationFrame(frame);
 
+/* --------------------------- EN|DE live refresh --------------------------- */
+function __refreshLang(){
+  if(typeof dotEls!=='undefined'){
+    const L=window.__omLang==='de'?labelsDE:labels;
+    dotEls.forEach((d,i)=>{ d.querySelector('.dl').textContent=L[i]; });
+  }
+  const s=scenes[cur];
+  if(s===S5){
+    // S5.onEnter would reset the build stage; rebuild controls + repaint instead
+    s.buildControls(document.getElementById('sctrl-cannonq'));
+    s.afterSet();
+  } else {
+    s.onEnter();
+  }
+  applySceneUI(s);
+}
+window.addEventListener('om-lang',__applyLang);
+window.__omApplyStatic();
+if(window.__omLang==='de') __applyLang();
+
 window.__DECKS.push({
   sectionId: 'deck-cannonq',
   labels: labels,
+  labelsDE: (typeof labelsDE!=='undefined')?labelsDE:null,
   goto(i){ go(i); },
   activate(){ __active = true; last = performance.now(); },
   deactivate(){ __active = false; },
@@ -4445,6 +4950,7 @@ window.__DECKS.push({
 window.__DECKS.push({
   sectionId: 'deck-resources',
   labels: ['Going Further'],
+  labelsDE: ['Weiterführendes'],
   goto(i){},
   activate(){},
   deactivate(){},
@@ -4493,6 +4999,20 @@ window.__DECKS.push({
   decks[0].activate && decks[0].activate();
   decks[0].goto(0);
   applyUI();
+  // EN|DE: swap the global nav labels + home-link target when the language toggle fires
+  function relabel(){
+    const de = window.__omLang==='de';
+    gdotEls.forEach((el,i)=>{
+      const f=flat[i], d=decks[f.di];
+      el.querySelector('.gdl').textContent = (de && d.labelsDE) ? d.labelsDE[f.li] : d.labels[f.li];
+    });
+    document.querySelectorAll('.home-link').forEach(a=>{
+      a.href = de ? 'https://aflorio.science/de/teaching/' : 'https://aflorio.science/teaching/';
+    });
+  }
+  window.addEventListener('om-lang', relabel);
+  window.__omApplyStatic && window.__omApplyStatic();
+  if(window.__omLang==='de') relabel();
 })();
 </script>
 </body>

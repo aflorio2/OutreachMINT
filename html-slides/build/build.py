@@ -63,7 +63,7 @@ header{position:relative}
   backdrop-filter:blur(4px);transition:background .15s,color .15s}
 .home-link:hover{background:#1b2350;color:var(--ink)}
 '''
-HOME_LINK_HTML = '<a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener">← Back to aflorio.science</a>'
+HOME_LINK_HTML = '<a class="home-link" href="https://aflorio.science/teaching/" target="_blank" rel="noopener" data-de="← Zurück zu aflorio.science">← Back to aflorio.science</a>'
 
 def add_home_link(style, body, deck_id):
     style = style + '\n' + HOME_LINK_CSS
@@ -87,7 +87,7 @@ controls_block = '''  <div class="controls">
       <input type="range" id="slider" min="0" max="3000" value="0">
       <button class="nav" id="next" title="Step outward (→)">▶</button>
     </div>
-    <div class="hint">Drag the slider, use <b>◀ ▶</b> or the <b>arrow keys</b>, or click a label. Pairs marked <b>≈</b> are the classic order-of-magnitude analogies.</div>
+    <div class="hint" data-de="Zieh am Regler, nutze <b>◀ ▶</b> oder die <b>Pfeiltasten</b>, oder klicke auf eine Beschriftung. Paare mit <b>≈</b> sind die klassischen Größenordnungs-Vergleiche.">Drag the slider, use <b>◀ ▶</b> or the <b>arrow keys</b>, or click a label. Pairs marked <b>≈</b> are the classic order-of-magnitude analogies.</div>
   </div>
 
 '''
@@ -152,6 +152,7 @@ reg_scales = '''
 window.__DECKS.push({
   sectionId: 'deck-scales',
   labels: ['Scales'],
+  labelsDE: ['Skalen'],
   goto(i){ animateTo(0); },
   activate(){},
   deactivate(){},
@@ -180,7 +181,7 @@ controls_block = '''  <div class="controls">
       <button class="nav" id="prev" title="Previous (←)">◀</button>
       <button class="nav" id="next" title="Next (→)">▶</button>
     </div>
-    <div class="hint">Use <b>◀ ▶</b> or the <b>arrow keys</b> to move between scenes · click a label to jump.</div>
+    <div class="hint" data-de="Nutze <b>◀ ▶</b> oder die <b>Pfeiltasten</b>, um zwischen den Szenen zu wechseln · klicke auf eine Beschriftung, um zu springen.">Use <b>◀ ▶</b> or the <b>arrow keys</b> to move between scenes · click a label to jump.</div>
   </div>
 
 '''
@@ -265,6 +266,7 @@ reg_slit = '''
 window.__DECKS.push({
   sectionId: 'deck-slit',
   labels: labels,
+  labelsDE: labelsDE,
   goto(i){ go(i); },
   activate(){ __active = true; last = performance.now(); },
   deactivate(){ __active = false; },
@@ -293,7 +295,7 @@ controls_block = '''  <div class="controls">
       <button class="nav" id="prev" title="Previous (←)">◀</button>
       <button class="nav" id="next" title="Next (→)">▶</button>
     </div>
-    <div class="hint">Use <b>◀ ▶</b> or the <b>arrow keys</b> to switch scenes · click the bits and drag the sliders.</div>
+    <div class="hint" data-de="Nutze <b>◀ ▶</b> oder die <b>Pfeiltasten</b>, um die Szene zu wechseln · klicke auf die Bits und zieh an den Reglern.">Use <b>◀ ▶</b> or the <b>arrow keys</b> to switch scenes · click the bits and drag the sliders.</div>
   </div>
 
 '''
@@ -361,6 +363,7 @@ reg_b2 = '''
 window.__DECKS.push({
   sectionId: 'deck-b2',
   labels: labels,
+  labelsDE: labelsDE,
   goto(i){ go(i); },
   activate(){},
   deactivate(){ clearInterval(S1.timer); clearInterval(S2.autoTimer); },
@@ -378,7 +381,7 @@ decks.append({
 print("PART 2 OK: b2 transformed")
 
 # ============================================================ CANNON + CANNONQ (shared pattern) ============================================================
-def build_cannon_deck(srcfile, deck_id, hint_text):
+def build_cannon_deck(srcfile, deck_id, hint_text, hint_de):
     src = load(srcfile)
     style = extract(src, "style")
     body = extract(src, "body")
@@ -392,7 +395,7 @@ def build_cannon_deck(srcfile, deck_id, hint_text):
       <button class="nav" id="prev" title="Previous (&#8592;)">&#9664;</button>
       <button class="nav" id="next" title="Next (&#8594;)">&#9654;</button>
     </div>
-    <div class="hint">Use <b>&#9664; &#9654;</b> or the <b>arrow keys</b> to move between panels &middot; {hint_text}</div>
+    <div class="hint" data-de="Nutze <b>&#9664; &#9654;</b> oder die <b>Pfeiltasten</b>, um zwischen den Ansichten zu wechseln &middot; {hint_de}">Use <b>&#9664; &#9654;</b> or the <b>arrow keys</b> to move between panels &middot; {hint_text}</div>
   </div>
 
 '''
@@ -480,6 +483,7 @@ requestAnimationFrame(frame);'''
 window.__DECKS.push({{
   sectionId: 'deck-{deck_id}',
   labels: labels,
+  labelsDE: (typeof labelsDE!=='undefined')?labelsDE:null,
   goto(i){{ go(i); }},
   activate(){{ __active = true; last = performance.now(); }},
   deactivate(){{ __active = false; }},
@@ -494,9 +498,11 @@ window.__DECKS.push({{
         'script': f'(function(){{\n{script}\n}})();'
     }
 
-decks.append(build_cannon_deck("cannon-bits.html", "cannon", "fire the cannon to send a bit."))
+decks.append(build_cannon_deck("cannon-bits.html", "cannon", "fire the cannon to send a bit.",
+                               "feuere die Kanone, um ein Bit zu senden."))
 print("PART 3 OK: cannon transformed")
-decks.append(build_cannon_deck("cannon-bits-quantum.html", "cannonq", "fire the cannon to send a qubit."))
+decks.append(build_cannon_deck("cannon-bits-quantum.html", "cannonq", "fire the cannon to send a qubit.",
+                               "feuere die Kanone, um ein Qubit zu senden."))
 print("PART 4 OK: cannonq transformed")
 
 # ============================================================ RESOURCES ============================================================
@@ -511,6 +517,7 @@ reg_resources = '''
 window.__DECKS.push({
   sectionId: 'deck-resources',
   labels: ['Going Further'],
+  labelsDE: ['Weiterführendes'],
   goto(i){},
   activate(){},
   deactivate(){},
@@ -612,6 +619,20 @@ master_script = '''(function(){
   decks[0].activate && decks[0].activate();
   decks[0].goto(0);
   applyUI();
+  // EN|DE: swap the global nav labels + home-link target when the language toggle fires
+  function relabel(){
+    const de = window.__omLang==='de';
+    gdotEls.forEach((el,i)=>{
+      const f=flat[i], d=decks[f.di];
+      el.querySelector('.gdl').textContent = (de && d.labelsDE) ? d.labelsDE[f.li] : d.labels[f.li];
+    });
+    document.querySelectorAll('.home-link').forEach(a=>{
+      a.href = de ? 'https://aflorio.science/de/teaching/' : 'https://aflorio.science/teaching/';
+    });
+  }
+  window.addEventListener('om-lang', relabel);
+  window.__omApplyStatic && window.__omApplyStatic();
+  if(window.__omLang==='de') relabel();
 })();'''
 
 scripts_html = '<script>\nwindow.__DECKS = [];\n</script>\n'

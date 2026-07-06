@@ -22,6 +22,14 @@
     overflow:hidden;height:100vh;display:flex;flex-direction:column;
   }
   header{text-align:center;padding:16px 16px 8px;flex:0 0 auto}
+  header{position:relative}
+  .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+  .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+  .lang-switch button.active{background:#1b2350;color:var(--ink)}
+  .lang-switch button:not(.active):hover{color:var(--ink)}
   header h1{font-size:clamp(19px,2.5vw,32px);font-weight:700;letter-spacing:.4px}
   header h1 .q{color:var(--accentL)} header h1 .c{color:var(--accentR)}
   header p{color:var(--muted);font-size:clamp(12px,1.2vw,15px);margin-top:4px}
@@ -127,13 +135,14 @@
 </head>
 <body>
   <header>
-    <h1><span class="q">The Very Small</span> &nbsp;⟷&nbsp; <span class="c">The Very Large</span></h1>
-    <ul class="lede"><li>Each step <b>inward</b> (left) mirrors a step <b>outward</b> (right) — the same factor in opposite directions.</li></ul>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="<span class='q'>Das ganz Kleine</span> &nbsp;⟷&nbsp; <span class='c'>Das ganz Große</span>"><span class="q">The Very Small</span> &nbsp;⟷&nbsp; <span class="c">The Very Large</span></h1>
+    <ul class="lede"><li data-de="Jeder Schritt nach <b>innen</b> (links) spiegelt einen Schritt nach <b>außen</b> (rechts) — derselbe Faktor in entgegengesetzten Richtungen.">Each step <b>inward</b> (left) mirrors a step <b>outward</b> (right) — the same factor in opposite directions.</li></ul>
   </header>
 
   <div class="stage">
     <div class="panel left" id="panelL">
-      <div class="tag">Zoom in · matter</div>
+      <div class="tag" data-de="Hineinzoomen · Materie">Zoom in · matter</div>
       <div class="imgwrap" id="wrapL"></div>
       <div class="readout"><div class="col"><div class="name" id="nameL"></div><div class="sub" id="subL"></div><a class="reflink" id="refL" target="_blank" rel="noopener"></a></div><div class="size" id="sizeL"></div></div>
     </div>
@@ -141,7 +150,7 @@
     <div class="divider"></div>
 
     <div class="panel right" id="panelR">
-      <div class="tag">Zoom out · space</div>
+      <div class="tag" data-de="Herauszoomen · Weltraum">Zoom out · space</div>
       <div class="imgwrap" id="wrapR"></div>
       <div class="readout"><div class="size" id="sizeR"></div><div class="col"><div class="name" id="nameR"></div><div class="sub" id="subR"></div><a class="reflink" id="refR" target="_blank" rel="noopener"></a></div></div>
     </div>
@@ -154,10 +163,47 @@
       <input type="range" id="slider" min="0" max="3000" value="0">
       <button class="nav" id="next" title="Step outward (→)">▶</button>
     </div>
-    <div class="hint">Drag the slider, use <b>◀ ▶</b> or the <b>arrow keys</b>, or click a label. Pairs marked <b>≈</b> are the classic order-of-magnitude analogies.</div>
+    <div class="hint" data-de="Zieh am Regler, nutze <b>◀ ▶</b> oder die <b>Pfeiltasten</b>, oder klicke auf eine Beschriftung. Paare mit <b>≈</b> sind die klassischen Größenordnungs-Vergleiche.">Drag the slider, use <b>◀ ▶</b> or the <b>arrow keys</b>, or click a label. Pairs marked <b>≈</b> are the classic order-of-magnitude analogies.</div>
   </div>
 
 <script>
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+const __L=(en,de)=>window.__omLang==='de'?de:en;
+const __SWAPS=[];
+function __regDE(obj,de){ for(const k in de){ __SWAPS.push([obj,k,obj[k],de[k]]); } }
+function __applyLang(){
+  const de=window.__omLang==='de';
+  __SWAPS.forEach(s=>{ s[0][s[1]]=de?s[3]:s[2]; });
+  __refreshLang();
+}
+
 const FP = "https://commons.wikimedia.org/wiki/Special:FilePath/";
 function fpath(name){return FP + encodeURIComponent(name);}
 const CB = "?v=" + Date.now();                 // cache-buster for local files
@@ -227,19 +273,19 @@ const RIGHT = [
   {name:"Earth",         local:"earth.jpg",  exp:7.10, sub:"the whole planet · ≈12,700 km"},
   {name:"To the Moon", exp:8.58, sub:"distance to the Moon · ≈384,000 km",
     content:distance({space:true,
-      a:{img:"earth.jpg", size:24, xpc:20, label:"Earth"},
-      b:{img:"moon.jpg", size:13, xpc:80, label:"Moon"},
-      pill:"≈ 384,000 km · 30 Earths apart"})},
+      a:{img:"earth.jpg", size:24, xpc:20, label:"<span data-de='Erde'>Earth</span>"},
+      b:{img:"moon.jpg", size:13, xpc:80, label:"<span data-de='Mond'>Moon</span>"},
+      pill:"<span data-de='≈ 384.000 km · 30 Erden Abstand'>≈ 384,000 km · 30 Earths apart</span>"})},
   {name:"To the Sun", exp:11.17, sub:"≈ distance to the Sun · 1 AU",
     content:distance({space:true,
-      a:{img:"earth.jpg", size:9, xpc:16, label:"Earth"},
-      b:{img:"sun.jpg", size:34, xpc:78, label:"Sun"},
-      pill:"≈ 1 AU · 150 million km · 8 light-minutes"})},
+      a:{img:"earth.jpg", size:9, xpc:16, label:"<span data-de='Erde'>Earth</span>"},
+      b:{img:"sun.jpg", size:34, xpc:78, label:"<span data-de='Sonne'>Sun</span>"},
+      pill:"<span data-de='≈ 1 AE · 150 Millionen km · 8 Lichtminuten'>≈ 1 AU · 150 million km · 8 light-minutes</span>"})},
   {name:"To Proxima", exp:16.60, sub:"≈ distance to the nearest star · 4.2 ly",
     content:distance({space:true,
-      a:{img:"sun.jpg", size:18, xpc:17, label:"our Sun"},
+      a:{img:"sun.jpg", size:18, xpc:17, label:"<span data-de='unsere Sonne'>our Sun</span>"},
       b:{star:true, size:5, xpc:83, label:"Proxima Centauri"},
-      pill:"≈ 4.2 light-years · 40 trillion km"})},
+      pill:"<span data-de='≈ 4,2 Lichtjahre · 40 Billionen km'>≈ 4.2 light-years · 40 trillion km</span>"})},
 ];
 
 const N = LEFT.length;       // 7
@@ -323,7 +369,7 @@ const nameL=document.getElementById('nameL'), subL=document.getElementById('subL
 const nameR=document.getElementById('nameR'), subR=document.getElementById('subR'), sizeR=document.getElementById('sizeR');
 const refL=document.getElementById('refL'), refR=document.getElementById('refR');
 function setRef(el,d){
-  if(d.ref){el.href=d.ref; el.textContent='↗ '+(d.refLabel||'reference'); el.style.display='inline-block';}
+  if(d.ref){el.href=d.ref; el.textContent='↗ '+(d.refLabel||__L('reference','Quelle')); el.style.display='inline-block';}
   else {el.style.display='none';}
 }
 
@@ -352,6 +398,34 @@ window.addEventListener('keydown',e=>{
 });
 
 render(0);
+
+/* ---- German text for the JS-driven readouts ---- */
+[
+  [LEFT[0], {name:'Mensch',  sub:'ein Mensch · ≈1,7 m'}],
+  [LEFT[1], {name:'Haar',    sub:'ein menschliches Haar · ≈0,08 mm'}],
+  [LEFT[2], {name:'Zelle',   sub:'eine lebende Zelle · ≈2 µm'}],
+  [LEFT[3], {name:'Virus',   sub:'ein Virus · ≈150 nm'}],
+  [LEFT[4], {name:'Protein', sub:'ein Protein / DNA · ≈3 nm'}],
+  [LEFT[5], {name:'Atom',    sub:'ein Atom · ≈0,1 nm'}],
+  [LEFT[6], {name:'Atomkern',sub:'ein Atomkern · ≈1 fm'}],
+  [RIGHT[0],{name:'Mensch',  sub:'ein Mensch · ≈1,7 m'}],
+  [RIGHT[1],{sub:'zwei Nachbarstädte · ≈15 km'}],
+  [RIGHT[2],{name:'Deutschland', sub:'Deutschland Nord–Süd · ≈880 km'}],
+  [RIGHT[3],{name:'Erde',    sub:'der ganze Planet · ≈12.700 km'}],
+  [RIGHT[4],{name:'Zum Mond',sub:'Entfernung zum Mond · ≈384.000 km'}],
+  [RIGHT[5],{name:'Zur Sonne',sub:'≈ Entfernung zur Sonne · 1 AE'}],
+  [RIGHT[6],{name:'Zu Proxima',sub:'≈ Entfernung zum nächsten Stern · 4,2 Lj'}],
+].forEach(p=>__regDE(p[0],p[1]));
+
+function __refreshLang(){
+  if(typeof tickEls!=='undefined'){
+    tickEls.forEach((el,i)=>{ el.innerHTML = i===0 ? LEFT[0].name : `${LEFT[i].name} ⟷ ${RIGHT[i].name}`; });
+  }
+  render(current);
+}
+window.addEventListener('om-lang',__applyLang);
+window.__omApplyStatic();
+if(window.__omLang==='de') __applyLang();
 </script>
 </body>
 </html>

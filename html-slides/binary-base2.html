@@ -28,6 +28,14 @@
   header h1 .a{color:var(--cool)}
   header p{color:var(--muted);font-size:clamp(12px,1.2vw,15.5px);margin-top:5px;min-height:1.2em;
     transition:opacity .3s}
+  header{position:relative}
+  .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+  .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+  .lang-switch button.active{background:#1b2350;color:var(--ink)}
+  .lang-switch button:not(.active):hover{color:var(--ink)}
 
   .stage{flex:1 1 auto;display:flex;padding:0 18px;min-height:0}
   .panel{position:relative;flex:1 1 100%;border:1px solid var(--line);border-radius:16px;
@@ -151,7 +159,8 @@
 </head>
 <body>
   <header>
-    <h1>Counting &amp; Adding in <span class="a">Base 2</span></h1>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="Zählen &amp; Addieren in <span class='a'>Basis 2</span>">Counting &amp; Adding in <span class="a">Base 2</span></h1>
     <p id="subtitle"></p>
   </header>
 
@@ -164,7 +173,7 @@
         <div class="s1ctrl">
           <button class="stepbtn" id="s1minus">− 1</button>
           <button class="stepbtn" id="s1plus">+ 1</button>
-          <button class="stepbtn play" id="s1play">▶ Count</button>
+          <button class="stepbtn play" id="s1play">▶ Count</button><!-- text managed by JS (__L) -->
         </div>
 
         <div class="s1wrap">
@@ -173,12 +182,12 @@
           <div class="readout">
             <div>
               <div class="bignum"><span class="bincode" id="binBig">0000</span></div>
-              <div class="numlab">binary</div>
+              <div class="numlab" data-de="binär">binary</div>
             </div>
             <div class="bignum eq">=</div>
             <div>
               <div class="bignum"><span class="deccode" id="decBig">0</span></div>
-              <div class="numlab">decimal</div>
+              <div class="numlab" data-de="dezimal">decimal</div>
             </div>
           </div>
         </div>
@@ -197,8 +206,8 @@
             <input type="range" id="inB" min="0" max="3" step="1" value="3">
             <span class="val" id="valB">3</span>
           </div>
-          <button class="stepbtn" id="addStep">Step ▶</button>
-          <button class="stepbtn play" id="addAuto">Add it ⚡</button>
+          <button class="stepbtn" id="addStep" data-de="Schritt ▶">Step ▶</button>
+          <button class="stepbtn play" id="addAuto">Add it ⚡</button><!-- text managed by JS (__L) -->
           <button class="stepbtn" id="addReset">↻</button>
         </div>
 
@@ -219,11 +228,48 @@
       <button class="nav" id="prev" title="Previous (←)">◀</button>
       <button class="nav" id="next" title="Next (→)">▶</button>
     </div>
-    <div class="hint">Use <b>◀ ▶</b> or the <b>arrow keys</b> to switch scenes · click the bits and drag the sliders.</div>
+    <div class="hint" data-de="Nutze <b>◀ ▶</b> oder die <b>Pfeiltasten</b>, um die Szene zu wechseln · klicke auf die Bits und zieh an den Reglern.">Use <b>◀ ▶</b> or the <b>arrow keys</b> to switch scenes · click the bits and drag the sliders.</div>
   </div>
 
 <script>
 "use strict";
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+const __L=(en,de)=>window.__omLang==='de'?de:en;
+const __SWAPS=[];
+function __regDE(obj,de){ for(const k in de){ __SWAPS.push([obj,k,obj[k],de[k]]); } }
+function __applyLang(){
+  const de=window.__omLang==='de';
+  __SWAPS.forEach(s=>{ s[0][s[1]]=de?s[3]:s[2]; });
+  __refreshLang();
+}
+
 /* ============================================================================
    COUNTING & ADDING IN BASE 2  —  2 navigable scenes
      1) Counting: 4 clickable bits (8 4 2 1), live binary<->decimal, auto-count
@@ -284,7 +330,7 @@ const S1 = {
     document.getElementById('binBig').textContent=this.bits.join('');
     document.getElementById('decBig').textContent=v;
     const sum=document.getElementById('s1sum');
-    if(parts.length===0){ sum.innerHTML='Nothing lit → <span class="t">0</span>'; }
+    if(parts.length===0){ sum.innerHTML=__L('Nothing lit → ','Nichts leuchtet → ')+'<span class="t">0</span>'; }
     else { sum.innerHTML=parts.join(' <span style="color:var(--muted)">+</span> ')+
             ' <span style="color:var(--muted)">=</span> <span class="t">'+v+'</span>'; }
   },
@@ -292,7 +338,7 @@ const S1 = {
     this.playing=!this.playing;
     const btn=document.getElementById('s1play');
     btn.classList.toggle('on',this.playing);
-    btn.textContent=this.playing?'⏸ Pause':'▶ Count';
+    btn.textContent=this.playing?'⏸ Pause':__L('▶ Count','▶ Zählen');
     if(this.playing){ this.timer=setInterval(()=>this.set(this.value+1),750); }
     else { clearInterval(this.timer); }
   },
@@ -328,7 +374,7 @@ const S2 = {
     const placeOf=(colFromLeft)=> Math.pow(2, COLS-1-colFromLeft); // value of column
 
     // --- row 0: carries (label + COLS) ---
-    g.appendChild(mk('lab','carry →'));
+    g.appendChild(mk('lab',__L('carry →','Übertrag →')));
     for(let c=0;c<COLS;c++){ const e=mk('carry',''); this.cells.carry.push(e); g.appendChild(e); }
     // --- row 1: place labels ---
     g.appendChild(mk('lab',''));
@@ -342,7 +388,7 @@ const S2 = {
     // --- rule line ---
     const r=document.createElement('div'); r.className='rule'; g.appendChild(r);
     // --- row 4: result ---
-    g.appendChild(labHTML('<b style="color:var(--elec)">Sum</b>'));
+    g.appendChild(labHTML('<b style="color:var(--elec)">'+__L('Sum','Summe')+'</b>'));
     for(let c=0;c<COLS;c++){ const e=cellEl(); e.classList.add('res'); this.cells.res.push(e); g.appendChild(e); }
 
     this.reset();
@@ -356,7 +402,7 @@ const S2 = {
   reset(){
     clearInterval(this.autoTimer); this.autoTimer=null;
     document.getElementById('addAuto').classList.remove('on');
-    document.getElementById('addAuto').textContent='Add it ⚡';
+    document.getElementById('addAuto').textContent=__L('Add it ⚡','Addieren ⚡');
     this.step=-1;
     const COLS=this.NB+1;
     const ab=this.bitsOf(this.a,COLS), bb=this.bitsOf(this.b,COLS);
@@ -374,7 +420,7 @@ const S2 = {
     document.getElementById('s2status').innerHTML=
       'A = <b style="color:var(--warm)">'+this.a+'</b> ('+this.a.toString(2).padStart(this.NB,'0')+
       ')  +  B = <b style="color:var(--cool)">'+this.b+'</b> ('+this.b.toString(2).padStart(this.NB,'0')+
-      ')  —  press <b>Step</b> or <b>Add it</b>.';
+      ')'+__L('  —  press <b>Step</b> or <b>Add it</b>.','  —  drücke <b>Schritt</b> oder <b>Addieren</b>.');
     function paint(el,bit){ el.textContent=bit; el.classList.toggle('one',bit===1); }
   },
   // advance one column (right to left). step counts columns done.
@@ -403,10 +449,10 @@ const S2 = {
       this.cells.carry[col-1].classList.toggle('show',cout===1);
     }
     const pv=Math.pow(2,this.step);
-    const cinTxt = cin? ' + carry <span class="c">1</span>' : '';
-    let line='Column '+pv+': <b style="color:var(--warm)">'+ab[col]+'</b> + <b style="color:var(--cool)">'+bb[col]+'</b>'+cinTxt+
-             ' = '+sum+' → write <span class="r">'+bit+'</span>';
-    if(cout) line+=', carry <span class="c">1</span> left';
+    const cinTxt = cin? __L(' + carry <span class="c">1</span>',' + Übertrag <span class="c">1</span>') : '';
+    let line=__L('Column ','Spalte ')+pv+': <b style="color:var(--warm)">'+ab[col]+'</b> + <b style="color:var(--cool)">'+bb[col]+'</b>'+cinTxt+
+             ' = '+sum+__L(' → write <span class="r">',' → schreibe <span class="r">')+bit+'</span>';
+    if(cout) line+=__L(', carry <span class="c">1</span> left',', Übertrag <span class="c">1</span> nach links');
     document.getElementById('s2status').innerHTML=line;
     if(this.step>=COLS-1){ setTimeout(()=>this.finish(),10); }
     return true;
@@ -415,18 +461,18 @@ const S2 = {
     [...this.cells.a,...this.cells.b,...this.cells.res].forEach(e=>e.classList.remove('active'));
     clearInterval(this.autoTimer); this.autoTimer=null;
     document.getElementById('addAuto').classList.remove('on');
-    document.getElementById('addAuto').textContent='Add it ⚡';
+    document.getElementById('addAuto').textContent=__L('Add it ⚡','Addieren ⚡');
     const tot=this.a+this.b;
     const COLS=this.NB+1;
     document.getElementById('s2status').innerHTML=
       '<b style="color:var(--warm)">'+this.a+'</b> + <b style="color:var(--cool)">'+this.b+'</b> = '+
-      '<span class="r">'+tot+'</span>  =  <span class="r">'+tot.toString(2).padStart(COLS,'0')+'</span> in binary.';
+      '<span class="r">'+tot+'</span>  =  <span class="r">'+tot.toString(2).padStart(COLS,'0')+'</span>'+__L(' in binary.',' im Binärsystem.');
   },
   auto(){
     if(this.autoTimer){ // pause
       clearInterval(this.autoTimer); this.autoTimer=null;
       document.getElementById('addAuto').classList.remove('on');
-      document.getElementById('addAuto').textContent='Add it ⚡';
+      document.getElementById('addAuto').textContent=__L('Add it ⚡','Addieren ⚡');
       return;
     }
     if(this.step>=this.NB){ this.reset(); }
@@ -460,6 +506,7 @@ const dotEls=labels.map((l,i)=>{
   d.innerHTML=`<span class="pip"></span><span class="dl">${l}</span>`;
   d.onclick=()=>go(i); dotsWrap.appendChild(d); return d;
 });
+const labelsDE=['Zählen','Addieren'];
 
 function applySceneUI(s){
   els.subtitle.textContent=s.subtitle;
@@ -492,6 +539,34 @@ window.addEventListener('keydown',e=>{
 /* boot */
 scenes[0].onEnter && scenes[0].onEnter();
 applySceneUI(scenes[0]);
+
+/* ---- German text for the JS-driven scene copy ---- */
+__regDE(S1,{
+  tag:'1 · Zählen',
+  subtitle:'Wir haben nur zwei Ziffern: 0 und 1. Klicke auf die Kästchen — jedes ist doppelt so viel wert wie das rechts daneben.',
+  capTitle:'Jede Zahl ist eine Summe von <b class="cool">Zweierpotenzen</b>.',
+  capSub:'Jedes Kästchen ist ein <b class="warm">Bit</b>: aus = 0, an = 1. Ein Kästchen, das <b class="warm">an</b> ist, zählt seinen Wert (8, 4, 2 oder 1). Addiere die leuchtenden Kästchen und du bekommst die Dezimalzahl — mehr bedeutet „Basis 2“ nicht.',
+});
+__regDE(S2,{
+  tag:'2 · Addieren',
+  subtitle:'Addiere zwei Zahlen genau wie in der Schule — von rechts nach links — nur mit der einen Regel: 1 + 1 = 10 (Übertrag 1).',
+  capTitle:'Addiere Spalte für Spalte; bei <b class="warn">1 + 1 wandert ein Übertrag</b> in die nächste.',
+  capSub:'In jeder Spalte addierst du die beiden Bits plus einen möglichen <b class="warn">Übertrag</b>. 0+0=0, 1+0=1, und <b class="warn">1+1 = „0, Übertrag 1“</b>. Der Übertrag rutscht nach links in die nächste Spalte — genau wie der Zehnerübertrag beim schriftlichen Addieren.',
+});
+function __refreshLang(){
+  applySceneUI(scenes[cur]);
+  if(typeof dotEls!=='undefined'){
+    const L=window.__omLang==='de'?labelsDE:labels;
+    dotEls.forEach((d,i)=>{ d.querySelector('.dl').textContent=L[i]; });
+  }
+  const pb=document.getElementById('s1play');
+  if(pb) pb.textContent=S1.playing?'⏸ Pause':__L('▶ Count','▶ Zählen');
+  if(S1.cells.length) S1.sync();
+  if(S2.cells.a.length) S2.build();
+}
+window.addEventListener('om-lang',__applyLang);
+window.__omApplyStatic();
+if(window.__omLang==='de') __applyLang();
 </script>
 </body>
 </html>

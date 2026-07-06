@@ -25,6 +25,14 @@
     overflow:hidden;height:100vh;display:flex;flex-direction:column;
   }
   header{text-align:center;padding:clamp(16px,3vh,30px) 16px 6px;flex:0 0 auto}
+  header{position:relative}
+  .lang-switch{position:absolute;right:16px;top:50%;transform:translateY(-50%);display:flex;z-index:20;
+    background:#0009;border:1px solid var(--line);border-radius:8px;overflow:hidden;backdrop-filter:blur(4px)}
+  .lang-switch button{background:none;border:none;color:var(--muted);
+    font:700 12px 'Inter',system-ui,sans-serif;letter-spacing:.5px;padding:6px 10px;cursor:pointer;
+    transition:background .15s,color .15s}
+  .lang-switch button.active{background:#1b2350;color:var(--ink)}
+  .lang-switch button:not(.active):hover{color:var(--ink)}
   header h1{font-size:clamp(21px,3vw,36px);font-weight:700;letter-spacing:.4px;
     animation:rise .6s ease-out forwards}
   header h1 .a{color:var(--mist)}
@@ -87,8 +95,9 @@
 </head>
 <body>
   <header>
-    <h1><span class="a">Going</span> Further</h1>
-    <p>Where this lecture's notation comes from — and where to keep exploring.</p>
+    <div class="lang-switch"><button type="button" data-lang="en" class="active">EN</button><button type="button" data-lang="de">DE</button></div>
+    <h1 data-de="<span class='a'>Weiter</span> geht’s"><span class="a">Going</span> Further</h1>
+    <p data-de="Woher die Notation dieser Vorlesung stammt — und wo du weiter entdecken kannst.">Where this lecture's notation comes from — and where to keep exploring.</p>
   </header>
 
   <div class="stage">
@@ -96,8 +105,8 @@
       <div class="content">
         <div class="grid">
           <div class="card notation">
-            <div class="card-head"><span class="dot elec"></span>Notation used in this lecture</div>
-            <p>The circuit diagrams and "cloud" superposition pictures used throughout this lecture are adapted from:</p>
+            <div class="card-head" data-de="<span class='dot elec'></span>Notation in dieser Vorlesung"><span class="dot elec"></span>Notation used in this lecture</div>
+            <p data-de="Die Schaltbilder und die „Wolken“-Bilder für Überlagerungen in dieser Vorlesung sind angelehnt an:">The circuit diagrams and "cloud" superposition pictures used throughout this lecture are adapted from:</p>
             <div class="paper">
               <div class="paper-title">"Q is for Quantum"</div>
               <div class="paper-authors">Terry Rudolph</div>
@@ -113,27 +122,59 @@
               <div class="paper-authors">S. E. Economou &amp; E. Barnes</div>
               <a class="paper-link" href="https://arxiv.org/pdf/2210.02868" target="_blank" rel="noopener">arXiv:2210.02868 &#8599;</a>
             </div>
-            <div class="thanks">With thanks to Sophia Economou and Ed Barnes for sharing their enthusiasm for quantum outreach.</div>
+            <div class="thanks" data-de="Mit Dank an Sophia Economou und Ed Barnes, die ihre Begeisterung für Quanten-Outreach mit uns geteilt haben.">With thanks to Sophia Economou and Ed Barnes for sharing their enthusiasm for quantum outreach.</div>
           </div>
 
           <div class="card explore">
-            <div class="card-head"><span class="dot mist"></span>Keep exploring</div>
+            <div class="card-head" data-de="<span class='dot mist'></span>Weiter entdecken"><span class="dot mist"></span>Keep exploring</div>
             <div class="explore-title"><a href="https://www.qisforquantum.org" target="_blank" rel="noopener">Q is for Quantum &#8599;</a></div>
-            <p>A free, rigorous introduction to quantum computing by Terry Rudolph, starting from nothing more than
+            <p data-de="Eine kostenlose, gründliche Einführung ins Quantencomputing von Terry Rudolph, die nicht mehr als Grundrechenarten voraussetzt — der natürliche nächste Schritt nach dieser Vorlesung.">A free, rigorous introduction to quantum computing by Terry Rudolph, starting from nothing more than
               basic arithmetic — the natural next step after this lecture.</p>
           </div>
         </div>
 
         <div class="card advanced">
-          <div class="card-head"><span class="dot warm"></span>Advanced reading</div>
-          <p>For a full, graduate-level mathematical treatment once you're ready to go deeper:</p>
+          <div class="card-head" data-de="<span class='dot warm'></span>Vertiefende Literatur"><span class="dot warm"></span>Advanced reading</div>
+          <p data-de="Für die vollständige mathematische Behandlung auf Hochschulniveau, wenn du tiefer einsteigen möchtest:">For a full, graduate-level mathematical treatment once you're ready to go deeper:</p>
           <ul class="reflist">
-            <li>M. A. Nielsen &amp; I. L. Chuang, <i>Quantum Computation and Quantum Information</i> — the standard textbook in the field</li>
-            <li>John Preskill, <a href="http://theory.caltech.edu/~preskill/ph219/" target="_blank" rel="noopener">Caltech Ph219/CS219 lecture notes</a></li>
+            <li data-de="M. A. Nielsen &amp;amp; I. L. Chuang, <i>Quantum Computation and Quantum Information</i> — das Standardlehrbuch des Fachs">M. A. Nielsen &amp; I. L. Chuang, <i>Quantum Computation and Quantum Information</i> — the standard textbook in the field</li>
+            <li data-de="John Preskill, <a href='http://theory.caltech.edu/~preskill/ph219/' target='_blank' rel='noopener'>Vorlesungsskript Ph219/CS219 (Caltech)</a>">John Preskill, <a href="http://theory.caltech.edu/~preskill/ph219/" target="_blank" rel="noopener">Caltech Ph219/CS219 lecture notes</a></li>
           </ul>
         </div>
       </div>
     </div>
   </div>
+
+<script>
+/* ---- EN|DE language machinery (shared; defined once even in the merged deck) ---- */
+if(!window.__omI18N){
+  window.__omI18N=true;
+  let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  window.__omLang=saved;
+  window.__omApplyStatic=function(){
+    const de=window.__omLang==='de';
+    document.querySelectorAll('[data-de]').forEach(el=>{
+      if(!el.hasAttribute('data-en')) el.setAttribute('data-en',el.innerHTML);
+      el.innerHTML=de?el.getAttribute('data-de'):el.getAttribute('data-en');
+    });
+    document.querySelectorAll('.lang-switch button').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('data-lang')===window.__omLang);
+    });
+    document.documentElement.lang=window.__omLang;
+  };
+  window.__omSetLang=function(lang){
+    if(lang===window.__omLang) return;
+    window.__omLang=lang;
+    try{ localStorage.setItem('omint-lang',lang); }catch(err){}
+    window.__omApplyStatic();
+    window.dispatchEvent(new CustomEvent('om-lang',{detail:lang}));
+  };
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?e.target.closest('.lang-switch button'):null;
+    if(b) window.__omSetLang(b.getAttribute('data-lang'));
+  });
+}
+window.__omApplyStatic();
+</script>
 </body>
 </html>
