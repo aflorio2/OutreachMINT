@@ -816,8 +816,14 @@ const lerp=(a,b,t)=>a+(b-a)*t;
 function paint(layers, t, dir){
   layers.forEach((layer,i)=>{
     const d = t - i;
-    const scale = Math.pow(K, dir*d);          // dir=+1 dive in, dir=-1 fly out
     const op = clamp(1 - Math.abs(d), 0, 1);
+    // Fully-invisible layers still get GPU-tiled/composited if only opacity is
+    // zeroed (worse here since each carries a big <img> + blur filter + a huge
+    // transform:scale from being many rungs away) -- drop them from the render
+    // tree entirely instead of just hiding them.
+    layer.style.display = op>0 ? 'flex' : 'none';
+    if(op<=0) return;
+    const scale = Math.pow(K, dir*d);          // dir=+1 dive in, dir=-1 fly out
     layer.style.opacity = op.toFixed(3);
     layer.style.transform = `scale(${scale.toFixed(4)})`;
     layer.style.filter = op<1 ? `blur(${((1-op)*6).toFixed(1)}px)` : 'none';
