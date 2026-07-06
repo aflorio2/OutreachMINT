@@ -52,6 +52,8 @@
   .layer .contentbox{width:88%;height:88%;border-radius:10px;overflow:hidden;
     box-shadow:0 0 60px rgba(0,0,0,.7);position:relative;display:flex;align-items:center;justify-content:center}
   .layer .contentbox.nuc{background:radial-gradient(circle at 50% 45%, #1a1030, #05060d 70%)}
+  .layer .contentbox.human{background:radial-gradient(circle at 50% 32%, #1a2440, #05060d 72%)}
+  .layer .contentbox.human svg{filter:drop-shadow(0 0 14px #ffffff40)}
   .layer .contentbox svg{width:70%;height:70%}
 
   /* distance diagrams */
@@ -174,6 +176,21 @@ const NUCLEUS_SVG = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/sv
   })()}
 </svg>`;
 
+// Simple vector silhouette for the "Human" frame (classroom-appropriate stand-in
+// for a photo) — a plain, gender-neutral standing figure, same idea as the SVG
+// nucleus above.
+const HUMAN_SVG = `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="100" cy="182" rx="34" ry="5" fill="#000" opacity="0.35"/>
+  <g fill="#eef2ff">
+    <circle cx="100" cy="38" r="17"/>
+    <rect x="80" y="58" width="40" height="54" rx="15"/>
+    <rect x="60" y="60" width="17" height="52" rx="8.5" transform="rotate(-8 68.5 60)"/>
+    <rect x="123" y="60" width="17" height="52" rx="8.5" transform="rotate(8 131.5 60)"/>
+    <rect x="81" y="106" width="17" height="72" rx="8.5"/>
+    <rect x="102" y="106" width="17" height="72" rx="8.5"/>
+  </g>
+</svg>`;
+
 // Distance diagram: two bodies separated by a labelled gap (illustrates a DISTANCE, not the object).
 // a/b = {img|star, size(%), label, xpc(% position)} ; pill = centred distance text.
 function distance({a, b, pill, space}){
@@ -191,7 +208,7 @@ function distance({a, b, pill, space}){
 
 // LEFT = zoom IN through matter.  Index 0 is the shared 1 m human.
 const LEFT = [
-  {name:"Human",   local:"human.jpg",   exp:0.23, sub:"a person · ≈1.7 m"},
+  {name:"Human",   content:HUMAN_SVG, human:true, exp:0.23, sub:"a person · ≈1.7 m"},
   {name:"Hair",    local:"hair.jpg",    exp:-4.1, sub:"a human hair · ≈0.08 mm"},
   {name:"Cell",    local:"cell.jpeg",   exp:-5.7, sub:"a living cell · ≈2 µm"},
   {name:"Virus",   local:"virus.jpeg",  exp:-6.8, sub:"a virus · ≈150 nm"},
@@ -204,7 +221,7 @@ const LEFT = [
 
 // RIGHT = zoom OUT through space.  Index 0 is the shared 1 m human (same image).
 const RIGHT = [
-  {name:"Human",         local:"human.jpg", exp:0.23, sub:"a person · ≈1.7 m"},
+  {name:"Human",         content:HUMAN_SVG, human:true, exp:0.23, sub:"a person · ≈1.7 m"},
   {name:"Bielefeld→Gütersloh", local:"bielfeld-gutersloh.png", fit:"contain", z:0.8, exp:4.18, sub:"two neighbouring towns · ≈15 km"},
   {name:"Germany",       local:"germany.png", fit:"contain", z:0.8, exp:5.94, sub:"north–south Germany · ≈880 km"},
   {name:"Earth",         local:"earth.jpg",  exp:7.10, sub:"the whole planet · ≈12,700 km"},
@@ -236,7 +253,7 @@ function buildLayers(wrapId, data){
     layer.className='layer';
     if(d.content){
       const box=document.createElement('div');
-      box.className='contentbox'+(d.nuc?' nuc':'');
+      box.className='contentbox'+(d.nuc?' nuc':'')+(d.human?' human':'');
       box.innerHTML=d.content;
       layer.appendChild(box);
     } else {
