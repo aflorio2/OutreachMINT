@@ -884,6 +884,13 @@ button.gnav:disabled{opacity:.3;cursor:default}
 if(!window.__omI18N){
   window.__omI18N=true;
   let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  // URL override: ?lang=de / ?lang=en (or #de / #en) opens the page directly in that language
+  const urlLang=(function(){
+    const m=location.search.match(/[?&]lang=(de|en)\b/); if(m) return m[1];
+    const h=location.hash.replace('#','').toLowerCase();
+    return (h==='de'||h==='en')?h:null;
+  })();
+  if(urlLang){ saved=urlLang; try{ localStorage.setItem('omint-lang',saved); }catch(err){} }
   window.__omLang=saved;
   window.__omApplyStatic=function(){
     const de=window.__omLang==='de';
@@ -931,6 +938,13 @@ window.__DECKS = [];
 if(!window.__omI18N){
   window.__omI18N=true;
   let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  // URL override: ?lang=de / ?lang=en (or #de / #en) opens the page directly in that language
+  const urlLang=(function(){
+    const m=location.search.match(/[?&]lang=(de|en)\b/); if(m) return m[1];
+    const h=location.hash.replace('#','').toLowerCase();
+    return (h==='de'||h==='en')?h:null;
+  })();
+  if(urlLang){ saved=urlLang; try{ localStorage.setItem('omint-lang',saved); }catch(err){} }
   window.__omLang=saved;
   window.__omApplyStatic=function(){
     const de=window.__omLang==='de';
@@ -1189,6 +1203,13 @@ window.__DECKS.push({
 if(!window.__omI18N){
   window.__omI18N=true;
   let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  // URL override: ?lang=de / ?lang=en (or #de / #en) opens the page directly in that language
+  const urlLang=(function(){
+    const m=location.search.match(/[?&]lang=(de|en)\b/); if(m) return m[1];
+    const h=location.hash.replace('#','').toLowerCase();
+    return (h==='de'||h==='en')?h:null;
+  })();
+  if(urlLang){ saved=urlLang; try{ localStorage.setItem('omint-lang',saved); }catch(err){} }
   window.__omLang=saved;
   window.__omApplyStatic=function(){
     const de=window.__omLang==='de';
@@ -1792,6 +1813,13 @@ window.__DECKS.push({
 if(!window.__omI18N){
   window.__omI18N=true;
   let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  // URL override: ?lang=de / ?lang=en (or #de / #en) opens the page directly in that language
+  const urlLang=(function(){
+    const m=location.search.match(/[?&]lang=(de|en)\b/); if(m) return m[1];
+    const h=location.hash.replace('#','').toLowerCase();
+    return (h==='de'||h==='en')?h:null;
+  })();
+  if(urlLang){ saved=urlLang; try{ localStorage.setItem('omint-lang',saved); }catch(err){} }
   window.__omLang=saved;
   window.__omApplyStatic=function(){
     const de=window.__omLang==='de';
@@ -2125,6 +2153,13 @@ window.__DECKS.push({
 if(!window.__omI18N){
   window.__omI18N=true;
   let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  // URL override: ?lang=de / ?lang=en (or #de / #en) opens the page directly in that language
+  const urlLang=(function(){
+    const m=location.search.match(/[?&]lang=(de|en)\b/); if(m) return m[1];
+    const h=location.hash.replace('#','').toLowerCase();
+    return (h==='de'||h==='en')?h:null;
+  })();
+  if(urlLang){ saved=urlLang; try{ localStorage.setItem('omint-lang',saved); }catch(err){} }
   window.__omLang=saved;
   window.__omApplyStatic=function(){
     const de=window.__omLang==='de';
@@ -3038,6 +3073,13 @@ window.__DECKS.push({
 if(!window.__omI18N){
   window.__omI18N=true;
   let saved='en'; try{ saved=localStorage.getItem('omint-lang')||'en'; }catch(err){}
+  // URL override: ?lang=de / ?lang=en (or #de / #en) opens the page directly in that language
+  const urlLang=(function(){
+    const m=location.search.match(/[?&]lang=(de|en)\b/); if(m) return m[1];
+    const h=location.hash.replace('#','').toLowerCase();
+    return (h==='de'||h==='en')?h:null;
+  })();
+  if(urlLang){ saved=urlLang; try{ localStorage.setItem('omint-lang',saved); }catch(err){} }
   window.__omLang=saved;
   window.__omApplyStatic=function(){
     const de=window.__omLang==='de';
