@@ -54,7 +54,7 @@ def must_replace(text, old, new, label):
     return text.replace(old, new, 1)
 
 # Every deck's header gets the same "back to the main site" link -- added here
-# at build time so it doesn't need to be hand-copied into all 6 source files.
+# at build time so it doesn't need to be hand-copied into all 7 source files.
 HOME_LINK_CSS = '''
 header{position:relative}
 .home-link{position:absolute;left:16px;top:50%;transform:translateY(-50%);
@@ -505,6 +505,59 @@ decks.append(build_cannon_deck("cannon-bits-quantum.html", "cannonq", "fire the 
                                "feuere die Kanone, um ein Qubit zu senden."))
 print("PART 4 OK: cannonq transformed")
 
+# ============================================================ HISTO ============================================================
+# Shot-by-shot histogram replay (real IBM Quantum data baked in). Single scene
+# with its own .sctrl controls, so it registers ONE bullet and only the bottom
+# hint bar is dropped. The source file carries two <script> tags (shared i18n
+# boilerplate + the scene code), so collect them all instead of extract().
+src = load("quantum-histogram-live.html")
+style = extract(src, "style")
+body = extract(src, "body")
+body = body[:body.index("<script")]
+script = '\n'.join(re.findall(r'<script>(.*?)</script>', src, re.S))
+style, body = add_home_link(style, body, 'histo')
+
+controls_block = '''  <div class="controls">
+    <div class="hint" data-de="Mit <b>Schritt +1</b> einzelne Shots landen sehen &middot; <b>&#9654; Play</b> spielt die Aufnahme ab und wird dabei immer schneller &middot; der <b>&times;</b>-Knopf multipliziert das Tempo.">Watch single shots land with <b>Step +1</b> &middot; <b>&#9654; Play</b> replays the run, speeding up as it goes &middot; the <b>&times;</b> button multiplies the pace.</div>
+  </div>
+
+'''
+body = must_replace(body, controls_block, '', 'histo controls block')
+
+loop_old = '''let last=performance.now();
+function tick(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;'''
+loop_new = '''let last=performance.now();
+let __active=false;
+function tick(now){
+  if(!__active){ last=now; requestAnimationFrame(tick); return; }
+  const dt=Math.min(0.05,(now-last)/1000);last=now;'''
+script = must_replace(script, loop_old, loop_new, 'histo main loop')
+
+ids_histo = ['panel','cv','readout','btnPlay','btnStep','btnSpeed','btnReset']
+body = suffix_html(body, ids_histo, 'histo')
+script = suffix_js(script, ids_histo, 'histo')
+
+reg_histo = '''
+window.__DECKS.push({
+  sectionId: 'deck-histo',
+  labels: ['Shot by Shot'],
+  labelsDE: ['Shot für Shot'],
+  goto(i){},
+  activate(){ __active = true; last = performance.now(); },
+  deactivate(){ __active = false; st.playing = false; refreshLabels(); },
+});
+'''
+script = script.rstrip() + '\n' + reg_histo
+
+decks.append({
+    'id': 'histo', 'active': False,
+    'css': scope_css(style, 'histo'),
+    'body': body,
+    'script': f'(function(){{\n{script}\n}})();'
+})
+print("PART 5 OK: histo transformed")
+
 # ============================================================ RESOURCES ============================================================
 # Static closing slide -- no canvas/JS scenes, so there's no <script> tag to
 # extract from the source file; just lift style+body and register one bullet.
@@ -530,7 +583,7 @@ decks.append({
     'body': body,
     'script': f'(function(){{\n{reg_resources}\n}})();'
 })
-print("PART 5 OK: resources transformed")
+print("PART 6 OK: resources transformed")
 
 # ============================================================ ASSEMBLE ============================================================
 GLOBAL_ROOT = ''':root{
@@ -676,7 +729,7 @@ print("getElementById refs with no matching id= :", missing if missing else "NON
 kd_count = final_html.count("addEventListener('keydown'")
 print("keydown listeners:", kd_count, "(expect 1)")
 
-expected = {'scales':1,'slit':4,'b2':2,'cannon':5,'cannonq':5,'resources':1}
+expected = {'scales':1,'slit':4,'b2':2,'cannon':5,'cannonq':6,'histo':1,'resources':1}
 print("Expected bullet counts:", expected, "total:", sum(expected.values()))
 
 # sanity: each deck's script should still contain its own 'labels' array declaration
